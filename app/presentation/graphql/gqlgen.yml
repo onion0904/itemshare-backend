@@ -1,0 +1,53 @@
+schema:
+  - graph/*.graphqls  # GraphQLスキーマファイルのパス。*.graphqlsで指定ディレクトリ内の全てのスキーマファイルを含む
+
+exec:
+  package: graph    # 生成されるコードのパッケージ名
+  layout: single-file  # すべての実行コードを1つのファイルに生成
+  filename: graph/generated.go  # 生成されるファイルのパス
+
+model:
+  filename: graph/model/models_gen.go  # 生成されるモデルコードのパス
+  package: model  # モデルコードのパッケージ名
+
+resolver:
+  package: graph  # リゾルバコードのパッケージ名
+  layout: follow-schema  # スキーマの構造に従ってリゾルバを生成
+  dir: graph  # リゾルバコードを生成するディレクトリ
+  filename_template: "{name}.resolvers.go"  # リゾルバファイルの命名パターン
+
+call_argument_directives_with_null: true  # ディレクティブ引数にnull値を許可
+
+directives:
+  isAuthenticated:
+    skip_runtime: false  # 実行時にこのディレクティブを使用する（falseにすると実装コードが生成される）
+
+models:
+  # GraphQLのID型のGo言語での実装を定義
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  
+  # GraphQLのUUID型のGo言語での実装を定義
+  UUID:
+    model:
+      - github.com/99designs/gqlgen/graphql.UUID
+
+  # GraphQLのDateTime型のGo言語での実装を定義（Time型にマッピング）
+  DateTime:
+    model:
+      - github.com/99designs/gqlgen/graphql.Time
+  
+  # GraphQLのInt型のGo言語での実装を定義（Int32型にマッピング）
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int32
+  
+  # GraphQLのInt64型のGo言語での実装を定義
+  Int64:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64

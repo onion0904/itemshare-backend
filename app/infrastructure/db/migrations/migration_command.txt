@@ -1,0 +1,5 @@
+// migrationファイルを生成するコマンド
+migrate create -ext sql -dir ./infrastructure/db/migrations/ -seq create_table
+
+// migrationファイルをsqlに適応させるコマンド
+migrate --path infrastructure/db/migrations --database 'mysql://onion:noino2828@tcp(localhost:3306)/CarShareSystem_DB?query' -verbose up

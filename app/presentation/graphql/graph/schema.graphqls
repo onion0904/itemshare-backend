@@ -1,0 +1,138 @@
+# スカラー型の定義
+# "2025-02-02T12:00:00Z" のような形式
+scalar DateTime
+
+directive @isAuthenticated on FIELD_DEFINITION
+
+# User型の定義
+type User {
+  id: String!
+  lastName: String!
+  firstName: String!
+  email: String!
+  password: String!
+  icon: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  groupIDs: [String!]!
+  eventIDs: [String!]!
+}
+
+# Group型の定義
+type Group {
+  id: String!
+  name: String!
+  icon: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  userIDs: [String!]!
+  eventIDs: [String!]!
+}
+
+# Event型の定義
+type Event {
+  id: String!
+  userID: String!
+  together: Boolean!
+  description: String!
+  year: Int!
+  month: Int!
+  day: Int!
+  date: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  startDate: DateTime!
+  endDate: DateTime!
+  important: Boolean!
+}
+
+# クエリの定義(データの取得のエンドポイント)
+type Query {
+  # ユーザー関連
+  user: User! @isAuthenticated
+
+  # グループ関連
+  group(id: String!): Group! @isAuthenticated 
+
+  # イベント関連
+  event(id: String!): Event! @isAuthenticated
+  eventsByMonth(input: MonthlyEventInput!): [String!]! @isAuthenticated
+}
+
+# 入力型の定義
+input CreateUserInput {
+  lastName: String!
+  firstName: String!
+  email: String!
+  password: String!
+  icon: String!
+}
+
+input UpdateUserInput {
+  lastName: String
+  firstName: String
+  email: String
+  password: String
+  icon: String
+}
+
+input CreateGroupInput {
+  name: String!
+  userId: String!
+  icon: String!
+}
+
+input UpdateGroupInput {
+  name: String
+  icon: String
+}
+
+input CreateEventInput {
+  userId: String!
+  together: Boolean!
+  description: String!
+  year: Int!
+  month: Int!
+  day: Int!
+  important: Boolean!
+}
+
+input UpdateEventInput {
+  together: Boolean
+  description: String
+  important: Boolean
+}
+
+input MonthlyEventInput {
+  year: Int!
+  month: Int!
+}
+
+type AuthUserResponse {
+  token: String!
+  User:  User!
+}
+
+# ミューテーションの定義(データの作成、更新、削除のエンドポイント)
+type Mutation {
+  # ユーザー関連
+  updateUser(input: UpdateUserInput!): User! @isAuthenticated
+  deleteUser: Boolean! @isAuthenticated
+
+  # グループ関連
+  createGroup(input: CreateGroupInput!): Group! @isAuthenticated
+  updateGroup(id: String!, input: UpdateGroupInput!): Group! @isAuthenticated
+  deleteGroup(id: String!): Boolean! @isAuthenticated
+  addUserToGroup(groupID: String!, userID: String!): Group! @isAuthenticated
+  removeUserFromGroup(groupID: String!, userID: String!): Group! @isAuthenticated
+  addEventToGroup(groupID: String!, eventID: String!): Group! @isAuthenticated
+
+  # イベント関連
+  createEvent(input: CreateEventInput!): Event! @isAuthenticated
+  deleteEvent(id: String!): Boolean! @isAuthenticated
+
+  # メール、認証関連
+  sendVerificationCode(email: String!): Boolean!
+  signup(input: CreateUserInput!, vcode: String!): AuthUserResponse!
+  signin(email: String!, password: String!): AuthUserResponse!
+}
