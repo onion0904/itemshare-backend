@@ -40,14 +40,17 @@
 - API形式
     - GraphQL
 - orm
-    - ~SQLBoiler~ (Maintenance Mode)
     - sqlc
+- DB
+    - supabase
 - ログイン認証
-    - JWT->OAuthにしていきたい
+    - JWT
 - SQL
     - MySQL
-- その他
+- deploy
+    - koyeb
     - docker
+- mock_test
     - gomock
 
 ## ディレクトリの説明
@@ -70,3 +73,5 @@
 
 - [Goで学ぶGraphQLサーバーサイド入門](https://zenn.dev/hsaki/books/golang-graphql)
 - [Go ⾔語で構築するクリーンアーキテクチャ設計](https://techbookfest.org/product/9a3U54LBdKDE30ewPS6Ugn?productVariantID=itEzQN5gKZX8gXMmLTEXAB)
+- [supabase](https://qiita.com/FrohleinYoshie/items/4acf666572e54232589a)
+- [koyeb](https://www.koyeb.com/docs/deploy/go)
