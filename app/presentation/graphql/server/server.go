@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -27,7 +26,7 @@ func Start() {
 	migrations.Migrate(DB)
 
 	Port := cfg.Server.Port
-	fmt.Println(Port)
+	log.Printf("%s",Port)
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
