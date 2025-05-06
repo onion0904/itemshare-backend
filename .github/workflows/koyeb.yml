@@ -31,7 +31,7 @@ jobs:
         with:
           app-name: my-go-api           # Koyeb 上の App 名
           service-name: api-service     # Service 名
-          git-branch: main
+          git-branch: ${{ github.ref_name }}
           git-builder: docker
           git-docker-dockerfile: Dockerfile
           privileged: true
