@@ -1,21 +1,23 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+
 	"github.com/onion0904/CarShareSystem/app/config"
 	"github.com/onion0904/CarShareSystem/app/infrastructure/db"
 	"github.com/onion0904/CarShareSystem/app/infrastructure/db/migrations"
-	"github.com/onion0904/CarShareSystem/app/presentation/graphql/graph"
 	mail_Service "github.com/onion0904/CarShareSystem/app/infrastructure/mail"
-	usecase_mail "github.com/onion0904/CarShareSystem/app/usecase/mail"
 	mymiddleware "github.com/onion0904/CarShareSystem/app/middleware"
-	
+	"github.com/onion0904/CarShareSystem/app/presentation/graphql/graph"
+	usecase_mail "github.com/onion0904/CarShareSystem/app/usecase/mail"
+
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -25,7 +27,8 @@ func Start() {
 	migrations.Migrate(DB)
 
 	Port := cfg.Server.Port
-	
+	fmt.Println(Port)
+
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
 			DB: DB,
