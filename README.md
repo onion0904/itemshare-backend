@@ -42,7 +42,7 @@
 - orm
     - sqlc
 - DB
-    - supabase
+    - supabase(postgresql)
 - ログイン認証
     - JWT
 - SQL
