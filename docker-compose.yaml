@@ -1,40 +1,10 @@
 services:
-  db:
-    container_name: db
-    image: mysql
-    command:
-      - --character-set-server=utf8mb4
-      - --explicit_defaults_for_timestamp
-      - --collation-server=utf8mb4_unicode_ci
-      - --sql-mode=ONLY_FULL_GROUP_BY,NO_ENGINE_SUBSTITUTION
-    environment:
-      MYSQL_ROOT_PASSWORD: ${ROOTPASS} # ルートユーザーのパスワード
-      MYSQL_DATABASE: ${DB_NAME}       # 初期作成するデータベース名
-      MYSQL_USER: ${DB_USER}           # 作成するユーザー名
-      MYSQL_PASSWORD: ${DB_PASSWORD}   # 作成するユーザーのパスワード
-    ports:
-      - "3306:3306"                     # MySQLのポート
-    networks:
-      - app-network
-    volumes:
-      - db_data:/var/lib/mysql          # データ永続化のためのボリューム
-      - ./app/infrastructure/db/authority/init.sql:/docker-entrypoint-initdb.d/init.sql
-    restart: always
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${ROOTPASS}"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
   api:
     build:
       context: .
       dockerfile: ./ops/docker/app/Dockerfile
     env_file:
       - .env
-    depends_on:
-      db:
-        condition: service_healthy     # DBサービスの健康チェック
     environment:
       DB_HOST: ${DB_HOST}              # DBのホスト名
       DB_PORT: ${DB_PORT}              # DBのポート番号
@@ -42,6 +12,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}      # DBユーザーパスワード
       DB_NAME: ${DB_NAME}              # 使用するデータベース名
       ROOTPASS: ${ROOTPASS}              # DBのルートパスワード
+      DATABASE_URL: ${DATABASE_URL}      # supabaseのdatabaseのURL
       SERVER_PORT: ${SERVER_PORT}        # サーバーポート
       MAILGUN_DOMAIN: ${MAILGUN_DOMAIN}  # Mailgunのドメイン
       MAILGUN_PRIVATE_API_KEY: ${MAILGUN_PRIVATE_API_KEY} # MailgunのAPIキー

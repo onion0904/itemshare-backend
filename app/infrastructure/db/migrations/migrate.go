@@ -6,7 +6,7 @@ import (
     "sync"
 
     "github.com/golang-migrate/migrate/v4"
-    "github.com/golang-migrate/migrate/v4/database/mysql"
+    "github.com/golang-migrate/migrate/v4/database/postgres"
     _ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
@@ -14,14 +14,14 @@ var once sync.Once
 
 func Migrate(db *sql.DB) {
     once.Do(func() {
-        driver, err := mysql.WithInstance(db, &mysql.Config{})
+        driver, err := postgres.WithInstance(db, &postgres.Config{})
         if err != nil {
             panic(err)
         }
 
         m, err := migrate.NewWithDatabaseInstance(
             "file:///app/infrastructure/db/migrations",
-            "mysql", driver,
+            "postgres", driver,
         )
         if err != nil {
             panic(err)

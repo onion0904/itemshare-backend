@@ -10,16 +10,15 @@ import (
 )
 
 const addEventToGroup = `-- name: AddEventToGroup :exec
-INSERT INTO
-    group_events (group_id, event_id)
-VALUES
-    (
-        ?,
-        ?
-    )
-ON DUPLICATE KEY UPDATE
-    group_id = ?, 
-    event_id = ?
+INSERT INTO group_events (
+    group_id,
+    event_id
+)
+VALUES (
+    $1,
+    $2
+)
+ON CONFLICT (group_id, event_id) DO NOTHING
 `
 
 type AddEventToGroupParams struct {
@@ -28,26 +27,20 @@ type AddEventToGroupParams struct {
 }
 
 func (q *Queries) AddEventToGroup(ctx context.Context, arg AddEventToGroupParams) error {
-	_, err := q.db.ExecContext(ctx, addEventToGroup,
-		arg.Groupid,
-		arg.Eventid,
-		arg.Groupid,
-		arg.Eventid,
-	)
+	_, err := q.db.ExecContext(ctx, addEventToGroup, arg.Groupid, arg.Eventid)
 	return err
 }
 
 const addUserToGroup = `-- name: AddUserToGroup :exec
-INSERT INTO
-    group_users (group_id, user_id)
-VALUES
-    (
-        ?,
-        ?
-    )
-ON DUPLICATE KEY UPDATE
-    group_id = ?, 
-    user_id = ?
+INSERT INTO group_users (
+    group_id,
+    user_id
+)
+VALUES (
+    $1,
+    $2
+)
+ON CONFLICT (group_id, user_id) DO NOTHING
 `
 
 type AddUserToGroupParams struct {
@@ -56,20 +49,13 @@ type AddUserToGroupParams struct {
 }
 
 func (q *Queries) AddUserToGroup(ctx context.Context, arg AddUserToGroupParams) error {
-	_, err := q.db.ExecContext(ctx, addUserToGroup,
-		arg.Groupid,
-		arg.Userid,
-		arg.Groupid,
-		arg.Userid,
-	)
+	_, err := q.db.ExecContext(ctx, addUserToGroup, arg.Groupid, arg.Userid)
 	return err
 }
 
 const deleteGroup = `-- name: DeleteGroup :exec
-DELETE FROM
-    ` + "`" + `groups` + "`" + `
-WHERE
-    id = ?
+DELETE FROM "groups"
+WHERE id = $1
 `
 
 func (q *Queries) DeleteGroup(ctx context.Context, groupid string) error {
@@ -84,10 +70,8 @@ SELECT
     icon,
     created_at,
     updated_at
-FROM
-    ` + "`" + `groups` + "`" + `
-WHERE
-    id = ?
+FROM "groups"
+WHERE id = $1
 `
 
 func (q *Queries) FindGroup(ctx context.Context, groupid string) (Group, error) {
@@ -106,10 +90,8 @@ func (q *Queries) FindGroup(ctx context.Context, groupid string) (Group, error) 
 const getEventIDsByGroupID = `-- name: GetEventIDsByGroupID :many
 SELECT
     ge.event_id
-FROM
-    group_events ge
-WHERE
-    ge.group_id = ?
+FROM group_events AS ge
+WHERE ge.group_id = $1
 `
 
 func (q *Queries) GetEventIDsByGroupID(ctx context.Context, groupid string) ([]string, error) {
@@ -138,10 +120,8 @@ func (q *Queries) GetEventIDsByGroupID(ctx context.Context, groupid string) ([]s
 const getUserIDsByGroupID = `-- name: GetUserIDsByGroupID :many
 SELECT
     gu.user_id
-FROM
-    group_users gu
-WHERE
-    gu.group_id = ?
+FROM group_users AS gu
+WHERE gu.group_id = $1
 `
 
 func (q *Queries) GetUserIDsByGroupID(ctx context.Context, groupid string) ([]string, error) {
@@ -168,43 +148,41 @@ func (q *Queries) GetUserIDsByGroupID(ctx context.Context, groupid string) ([]st
 }
 
 const removeUserFromGroup = `-- name: RemoveUserFromGroup :exec
-DELETE FROM 
-    group_users
-WHERE 
-    group_id = ? AND user_id = ?
+DELETE FROM group_users
+WHERE group_id = $1
+    AND user_id  = $2
 `
 
 type RemoveUserFromGroupParams struct {
-	GroupID string
-	UserID  string
+	Groupid string
+	Userid  string
 }
 
 func (q *Queries) RemoveUserFromGroup(ctx context.Context, arg RemoveUserFromGroupParams) error {
-	_, err := q.db.ExecContext(ctx, removeUserFromGroup, arg.GroupID, arg.UserID)
+	_, err := q.db.ExecContext(ctx, removeUserFromGroup, arg.Groupid, arg.Userid)
 	return err
 }
 
 const upsertGroup = `-- name: UpsertGroup :exec
-INSERT INTO
-    ` + "`" + `groups` + "`" + ` (
-        id,
-        name,
-        icon,
-        created_at,
-        updated_at
-    )
-VALUES
-    (
-        ?,
-        ?,
-        ?,
-        NOW(),
-        NOW()
-    ) ON DUPLICATE KEY
-UPDATE
-    name = ?,
-    icon = ?,
-    updated_at = NOW()
+INSERT INTO "groups" (
+    id,
+    name,
+    icon,
+    created_at,
+    updated_at
+)
+VALUES (
+    $1,
+    $2,
+    $3,
+    NOW(),
+    NOW()
+)
+ON CONFLICT (id) DO UPDATE
+SET
+    name        = EXCLUDED.name,
+    icon        = EXCLUDED.icon,
+    updated_at  = NOW()
 `
 
 type UpsertGroupParams struct {
@@ -214,12 +192,6 @@ type UpsertGroupParams struct {
 }
 
 func (q *Queries) UpsertGroup(ctx context.Context, arg UpsertGroupParams) error {
-	_, err := q.db.ExecContext(ctx, upsertGroup,
-		arg.ID,
-		arg.Name,
-		arg.Icon,
-		arg.Name,
-		arg.Icon,
-	)
+	_, err := q.db.ExecContext(ctx, upsertGroup, arg.ID, arg.Name, arg.Icon)
 	return err
 }

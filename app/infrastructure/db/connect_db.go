@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 	"github.com/onion0904/CarShareSystem/app/config"
 	dbgen "github.com/onion0904/CarShareSystem/app/infrastructure/db/sqlc/dbgen"
 )
@@ -45,13 +45,7 @@ func SetDB(d *sql.DB) {
 
 func NewMainDB(cnf config.DBConfig) *sql.DB {
 	once.Do(func() {
-		dbcon, err := connect(
-			cnf.User,
-			cnf.Password,
-			cnf.Host,
-			cnf.Port,
-			cnf.Name,
-		)
+		dbcon, err := connect(cnf.DB_URL)
 		if err != nil {
 			panic(err)
 		}
@@ -64,10 +58,12 @@ func NewMainDB(cnf config.DBConfig) *sql.DB {
 }
 
 // dbに接続する：最大5回リトライする
-func connect(user string, password string, host string, port string, name string) (*sql.DB, error) {
+func connect(db_url string) (*sql.DB, error) {
 	for i := 0; i < maxRetries; i++ {
-		connect := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", user, password, host, port, name)
-		db, err := sql.Open("mysql", connect)
+		db, err := sql.Open("postgres", db_url)
+		if err != nil {
+			log.Fatal("Error connecting to the database:", err)
+		}
 		if err != nil {
 			log.Printf("Error opening DB connection: %v", err)
 

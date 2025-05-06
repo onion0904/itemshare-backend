@@ -11,10 +11,8 @@ import (
 )
 
 const deleteEvent = `-- name: DeleteEvent :exec
-DELETE FROM
-    events
-WHERE
-    id = ?
+DELETE FROM events
+WHERE id = $1
 `
 
 func (q *Queries) DeleteEvent(ctx context.Context, eventid string) error {
@@ -23,12 +21,9 @@ func (q *Queries) DeleteEvent(ctx context.Context, eventid string) error {
 }
 
 const findEvent = `-- name: FindEvent :one
-SELECT
-    id, user_id, together, description, year, month, day, date, created_at, updated_at, start_date, end_date, important
-FROM
-    events
-WHERE
-    id = ?
+SELECT id, user_id, together, description, year, month, day, date, start_date, end_date, important, created_at, updated_at
+FROM events
+WHERE id = $1
 `
 
 func (q *Queries) FindEvent(ctx context.Context, eventid string) (Event, error) {
@@ -43,22 +38,20 @@ func (q *Queries) FindEvent(ctx context.Context, eventid string) (Event, error) 
 		&i.Month,
 		&i.Day,
 		&i.Date,
-		&i.CreatedAt,
-		&i.UpdatedAt,
 		&i.StartDate,
 		&i.EndDate,
 		&i.Important,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const findMonthEventIDs = `-- name: FindMonthEventIDs :many
-SELECT
-    id
-FROM
-    events
-WHERE
-    year = ? AND month = ?
+SELECT id
+FROM events
+WHERE year  = $1
+    AND month = $2
 `
 
 type FindMonthEventIDsParams struct {
@@ -90,50 +83,49 @@ func (q *Queries) FindMonthEventIDs(ctx context.Context, arg FindMonthEventIDsPa
 }
 
 const upsertEvent = `-- name: UpsertEvent :exec
-INSERT INTO
-    events (
-        id,
-        user_id,
-        together,
-        description,
-        year,
-        month,
-        day,
-        date,
-        start_date,
-        end_date,
-        created_at,
-        updated_at,
-        important
-    )
-VALUES
-    (
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        NOW(),
-        NOW(),
-        ?
-    ) ON DUPLICATE KEY
-UPDATE
-    user_id = ?,
-    together = ?,
-    description = ?,
-    year = ?,
-    month = ?,
-    day = ?,
-    date = ?,
-    start_date = ?,
-    end_date = ?,
-    updated_at = NOW(),
-    important = ?
+INSERT INTO events (
+    id,
+    user_id,
+    together,
+    description,
+    year,
+    month,
+    day,
+    date,
+    start_date,
+    end_date,
+    created_at,
+    updated_at,
+    important
+)
+VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    $8,
+    $9,
+    $10,
+    NOW(),
+    NOW(),
+    $11
+)
+ON CONFLICT (id) DO UPDATE
+SET
+    user_id     = EXCLUDED.user_id,
+    together    = EXCLUDED.together,
+    description = EXCLUDED.description,
+    year        = EXCLUDED.year,
+    month       = EXCLUDED.month,
+    day         = EXCLUDED.day,
+    date        = EXCLUDED.date,
+    start_date  = EXCLUDED.start_date,
+    end_date    = EXCLUDED.end_date,
+    updated_at  = NOW(),
+    important   = EXCLUDED.important
 `
 
 type UpsertEventParams struct {
@@ -153,16 +145,6 @@ type UpsertEventParams struct {
 func (q *Queries) UpsertEvent(ctx context.Context, arg UpsertEventParams) error {
 	_, err := q.db.ExecContext(ctx, upsertEvent,
 		arg.ID,
-		arg.UserID,
-		arg.Together,
-		arg.Description,
-		arg.Year,
-		arg.Month,
-		arg.Day,
-		arg.Date,
-		arg.StartDate,
-		arg.EndDate,
-		arg.Important,
 		arg.UserID,
 		arg.Together,
 		arg.Description,

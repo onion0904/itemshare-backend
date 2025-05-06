@@ -10,5 +10,5 @@
 - docs
 
 ## todo
-- 
-- CI/CD
+- infra層のmysqlをsupabase
+- supabase-koyeb-GithubActions
