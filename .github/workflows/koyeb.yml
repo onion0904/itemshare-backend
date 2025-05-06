@@ -33,7 +33,7 @@ jobs:
           service-name: api-service     # Service 名
           git-branch: main
           git-builder: docker
-          git-docker-dockerfile: ./ops/docker/app/Dockerfile
+          git-docker-dockerfile: Dockerfile
           privileged: true
           service-instance-type: free
           service-regions: was
