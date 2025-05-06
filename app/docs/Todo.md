@@ -10,5 +10,3 @@
 - docs
 
 ## todo
-- infra層のmysqlをsupabase
-- supabase-koyeb-GithubActions
