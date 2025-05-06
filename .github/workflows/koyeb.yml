@@ -40,7 +40,7 @@ jobs:
           service-min-instances: 0
           service-ports: "8080:http"    # Koyeb 側のポートマッピング
           service-routes: "/:8080"      # ルーティング設定
-          environment-variables: |
+          service-env: |
             DATABASE_URL=${{ secrets.DATABASE_URL }}
             SERVER_PORT=${{ secrets.SERVER_PORT }}
             MAILGUN_DOMAIN=${{ secrets.MAILGUN_DOMAIN }}
