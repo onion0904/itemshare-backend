@@ -42,7 +42,7 @@ func GetConfig() *Config {
 		config.DB.DB_URL = getEnv("DATABASE_URL", "")
 
 		// Server
-		config.Server.Port = getEnv("SERVER_PORT", "")
+		config.Server.Port = getEnv("SERVER_PORT", "8080")
 
 		// Mailgun
 		config.Mailgun.Domain = getEnv("MAILGUN_DOMAIN", "")
