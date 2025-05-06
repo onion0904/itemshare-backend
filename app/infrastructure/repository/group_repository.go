@@ -136,8 +136,8 @@ func (gr *groupRepository)RemoveUserFromGroup(ctx context.Context ,groupID strin
 	query := db.GetQuery(ctx)
 
     err := query.RemoveUserFromGroup(ctx, dbgen.RemoveUserFromGroupParams{
-        GroupID: groupID,
-        UserID: userID,
+        Groupid: groupID,
+        Userid: userID,
     })
 	if err!= nil {
         return err

@@ -17,11 +17,11 @@ type Event struct {
 	Month       int32
 	Day         int32
 	Date        time.Time
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
 	StartDate   time.Time
 	EndDate     time.Time
 	Important   bool
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 type Group struct {

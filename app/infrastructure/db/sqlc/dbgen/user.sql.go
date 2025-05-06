@@ -10,10 +10,8 @@ import (
 )
 
 const deleteUser = `-- name: DeleteUser :exec
-DELETE FROM
-    users
-WHERE
-    id = ?
+DELETE FROM users
+WHERE id = $1
 `
 
 func (q *Queries) DeleteUser(ctx context.Context, id string) error {
@@ -22,12 +20,12 @@ func (q *Queries) DeleteUser(ctx context.Context, id string) error {
 }
 
 const existUser = `-- name: ExistUser :one
-SELECT
-    EXISTS(
-        SELECT 1
-        FROM users
-        WHERE email = ? AND password = ?
-    ) AS exists_user
+SELECT EXISTS(
+    SELECT 1
+    FROM users
+    WHERE email = $1
+        AND password = $2
+) AS exists_user
 `
 
 type ExistUserParams struct {
@@ -52,10 +50,9 @@ SELECT
     icon,
     created_at,
     updated_at
-FROM
-    users
-WHERE
-    email = ? AND password = ?
+FROM users
+WHERE email = $1
+    AND password = $2
 `
 
 type FindUserByEmailPasswordParams struct {
@@ -89,10 +86,8 @@ SELECT
     icon,
     created_at,
     updated_at
-FROM
-    users
-WHERE
-    id = ?
+FROM users
+WHERE id = $1
 `
 
 func (q *Queries) FindUserByID(ctx context.Context, id string) (User, error) {
@@ -112,12 +107,9 @@ func (q *Queries) FindUserByID(ctx context.Context, id string) (User, error) {
 }
 
 const getEventIDsByUserID = `-- name: GetEventIDsByUserID :many
-SELECT
-    ue.event_id
-FROM
-    user_events ue
-WHERE
-    ue.user_id = ?
+SELECT ue.event_id
+FROM user_events AS ue
+WHERE ue.user_id = $1
 `
 
 func (q *Queries) GetEventIDsByUserID(ctx context.Context, userid string) ([]string, error) {
@@ -144,12 +136,9 @@ func (q *Queries) GetEventIDsByUserID(ctx context.Context, userid string) ([]str
 }
 
 const getGroupIDsByUserID = `-- name: GetGroupIDsByUserID :many
-SELECT
-    gu.group_id
-FROM
-    group_users gu
-WHERE
-    gu.user_id = ?
+SELECT gu.group_id
+FROM group_users AS gu
+WHERE gu.user_id = $1
 `
 
 func (q *Queries) GetGroupIDsByUserID(ctx context.Context, userid string) ([]string, error) {
@@ -176,32 +165,34 @@ func (q *Queries) GetGroupIDsByUserID(ctx context.Context, userid string) ([]str
 }
 
 const upsertUser = `-- name: UpsertUser :exec
-INSERT INTO
-    users (
-        id,
-        last_name,
-        first_name,
-        email,
-        icon,
-        created_at,
-        updated_at
-    )
-VALUES
-    (
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        NOW(),
-        NOW()
-    ) ON DUPLICATE KEY
-UPDATE
-    last_name = ?,
-    first_name = ?,
-    email = ?,
-    icon = ?,
-    updated_at = NOW()
+INSERT INTO users (
+    id,
+    last_name,
+    first_name,
+    email,
+    password,
+    icon,
+    created_at,
+    updated_at
+)
+VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6,
+    NOW(),
+    NOW()
+)
+ON CONFLICT (id) DO UPDATE
+SET
+    last_name   = EXCLUDED.last_name,
+    first_name  = EXCLUDED.first_name,
+    email       = EXCLUDED.email,
+    password    = EXCLUDED.password,
+    icon        = EXCLUDED.icon,
+    updated_at  = NOW()
 `
 
 type UpsertUserParams struct {
@@ -209,6 +200,7 @@ type UpsertUserParams struct {
 	LastName  string
 	FirstName string
 	Email     string
+	Password  string
 	Icon      string
 }
 
@@ -218,10 +210,7 @@ func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) error {
 		arg.LastName,
 		arg.FirstName,
 		arg.Email,
-		arg.Icon,
-		arg.LastName,
-		arg.FirstName,
-		arg.Email,
+		arg.Password,
 		arg.Icon,
 	)
 	return err

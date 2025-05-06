@@ -26,6 +26,7 @@ func (ur *userRepository)Update(ctx context.Context, user *user.User) error {
         LastName:  user.LastName(),
         FirstName: user.FirstName(),
         Email:     user.Email(),
+        Password:  user.Password(),
 		Icon:      user.Icon(),
 		}); err != nil {
 		return err
@@ -40,6 +41,7 @@ func (ur *userRepository)Save(ctx context.Context, user *user.User) error {
         LastName:  user.LastName(),
         FirstName: user.FirstName(),
         Email:     user.Email(),
+        Password:  user.Password(),
 		Icon:      user.Icon(),
 		}); err != nil {
 		return err
