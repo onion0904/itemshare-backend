@@ -11,7 +11,6 @@ import (
 	usecase_mail "github.com/onion0904/CarShareSystem/app/usecase/mail"
 	mymiddleware "github.com/onion0904/CarShareSystem/app/middleware"
 	
-	"github.com/joho/godotenv"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
@@ -21,10 +20,6 @@ import (
 )
 
 func Start() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println(".env file not found, proceeding without it")
-	}
 	cfg := config.GetConfig()
 	DB := db.NewMainDB(cfg.DB)
 	migrations.Migrate(DB)
