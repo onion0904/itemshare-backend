@@ -24,7 +24,6 @@ func Start() {
 	cfg := config.GetConfig()
 	DB := db.NewMainDB(cfg.DB)
 	migrations.Migrate(DB)
-	log.Printf("%s",cfg.DB.DB_URL)
 
 	Port := cfg.Server.Port
 
