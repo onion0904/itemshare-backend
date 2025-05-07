@@ -17,7 +17,7 @@ import (
 	"github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model"
 	usecase_event "github.com/onion0904/CarShareSystem/app/usecase/event"
 	usecase_group "github.com/onion0904/CarShareSystem/app/usecase/group"
-	// usecase_mail "github.com/onion0904/CarShareSystem/app/usecase/mail"
+	usecase_mail "github.com/onion0904/CarShareSystem/app/usecase/mail"
 	usecase_user "github.com/onion0904/CarShareSystem/app/usecase/user"
 	"github.com/onion0904/CarShareSystem/pkg/jwt"
 	VerifiedCode "github.com/onion0904/CarShareSystem/pkg/verified_code"
@@ -259,6 +259,7 @@ func (r *mutationResolver) SendVerificationCode(ctx context.Context, email strin
 		log.Printf("Error generating verification code: %v", err)
 		return false, errDomain.NewError("認証コードの生成に失敗しました")
 	}
+	log.Println(vcode)
 
 	// 認証コードを保存
 	r.EmailUseCase.CodeMutex.Lock()
@@ -266,11 +267,11 @@ func (r *mutationResolver) SendVerificationCode(ctx context.Context, email strin
 	r.EmailUseCase.CodeMutex.Unlock()
 	// メール送信
 
-	// DTO := usecase_mail.SendEmailUseCaseDto{
-	// 	Email: email,
-	// 	Code:  vcode,
-	// }
-	// r.EmailUseCase.Run(ctx, DTO)
+	DTO := usecase_mail.SendEmailUseCaseDto{
+		Email: email,
+		Code:  vcode,
+	}
+	r.EmailUseCase.Run(ctx, DTO)
 	return true, nil
 }
 
@@ -307,8 +308,6 @@ func (r *mutationResolver) Signup(ctx context.Context, input model.CreateUserInp
 	if expectedCode != vcode {
 		return nil, errDomain.NewError("Invalid verified code")
 	}
-
-	log.Println(expectedCode)
 
 	r.EmailUseCase.CodeMutex.Lock()
 	delete(r.EmailUseCase.VerificationCodes, input.Email)
