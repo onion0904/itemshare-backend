@@ -17,7 +17,7 @@ import (
 	"github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model"
 	usecase_event "github.com/onion0904/CarShareSystem/app/usecase/event"
 	usecase_group "github.com/onion0904/CarShareSystem/app/usecase/group"
-	usecase_mail "github.com/onion0904/CarShareSystem/app/usecase/mail"
+	// usecase_mail "github.com/onion0904/CarShareSystem/app/usecase/mail"
 	usecase_user "github.com/onion0904/CarShareSystem/app/usecase/user"
 	"github.com/onion0904/CarShareSystem/pkg/jwt"
 	VerifiedCode "github.com/onion0904/CarShareSystem/pkg/verified_code"
@@ -265,11 +265,12 @@ func (r *mutationResolver) SendVerificationCode(ctx context.Context, email strin
 	r.EmailUseCase.VerificationCodes[email] = vcode
 	r.EmailUseCase.CodeMutex.Unlock()
 	// メール送信
-	DTO := usecase_mail.SendEmailUseCaseDto{
-		Email: email,
-		Code:  vcode,
-	}
-	r.EmailUseCase.Run(ctx, DTO)
+
+	// DTO := usecase_mail.SendEmailUseCaseDto{
+	// 	Email: email,
+	// 	Code:  vcode,
+	// }
+	// r.EmailUseCase.Run(ctx, DTO)
 	return true, nil
 }
 
