@@ -307,6 +307,8 @@ func (r *mutationResolver) Signup(ctx context.Context, input model.CreateUserInp
 		return nil, errDomain.NewError("Invalid verified code")
 	}
 
+	log.Println(expectedCode)
+
 	r.EmailUseCase.CodeMutex.Lock()
 	delete(r.EmailUseCase.VerificationCodes, input.Email)
 	r.EmailUseCase.CodeMutex.Unlock()
