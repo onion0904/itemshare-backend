@@ -13,11 +13,6 @@ type Config struct {
 }
 
 type DBConfig struct {
-	Name     string
-	User     string
-	Password string
-	Port     string
-	Host     string
 	DB_URL   string
 }
 
@@ -44,12 +39,6 @@ var (
 func GetConfig() *Config {
 	// goroutine実行中でも一度だけ実行される
 	once.Do(func() {
-		// DBConfig
-		config.DB.Name = getEnv("DB_NAME", "")
-		config.DB.User = getEnv("DB_USER", "")
-		config.DB.Password = getEnv("DB_PASSWORD", "")
-		config.DB.Port = getEnv("DB_PORT", "")
-		config.DB.Host = getEnv("DB_HOST", "")
 		config.DB.DB_URL = getEnv("DATABASE_URL", "")
 
 		// Server

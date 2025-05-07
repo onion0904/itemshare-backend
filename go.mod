@@ -6,7 +6,6 @@ require (
 	github.com/99designs/gqlgen v0.17.73
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/golang-migrate/migrate/v4 v4.18.3
-	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/mailgun/mailgun-go/v4 v4.23.0
 	github.com/oklog/ulid/v2 v2.1.0
