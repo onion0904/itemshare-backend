@@ -370,8 +370,8 @@ func (r *mutationResolver) Signin(ctx context.Context, email string, password st
 	if err != nil {
 		return nil, err
 	}
-	if exist {
-		return nil, errDomain.NewError("User is already registered")
+	if !exist {
+		return nil, errDomain.NewError("User is not found")
 	}
 
 	find := usecase_user.NewFindUserByEmailPasswordUseCase(userRepo)
