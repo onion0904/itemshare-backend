@@ -54,21 +54,6 @@ func (mr *MockUserRepositoryMockRecorder) Delete(ctx, UserID any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockUserRepository)(nil).Delete), ctx, UserID)
 }
 
-// ExistUser mocks base method.
-func (m *MockUserRepository) ExistUser(ctx context.Context, email, password string) (bool, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExistUser", ctx, email, password)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ExistUser indicates an expected call of ExistUser.
-func (mr *MockUserRepositoryMockRecorder) ExistUser(ctx, email, password any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistUser", reflect.TypeOf((*MockUserRepository)(nil).ExistUser), ctx, email, password)
-}
-
 // FindUser mocks base method.
 func (m *MockUserRepository) FindUser(ctx context.Context, UserID string) (*User, error) {
 	m.ctrl.T.Helper()
@@ -84,19 +69,19 @@ func (mr *MockUserRepositoryMockRecorder) FindUser(ctx, UserID any) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindUser", reflect.TypeOf((*MockUserRepository)(nil).FindUser), ctx, UserID)
 }
 
-// FindUserByEmailPassword mocks base method.
-func (m *MockUserRepository) FindUserByEmailPassword(ctx context.Context, email, password string) (*User, error) {
+// FindUserByEmail mocks base method.
+func (m *MockUserRepository) FindUserByEmail(ctx context.Context, email string) (*User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindUserByEmailPassword", ctx, email, password)
+	ret := m.ctrl.Call(m, "FindUserByEmail", ctx, email)
 	ret0, _ := ret[0].(*User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindUserByEmailPassword indicates an expected call of FindUserByEmailPassword.
-func (mr *MockUserRepositoryMockRecorder) FindUserByEmailPassword(ctx, email, password any) *gomock.Call {
+// FindUserByEmail indicates an expected call of FindUserByEmail.
+func (mr *MockUserRepositoryMockRecorder) FindUserByEmail(ctx, email any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindUserByEmailPassword", reflect.TypeOf((*MockUserRepository)(nil).FindUserByEmailPassword), ctx, email, password)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindUserByEmail", reflect.TypeOf((*MockUserRepository)(nil).FindUserByEmail), ctx, email)
 }
 
 // Save mocks base method.

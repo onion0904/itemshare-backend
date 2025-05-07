@@ -105,7 +105,7 @@ func (ur *userRepository) FindUser(ctx context.Context, UserID string) (*user.Us
     return nu, nil
 }
 
-func (ur *userRepository) FindUserByEmailPassword(ctx context.Context, email string, password string) (*user.User, error) {
+func (ur *userRepository) FindUserByEmail(ctx context.Context, email string) (*user.User, error) {
     DB := db.GetDB() // DB インスタンス取得
     tx, err := DB.BeginTx(ctx, nil) // トランザクション開始
     if err != nil {
@@ -115,11 +115,7 @@ func (ur *userRepository) FindUserByEmailPassword(ctx context.Context, email str
 
     query := db.GetQuery(ctx).WithTx(tx)
 
-    input := dbgen.FindUserByEmailPasswordParams{
-        Email:    email,
-        Password: password,
-    }
-    u,err := query.FindUserByEmailPassword(ctx,input)
+    u,err := query.FindUserByEmail(ctx,email)
     if err != nil {
         return nil,err
     }
@@ -169,14 +165,4 @@ func (ur *userRepository)Delete(ctx context.Context, UserID string) error {
         return err
     }
 	return nil
-}
-    
-func (ur *userRepository)ExistUser(ctx context.Context, email string, password string) (bool,error) {
-	query := db.GetQuery(ctx)
-	
-	exist,err := query.ExistUser(ctx, dbgen.ExistUserParams{Email: email, Password: password})
-	if err!= nil {
-        return false, err
-    }
-	return exist, nil
 }

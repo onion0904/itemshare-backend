@@ -43,7 +43,7 @@ FROM users
 WHERE id = sqlc.arg(id);
 
 
--- name: FindUserByEmailPassword :one
+-- name: FindUserByEmail :one
 SELECT
     id,
     last_name,
@@ -54,22 +54,12 @@ SELECT
     created_at,
     updated_at
 FROM users
-WHERE email = sqlc.arg(email)
-    AND password = sqlc.arg(password);
+WHERE email = sqlc.arg(email);
 
 
 -- name: DeleteUser :exec
 DELETE FROM users
 WHERE id = sqlc.arg(id);
-
-
--- name: ExistUser :one
-SELECT EXISTS(
-    SELECT 1
-    FROM users
-    WHERE email = sqlc.arg(email)
-        AND password = sqlc.arg(password)
-) AS exists_user;
 
 
 -- name: GetGroupIDsByUserID :many

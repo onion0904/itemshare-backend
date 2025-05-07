@@ -19,28 +19,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id string) error {
 	return err
 }
 
-const existUser = `-- name: ExistUser :one
-SELECT EXISTS(
-    SELECT 1
-    FROM users
-    WHERE email = $1
-        AND password = $2
-) AS exists_user
-`
-
-type ExistUserParams struct {
-	Email    string
-	Password string
-}
-
-func (q *Queries) ExistUser(ctx context.Context, arg ExistUserParams) (bool, error) {
-	row := q.db.QueryRowContext(ctx, existUser, arg.Email, arg.Password)
-	var exists_user bool
-	err := row.Scan(&exists_user)
-	return exists_user, err
-}
-
-const findUserByEmailPassword = `-- name: FindUserByEmailPassword :one
+const findUserByEmail = `-- name: FindUserByEmail :one
 SELECT
     id,
     last_name,
@@ -52,16 +31,10 @@ SELECT
     updated_at
 FROM users
 WHERE email = $1
-    AND password = $2
 `
 
-type FindUserByEmailPasswordParams struct {
-	Email    string
-	Password string
-}
-
-func (q *Queries) FindUserByEmailPassword(ctx context.Context, arg FindUserByEmailPasswordParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, findUserByEmailPassword, arg.Email, arg.Password)
+func (q *Queries) FindUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, findUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,

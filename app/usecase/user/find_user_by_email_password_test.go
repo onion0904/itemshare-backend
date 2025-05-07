@@ -10,7 +10,7 @@ import (
 	userDomain "github.com/onion0904/CarShareSystem/app/domain/user"
 )
 
-func TestFindUserByEmailPasswordUseCase_Run(t *testing.T) {
+func TestFindUserByEmailUseCase_Run(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockUserRepo := userDomain.NewMockUserRepository(ctrl)
 	uc := NewFindUserByEmailPasswordUseCase(mockUserRepo)
@@ -18,7 +18,6 @@ func TestFindUserByEmailPasswordUseCase_Run(t *testing.T) {
 	tests := []struct {
 		name     string
 		email    string
-		password string
 		mockFunc func()
 		want     *FindUserByEmailPasswordUseCaseDto
 		wantErr  bool
@@ -26,18 +25,17 @@ func TestFindUserByEmailPasswordUseCase_Run(t *testing.T) {
 		{
 			name: "ok case: FindUserUseCase",
 			email: "example@onion.com",
-			password: "pass",
 			mockFunc: func() {
 				mockUserRepo.
 						EXPECT().
-						FindUserByEmailPassword(gomock.Any(), gomock.Any(), gomock.Any()).
-						DoAndReturn(func(ctx context.Context, email string, password string) (*userDomain.User, error){
+						FindUserByEmail(gomock.Any(), gomock.Any()).
+						DoAndReturn(func(ctx context.Context, email string) (*userDomain.User, error){
 							return reconstructUser(
 								"01F8B9Z6G9WBJK9XJH5M7RQK5X",
 								"onion",
 								"gratin",
 								email,
-								password,
+								"password",
 								"icon",
 								nil,
 								nil,
@@ -49,7 +47,7 @@ func TestFindUserByEmailPasswordUseCase_Run(t *testing.T) {
 				LastName: "onion",
 				FirstName: "gratin",
 				Email: "example@onion.com",
-				Password: "pass",
+				Password: "password",
 				Icon: "icon",
 				GroupIDs: nil,
 				EventIDs: nil,
@@ -62,7 +60,7 @@ func TestFindUserByEmailPasswordUseCase_Run(t *testing.T) {
 			tt := tt
 			t.Parallel()
 			tt.mockFunc()
-			got, err := uc.Run(context.Background(), tt.email, tt.password)
+			got, err := uc.Run(context.Background(), tt.email)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("FindUserByEmailPasswordUseCase.Run() error = %v, wantErr %v", err, tt.wantErr)
 				return
