@@ -366,7 +366,7 @@ func (r *mutationResolver) Signin(ctx context.Context, email string, password st
 		return nil, errDomain.NewError("Email or Password or verified code is not set")
 	}
 	userRepo := repo.NewUserRepository(r.DB)
-	exist, err := userRepo.ExistUser(ctx, email, password)
+	exist, err := userRepo.ExistUser(ctx, email, string([]byte(password)))
 	if err != nil {
 		return nil, err
 	}
@@ -375,7 +375,7 @@ func (r *mutationResolver) Signin(ctx context.Context, email string, password st
 	}
 
 	find := usecase_user.NewFindUserByEmailPasswordUseCase(userRepo)
-	user, err := find.Run(ctx, email, password)
+	user, err := find.Run(ctx, email, string([]byte(password)))
 	if err != nil {
 		return nil, err
 	}
