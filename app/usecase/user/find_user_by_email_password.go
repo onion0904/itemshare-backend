@@ -31,8 +31,8 @@ type FindUserByEmailPasswordUseCaseDto struct {
 	UpdatedAt   time.Time
 }
 
-func (uc *FindUserByEmailPasswordUseCase) Run(ctx context.Context, email,password string) (*FindUserByEmailPasswordUseCaseDto, error) {
-	user, err := uc.userRepo.FindUserByEmailPassword(ctx,email,password)
+func (uc *FindUserByEmailPasswordUseCase) Run(ctx context.Context, email string) (*FindUserByEmailPasswordUseCaseDto, error) {
+	user, err := uc.userRepo.FindUserByEmail(ctx,email)
 	if err != nil {
 		return nil, err
 	}

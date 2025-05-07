@@ -8,6 +8,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"golang.org/x/crypto/bcrypt"
+	"github.com/onion0904/CarShareSystem/pkg/jwt"
 
 	"github.com/onion0904/CarShareSystem/app/config"
 	errDomain "github.com/onion0904/CarShareSystem/app/domain/error"
@@ -19,9 +21,7 @@ import (
 	usecase_group "github.com/onion0904/CarShareSystem/app/usecase/group"
 	usecase_mail "github.com/onion0904/CarShareSystem/app/usecase/mail"
 	usecase_user "github.com/onion0904/CarShareSystem/app/usecase/user"
-	"github.com/onion0904/CarShareSystem/pkg/jwt"
 	VerifiedCode "github.com/onion0904/CarShareSystem/pkg/verified_code"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // UpdateUser is the resolver for the updateUser field.
@@ -289,11 +289,12 @@ func (r *mutationResolver) Signup(ctx context.Context, input model.CreateUserInp
 		return nil, errDomain.NewError("Email or Password or verified code is not set")
 	}
 	userRepo := repo.NewUserRepository(r.DB)
-	exist, err := userRepo.ExistUser(ctx, input.Email, input.Password)
+	exist := usecase_user.NewCheckExistUserUseCase(userRepo)
+	existed, err := exist.Run(ctx,input.Email,input.Password)
 	if err != nil {
 		return nil, err
 	}
-	if exist {
+	if existed {
 		return nil, errDomain.NewError("User is already registered")
 	}
 
@@ -366,16 +367,18 @@ func (r *mutationResolver) Signin(ctx context.Context, email string, password st
 		return nil, errDomain.NewError("Email or Password or verified code is not set")
 	}
 	userRepo := repo.NewUserRepository(r.DB)
-	exist, err := userRepo.ExistUser(ctx, email, string([]byte(password)))
+	
+	exist := usecase_user.NewCheckExistUserUseCase(userRepo)
+	exists, err := exist.Run(ctx,email,password)
 	if err != nil {
 		return nil, err
 	}
-	if !exist {
+	if !exists {
 		return nil, errDomain.NewError("User is not found")
 	}
 
 	find := usecase_user.NewFindUserByEmailPasswordUseCase(userRepo)
-	user, err := find.Run(ctx, email, string([]byte(password)))
+	user, err := find.Run(ctx, email)
 	if err != nil {
 		return nil, err
 	}
