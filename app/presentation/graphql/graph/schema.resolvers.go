@@ -30,11 +30,18 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 	update := usecase_user.NewUpdateUserUseCase(userRepo)
 	//ctx から取った userID を使うことで 「なりすまし」を防ぐ
 	userID, _ := middleware.GetUserID(ctx)
-	DTO := usecase_user.UpdateUseCaseDto{
-		LastName:  *input.LastName,
-		FirstName: *input.FirstName,
-		Email:     *input.Email,
-		Icon:      *input.Icon,
+	DTO := usecase_user.UpdateUseCaseDto{}
+	if input.LastName != nil {
+		DTO.LastName = *input.LastName
+	}
+	if input.FirstName != nil {
+		DTO.FirstName = *input.FirstName
+	}
+	if input.Email != nil {
+		DTO.Email = *input.Email	
+	}
+	if input.Icon != nil {
+		DTO.Icon = *input.Icon
 	}
 	user, err := update.Run(ctx, userID, DTO)
 	if err != nil {
