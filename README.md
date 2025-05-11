@@ -9,6 +9,7 @@
 - CleanArchitectureを学ぶ
 - Testを学ぶ
 - GraphQLとsqlcを学ぶ
+- CI/CDとdeployを学ぶ
 - 友達と車をシェアしたい
 
 ## ドメイン
