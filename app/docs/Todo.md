@@ -10,3 +10,4 @@
 - docs
 
 ## todo
+- mailgunをnet/smtpにする

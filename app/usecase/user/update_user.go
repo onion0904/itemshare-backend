@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"reflect"
 	userDomain "github.com/onion0904/CarShareSystem/app/domain/user"
 )
 
@@ -18,10 +19,10 @@ func NewUpdateUserUseCase(
 }
 
 type UpdateUseCaseDto struct {
-	LastName string
-	FirstName string
-	Email string
-	Icon string
+	LastName *string
+	FirstName *string
+	Email *string
+	Icon *string
 }
 
 func (uc *UpdateUseCase) Run(ctx context.Context, id string, dto UpdateUseCaseDto) (*FindUserUseCaseDto,error) {
@@ -29,7 +30,9 @@ func (uc *UpdateUseCase) Run(ctx context.Context, id string, dto UpdateUseCaseDt
 	if err != nil {
         return nil,err
     }
-	nuser, err := userDomain.Reconstruct(id,dto.LastName, dto.FirstName, dto.Email, user.Password(), dto.Icon,user.GroupIDs(),user.EventIDs())
+	defaultValue(&dto)
+	
+	nuser, err := userDomain.Reconstruct(id,*dto.LastName, *dto.FirstName, *dto.Email, user.Password(), *dto.Icon,user.GroupIDs(),user.EventIDs())
 	if err != nil {
 		return nil,err
 	}
@@ -53,4 +56,16 @@ func (uc *UpdateUseCase) Run(ctx context.Context, id string, dto UpdateUseCaseDt
 		CreatedAt:   updatedUser.CreatedAt(),
         UpdatedAt:   updatedUser.UpdatedAt(),
 	}, nil
+}
+
+// inputの構造体のnilの部分をデフォルト値に変換
+func defaultValue (inDTO *UpdateUseCaseDto){
+	v := reflect.ValueOf(inDTO).Elem()
+	for i:=0; i<v.NumField(); i++{
+		field := v.Field(i)
+		if field.IsNil(){
+			defaultValue := ""
+			field.Set(reflect.ValueOf(&defaultValue))
+		}
+	}
 }
