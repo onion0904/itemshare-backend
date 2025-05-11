@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"go.uber.org/mock/gomock"
+	"github.com/samber/lo"
 
 	userDomain "github.com/onion0904/CarShareSystem/app/domain/user"
 )
@@ -29,10 +30,10 @@ func TestUpdateUseCaseRun(t *testing.T) {
 			name: "ok case: UpdateUserUseCase",
 			id: "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 			dto: UpdateUseCaseDto{
-				LastName: "Updated",
-				FirstName: "User",
-				Email: "updated@example.com",
-				Icon: "Updated Icon",
+				LastName: lo.ToPtr("Updated"),
+				FirstName: lo.ToPtr("User"),
+				Email: lo.ToPtr("updated@example.com"),
+				Icon: lo.ToPtr("Updated Icon"),
 			},
 			mockFunc: func() {
 				mockUserRepo.

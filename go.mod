@@ -9,6 +9,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/mailgun/mailgun-go/v4 v4.23.0
 	github.com/oklog/ulid/v2 v2.1.0
+	github.com/samber/lo v1.50.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/vektah/gqlparser/v2 v2.5.26
 	go.uber.org/mock v0.5.2
@@ -30,4 +31,5 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
+	golang.org/x/text v0.24.0 // indirect
 )
