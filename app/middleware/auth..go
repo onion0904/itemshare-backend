@@ -3,7 +3,6 @@ package middleware
 // 参照元 https://zenn.dev/hsaki/books/golang-graphql/viewer/auth
 
 import (
-	"fmt"
 	"context"
 	"log"
 	"net/http"
@@ -50,7 +49,6 @@ func validateToken(token string) (string, error) {
 	if strings.HasPrefix(token, "Bearer ") {
 		token = strings.TrimPrefix(token, "Bearer ")
 	}
-	fmt.Println("Received Token:", token)
 	claims, err := jwt.ParseJWT(token,[]byte(secretkey))
 	if err != nil {
 		return "", err
