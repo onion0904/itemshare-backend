@@ -60,7 +60,7 @@ func (uc *UpdateUseCase) Run(ctx context.Context, id string, dto UpdateUseCaseDt
 
 // inputの構造体のnilの部分をデフォルト値に変換
 func defaultValue (inDTO *UpdateUseCaseDto){
-	v := reflect.ValueOf(&inDTO).Elem()
+	v := reflect.ValueOf(inDTO).Elem()
 	for i:=0; i<v.NumField(); i++{
 		field := v.Field(i)
 		if field.IsNil(){
