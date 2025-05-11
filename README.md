@@ -62,13 +62,12 @@
 ├──app # アプリケーションコード
 |   ├── cmd # アプリケーションのスタート地点 (main.go等)
 |   ├── config # 各種設定値
-|    ├── docs # APIドキュメント
-|    ├── domain # ビジネスロジックの中核 、各種ドメインオブジェクト
-|    ├── infrastructure # データベースや外部APIへの実装詳細
-|    ├── presentation # ユーザーへの表⽰や⼊⼒ (HTTP等)
-|    ├── server # HTTPサーバーの設定やルーティング
-|    └── usecase # ユースケース
-├── ops # 各種環境周りに関するファイル
+|   ├── docs # APIドキュメント
+|   ├── domain # ビジネスロジックの中核 、各種ドメインオブジェクト
+|   ├── infrastructure # データベースや外部APIへの実装詳細
+|   ├── presentation # ユーザーへの表⽰や⼊⼒ (HTTP等)
+|   ├── server # HTTPサーバーの設定やルーティング
+|   └── usecase # ユースケース
 └── pkg # ドメインロジックをもたない汎⽤的な処理
 ```
 
