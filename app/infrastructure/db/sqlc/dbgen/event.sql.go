@@ -20,6 +20,41 @@ func (q *Queries) DeleteEvent(ctx context.Context, eventid string) error {
 	return err
 }
 
+const findDayOfEvent = `-- name: FindDayOfEvent :one
+SELECT id, user_id, together, description, year, month, day, date, start_date, end_date, important, created_at, updated_at
+FROM events
+WHERE year  = $1
+    AND month = $2
+    AND day = $3
+`
+
+type FindDayOfEventParams struct {
+	Year  int32
+	Month int32
+	Day   int32
+}
+
+func (q *Queries) FindDayOfEvent(ctx context.Context, arg FindDayOfEventParams) (Event, error) {
+	row := q.db.QueryRowContext(ctx, findDayOfEvent, arg.Year, arg.Month, arg.Day)
+	var i Event
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Together,
+		&i.Description,
+		&i.Year,
+		&i.Month,
+		&i.Day,
+		&i.Date,
+		&i.StartDate,
+		&i.EndDate,
+		&i.Important,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const findEvent = `-- name: FindEvent :one
 SELECT id, user_id, together, description, year, month, day, date, start_date, end_date, important, created_at, updated_at
 FROM events

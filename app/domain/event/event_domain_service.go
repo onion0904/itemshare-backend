@@ -28,10 +28,17 @@ func (c *EventDomainService) SaveEventService(ctx context.Context, event *Event)
 	if err != nil {
 		return err
 	}
-
 	// イベント数の制約を確認
 	if !c.validNumEvents(ctx,events) {
 		return errors.New("イベントの最大数を超えています")
+	}
+	oldEvent,err := c.EventRepo.FindDayOfEvent(ctx,event.year,event.month,event.day)
+	if err!=nil {
+		return err
+	}
+	err = c.validSetableEvents(ctx,oldEvent,event)
+	if err!=nil {
+		return err
 	}
 
 	err = c.EventRepo.SaveEvent(ctx, event)
@@ -42,6 +49,7 @@ func (c *EventDomainService) SaveEventService(ctx context.Context, event *Event)
 	return nil
 }
 
+//Maxのevent数とMaxのimportantEvent数を確認。
 func (c *EventDomainService) validNumEvents (ctx context.Context , eventIDs []string) bool {
 	var importantEvent int
 	var nimportantEvent int
@@ -63,6 +71,19 @@ func (c *EventDomainService) validNumEvents (ctx context.Context , eventIDs []st
 	}else {
 		return false
 	}
+}
+
+// eventが被ったとき早い者勝ちにする。eventが被り、片方がimportantをtrueにしている場合はimportantの方を登録。両方importantのときは早い者勝ち。
+func (c *EventDomainService) validSetableEvents (ctx context.Context, oldEvent, newEvent *Event) error {
+	if oldEvent.important == true && newEvent.important == true{
+		return errors.New("すでに重要なイベントが登録されています。")
+	} else if oldEvent.important == false && newEvent.important ==false{
+		return errors.New("すでにイベントが登録されていますが、重要にすれば登録できます。")
+	} else if oldEvent.important == true && newEvent.important ==false{
+		return errors.New("すでに重要なイベントが登録されています。")
+	}
+	c.EventRepo.DeleteEvent(ctx,oldEvent.id)
+	return nil
 }
 
 const (

@@ -53,6 +53,13 @@ SELECT *
 FROM events
 WHERE id = sqlc.arg(eventID);
 
+-- name: FindDayOfEvent :one
+SELECT *
+FROM events
+WHERE year  = sqlc.arg(year)
+    AND month = sqlc.arg(month)
+    AND day = sqlc.arg(day);
+
 -- name: FindMonthEventIDs :many
 SELECT id
 FROM events
