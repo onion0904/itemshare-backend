@@ -8,6 +8,7 @@ import (
 type Config struct {
 	Server  Server
 	DB      DBConfig
+	Mail    Mail
 	Mailgun Mailgun
 	JWT     JWT
 }
@@ -18,6 +19,10 @@ type DBConfig struct {
 
 type Server struct {
 	Port string
+}
+
+type Mail struct{
+	GmailPass string
 }
 
 type Mailgun struct {
@@ -43,6 +48,9 @@ func GetConfig() *Config {
 
 		// Server
 		config.Server.Port = getEnv("SERVER_PORT", "")
+
+		// Mail
+		config.Mail.GmailPass = getEnv("GMAIL_APP_PASS", "")
 
 		// Mailgun
 		config.Mailgun.Domain = getEnv("MAILGUN_DOMAIN", "")
