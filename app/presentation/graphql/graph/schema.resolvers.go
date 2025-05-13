@@ -259,7 +259,6 @@ func (r *mutationResolver) SendVerificationCode(ctx context.Context, email strin
 		log.Printf("Error generating verification code: %v", err)
 		return false, errDomain.NewError("認証コードの生成に失敗しました")
 	}
-	log.Println(vcode)
 
 	// 認証コードを保存
 	r.EmailUseCase.CodeMutex.Lock()
@@ -300,7 +299,6 @@ func (r *mutationResolver) Signup(ctx context.Context, input model.CreateUserInp
 
 	r.EmailUseCase.CodeMutex.Lock()
 	expectedCode, exists := r.EmailUseCase.VerificationCodes[input.Email]
-	log.Println(exists,expectedCode)
 	r.EmailUseCase.CodeMutex.Unlock()
 
 	if !exists {
