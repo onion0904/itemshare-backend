@@ -22,7 +22,7 @@ func NewCheckExistUserUseCase(
 func (uc *CheckExistUserUseCase) Run(ctx context.Context, email string, password string) (bool,error) {
 	user, err := uc.userRepo.FindUserByEmail(ctx,email)
 	if err != nil {
-		return false, err
+		return false, nil
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password()), []byte(password))
     if err != nil {

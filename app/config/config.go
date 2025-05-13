@@ -8,7 +8,7 @@ import (
 type Config struct {
 	Server  Server
 	DB      DBConfig
-	Mailgun Mailgun
+	Mail    Mail
 	JWT     JWT
 }
 
@@ -20,11 +20,9 @@ type Server struct {
 	Port string
 }
 
-type Mailgun struct {
-	Domain          string
-	Private_Key     string
-	Sender_email    string
-	Recipient_email string
+type Mail struct{
+	GmailPass string
+	SenderEmail string
 }
 
 type JWT struct {
@@ -44,11 +42,9 @@ func GetConfig() *Config {
 		// Server
 		config.Server.Port = getEnv("SERVER_PORT", "")
 
-		// Mailgun
-		config.Mailgun.Domain = getEnv("MAILGUN_DOMAIN", "")
-		config.Mailgun.Private_Key = getEnv("MAILGUN_PRIVATE_API_KEY", "")
-		config.Mailgun.Sender_email = getEnv("SENDER_EMAIL", "")
-		config.Mailgun.Recipient_email = getEnv("RECIPIENT_EMAIL", "")
+		// Mail
+		config.Mail.GmailPass = getEnv("GMAIL_APP_PASS", "")
+		config.Mail.SenderEmail = getEnv("SENDER_EMAIL", "")
 
 		// JWT
 		config.JWT.Secret = getEnv("JWT_SECRET", "")
