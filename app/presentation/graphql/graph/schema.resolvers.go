@@ -300,6 +300,7 @@ func (r *mutationResolver) Signup(ctx context.Context, input model.CreateUserInp
 
 	r.EmailUseCase.CodeMutex.Lock()
 	expectedCode, exists := r.EmailUseCase.VerificationCodes[input.Email]
+	log.Println(exists,expectedCode)
 	r.EmailUseCase.CodeMutex.Unlock()
 
 	if !exists {
