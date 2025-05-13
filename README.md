@@ -3,7 +3,6 @@
 # 説明
 このアプリは知り合い同士で車をシェアするアプリのAPIです。
 [APIのplayground](https://my-go-api-onion0904-2d2c780f.koyeb.app/)
-※現在はサーバー側の負荷対策はしていないので、使えるメールアドレスを制限してます。
 
 ## 目的
 - CleanArchitectureを学ぶ
