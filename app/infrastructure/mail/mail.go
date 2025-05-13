@@ -18,9 +18,10 @@ func NewMailRepository() mailDomain.MailService {
 func (mr *mailService)SendEmail(toEmail string, code string)error{
 	mailConfig := config.GetConfig()
     gmailpass := mailConfig.Mail.GmailPass
+	senderEmail := mailConfig.Mail.SenderEmail
 
 	e := email.NewEmail()
-	e.From = "takerudaze0904@gmail.com"
+	e.From = senderEmail
 	e.To = []string{toEmail}
 	e.Subject = "CarShareSystemの確認コード"
 	e.Text = []byte("見覚えのない連絡でしたら無視してください\n確認コード:"+code)
@@ -31,7 +32,7 @@ func (mr *mailService)SendEmail(toEmail string, code string)error{
 
 	err := e.Send(smtpAddr, smtp.PlainAuth(
 		"",               // identity（通常は空文字）
-		"takerudaze0904@gmail.com",   // Gmailアドレス
+		senderEmail,   // Gmailアドレス
 		gmailpass,      // Appパスワード
 		smtpServer,       // ホスト名（smtp.gmail.com）
 	))
