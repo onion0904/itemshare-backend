@@ -33,12 +33,12 @@ func (c *EventDomainService) SaveEventService(ctx context.Context, event *Event)
 		return errors.New("イベントの最大数を超えています")
 	}
 	oldEvent,err := c.EventRepo.FindDayOfEvent(ctx,event.year,event.month,event.day)
-	if err!=nil {
-		return err
-	}
-	err = c.validSetableEvents(ctx,oldEvent,event)
-	if err!=nil {
-		return err
+	
+	if oldEvent != nil{
+		err = c.validSetableEvents(ctx,oldEvent,event)
+		if err!=nil {
+			return err
+		}
 	}
 
 	err = c.EventRepo.SaveEvent(ctx, event)

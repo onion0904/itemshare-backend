@@ -92,9 +92,9 @@ func (er *eventRepository)FindDayOfEvent(ctx context.Context, year, month,day in
 	e, err := query.FindDayOfEvent(ctx, InputFindDayOfEventParams)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errDomain.NewError("Event not found")
+			return nil, nil
 		}
-		return nil, err
+		return nil,nil
 	}
 
 	ne, err := event.Reconstruct(
