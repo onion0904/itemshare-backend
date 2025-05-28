@@ -1,10 +1,10 @@
 ---
-name: Custom issue template
+name: sub issue
 about: Describe this issue template's purpose here.
 title: ''
-labels: issue, sub issue
+labels: sub issue
 assignees: ''
 
 ---
 
-# 何をするのか
+- 何をするのか
