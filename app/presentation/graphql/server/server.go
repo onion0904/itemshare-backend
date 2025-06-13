@@ -36,6 +36,7 @@ func Start() {
 		Resolvers: &graph.Resolver{
 			DB: DB,
 			EmailUseCase: usecase_mail.NewSendEmailUseCase(mail_Service.NewMailRepository()),
+			BaseURL: cfg.InviteGroup.BaseURL,
 		},
 		Directives: graph.Directive,
 	}))

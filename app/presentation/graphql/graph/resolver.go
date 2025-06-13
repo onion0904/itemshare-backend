@@ -11,4 +11,5 @@ import (
 type Resolver struct{
 	DB *sql.DB
 	EmailUseCase  *usecase_mail.SendEmailUseCase
+	BaseURL string
 }

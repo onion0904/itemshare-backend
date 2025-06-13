@@ -10,6 +10,7 @@ type Config struct {
 	DB      DBConfig
 	Mail    Mail
 	JWT     JWT
+	InviteGroup InviteGroup
 }
 
 type DBConfig struct {
@@ -27,6 +28,10 @@ type Mail struct{
 
 type JWT struct {
 	Secret string
+}
+
+type InviteGroup struct{
+	BaseURL string
 }
 
 var (
@@ -48,6 +53,9 @@ func GetConfig() *Config {
 
 		// JWT
 		config.JWT.Secret = getEnv("JWT_SECRET", "")
+
+		// InviteGroup
+		config.InviteGroup.BaseURL = getEnv("INVITE_BASEURL", "http://localhost:3000")
 	})
 	return &config
 }

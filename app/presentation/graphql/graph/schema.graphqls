@@ -127,6 +127,16 @@ type Mutation {
   removeUserFromGroup(groupID: String!, userID: String!): Group! @isAuthenticated
   addEventToGroup(groupID: String!, eventID: String!): Group! @isAuthenticated
 
+  # グループ招待
+  """招待リンクを生成します"""
+  generateGroupInviteLink(groupID: String!): String! @isAuthenticated
+
+  """招待用のQRコードを生成します (Base64エンコードされた画像データ)"""
+  generateGroupInviteQRCode(groupID: String!): String! @isAuthenticated
+
+  """招待を承諾します"""
+  acceptGroupInvitation(token: String!): Group! @isAuthenticated
+
   # イベント関連
   createEvent(input: CreateEventInput!): Event! @isAuthenticated
   deleteEvent(id: String!): Boolean! @isAuthenticated

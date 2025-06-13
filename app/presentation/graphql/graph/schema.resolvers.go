@@ -8,8 +8,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"golang.org/x/crypto/bcrypt"
-	"github.com/onion0904/CarShareSystem/pkg/jwt"
 
 	"github.com/onion0904/CarShareSystem/app/config"
 	errDomain "github.com/onion0904/CarShareSystem/app/domain/error"
@@ -21,7 +19,9 @@ import (
 	usecase_group "github.com/onion0904/CarShareSystem/app/usecase/group"
 	usecase_mail "github.com/onion0904/CarShareSystem/app/usecase/mail"
 	usecase_user "github.com/onion0904/CarShareSystem/app/usecase/user"
+	"github.com/onion0904/CarShareSystem/pkg/jwt"
 	VerifiedCode "github.com/onion0904/CarShareSystem/pkg/verified_code"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // UpdateUser is the resolver for the updateUser field.
@@ -201,6 +201,57 @@ func (r *mutationResolver) AddEventToGroup(ctx context.Context, groupID string, 
 	return &ngroup, nil
 }
 
+// GenerateGroupInviteLink is the resolver for the generateGroupInviteLink field.
+func (r *mutationResolver) GenerateGroupInviteLink(ctx context.Context, groupID string) (string, error) {
+	inviteService := usecase_group.NewGroupInviteService(repo.NewGroupRepository(r.DB), r.BaseURL)
+	return inviteService.GenerateInviteLink(ctx, groupID)
+}
+
+// GenerateGroupInviteQRCode is the resolver for the generateGroupInviteQRCode field.
+func (r *mutationResolver) GenerateGroupInviteQRCode(ctx context.Context, groupID string) (string, error) {
+	inviteService := usecase_group.NewGroupInviteService(repo.NewGroupRepository(r.DB), r.BaseURL)
+	return inviteService.GenerateQRCode(ctx, groupID)
+}
+
+// AcceptGroupInvitation is the resolver for the acceptGroupInvitation field.
+func (r *mutationResolver) AcceptGroupInvitation(ctx context.Context, token string) (*model.Group, error) {
+	// 自身のUserIDを取得
+	userID, ok := middleware.GetUserID(ctx)
+	if !ok {
+		return nil, errDomain.NewError("認証されていません")
+	}
+
+	// 招待トークンを検証
+	cfg := config.GetConfig()
+	claims, err := jwt.ParseInviteJWT(token, []byte(cfg.JWT.Secret))
+	if err != nil {
+		return nil, errDomain.NewError("無効な招待トークンです")
+	}
+
+	// ユーザーをグループに追加するユースケースを呼び出す
+	addUserToGroupUC := usecase_group.NewAddUserToGroupUseCase(repo.NewGroupRepository(r.DB))
+	dto := usecase_group.AddUserToGroupUseCaseDto{
+		UserID:  userID,
+		GroupID: claims.GroupID,
+	}
+
+	group, err := addUserToGroupUC.Run(ctx, dto)
+	if err != nil {
+		return nil, err
+	}
+	
+	// 結果をGraphQLモデルに変換して返す
+	return &model.Group{
+		ID:        group.ID(),
+		Name:      group.Name(),
+		Icon:      group.Icon(),
+		CreatedAt: group.CreatedAt(),
+		UpdatedAt: group.UpdatedAt(),
+		UserIDs:   group.UserIDs(),
+		EventIDs:  group.EventIDs(),
+	}, nil
+}
+
 // CreateEvent is the resolver for the createEvent field.
 func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEventInput) (*model.Event, error) {
 	eventRepo := repo.NewEventRepository(r.DB)
@@ -289,7 +340,7 @@ func (r *mutationResolver) Signup(ctx context.Context, input model.CreateUserInp
 	}
 	userRepo := repo.NewUserRepository(r.DB)
 	exist := usecase_user.NewCheckExistUserUseCase(userRepo)
-	existed, err := exist.Run(ctx,input.Email,input.Password)
+	existed, err := exist.Run(ctx, input.Email, input.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -366,9 +417,9 @@ func (r *mutationResolver) Signin(ctx context.Context, email string, password st
 		return nil, errDomain.NewError("Email or Password or verified code is not set")
 	}
 	userRepo := repo.NewUserRepository(r.DB)
-	
+
 	exist := usecase_user.NewCheckExistUserUseCase(userRepo)
-	exists, err := exist.Run(ctx,email,password)
+	exists, err := exist.Run(ctx, email, password)
 	if err != nil {
 		return nil, err
 	}

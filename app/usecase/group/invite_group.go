@@ -6,6 +6,8 @@ import (
     "fmt"
 
     groupDomain "github.com/onion0904/CarShareSystem/app/domain/group"
+    "github.com/onion0904/CarShareSystem/app/config" // config をインポート
+	"github.com/onion0904/CarShareSystem/pkg/jwt"     // jwt をインポート
     "github.com/skip2/go-qrcode" // QRコード生成ライブラリ
 )
 
@@ -23,50 +25,40 @@ func NewGroupInviteService(
     }
 }
 
-// Lineで招待
-func (s *GroupInviteService) InviteByLine(ctx context.Context, groupID, userID string) error {
-    group, err := s.groupRepo.FindGroup(ctx, groupID)
-    if err != nil {
-        return fmt.Errorf("グループが見つかりません: %w", err)
-    }
+// 招待リンクを生成
+func (s *GroupInviteService) GenerateInviteLink(ctx context.Context, groupID string) (string, error) {
+	// JWTの秘密鍵を取得
+	cfg := config.GetConfig()
+	jwtSecret := []byte(cfg.JWT.Secret)
 
-    // Lineでの招待リンクを生成（仮）
-    inviteLink := fmt.Sprintf("%s/groups/%s/invite", s.baseURL, group.ID())
-    // LineのAPIを呼び出すロジックをここに記述
-    fmt.Printf("Lineで招待リンクを送信: %s\n", inviteLink)
+	// 招待用トークンを生成
+	claims := jwt.NewInviteClaims(groupID)
+	token := jwt.CreateToken(claims)
+	tokenString, err := token.SignedString(jwtSecret)
+	if err != nil {
+		return "", fmt.Errorf("招待トークンの生成に失敗しました: %w", err)
+	}
 
-    return nil
+	// トークンを含む招待リンクを生成
+	inviteLink := fmt.Sprintf("%s/invite?token=%s", s.baseURL, tokenString) // フロントエンドの招待承諾ページのURL
+	return inviteLink, nil
 }
 
 // QRコードを生成
 func (s *GroupInviteService) GenerateQRCode(ctx context.Context, groupID string) (string, error) {
-    group, err := s.groupRepo.FindGroup(ctx, groupID)
-    if err != nil {
-        return "", fmt.Errorf("グループが見つかりません: %w", err)
-    }
+	// 招待リンク生成
+	inviteLink, err := s.GenerateInviteLink(ctx, groupID)
+	if err != nil {
+		return "", err
+	}
 
-    // 招待リンク生成
-    inviteLink := fmt.Sprintf("%s/groups/%s/invite", s.baseURL, group.ID())
-    
-    // QRコードを生成
-    pngData, err := qrcode.Encode(inviteLink, qrcode.Medium, 256)
-    if err != nil {
-        return "", fmt.Errorf("QRコード生成エラー: %w", err)
-    }
+	// QRコードを生成
+	pngData, err := qrcode.Encode(inviteLink, qrcode.Medium, 256)
+	if err != nil {
+		return "", fmt.Errorf("QRコード生成エラー: %w", err)
+	}
 
-    // Base64エンコードしたデータを返す
-    encoded := base64.StdEncoding.EncodeToString(pngData)
-    return fmt.Sprintf("data:image/png;base64,%s", encoded), nil
-}
-
-// 招待リンクを生成
-func (s *GroupInviteService) GenerateInviteLink(ctx context.Context, groupID string) (string, error) {
-    group, err := s.groupRepo.FindGroup(ctx, groupID)
-    if err != nil {
-        return "", fmt.Errorf("グループが見つかりません: %w", err)
-    }
-
-    // 招待リンク生成
-    inviteLink := fmt.Sprintf("%s/groups/%s/invite", s.baseURL, group.ID())
-    return inviteLink, nil
+	// Base64エンコードしたデータを返す
+	encoded := base64.StdEncoding.EncodeToString(pngData)
+	return fmt.Sprintf("data:image/png;base64,%s", encoded), nil
 }
