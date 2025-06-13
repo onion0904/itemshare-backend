@@ -81,19 +81,22 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddEventToGroup      func(childComplexity int, groupID string, eventID string) int
-		AddUserToGroup       func(childComplexity int, groupID string, userID string) int
-		CreateEvent          func(childComplexity int, input model.CreateEventInput) int
-		CreateGroup          func(childComplexity int, input model.CreateGroupInput) int
-		DeleteEvent          func(childComplexity int, id string) int
-		DeleteGroup          func(childComplexity int, id string) int
-		DeleteUser           func(childComplexity int) int
-		RemoveUserFromGroup  func(childComplexity int, groupID string, userID string) int
-		SendVerificationCode func(childComplexity int, email string) int
-		Signin               func(childComplexity int, email string, password string) int
-		Signup               func(childComplexity int, input model.CreateUserInput, vcode string) int
-		UpdateGroup          func(childComplexity int, id string, input model.UpdateGroupInput) int
-		UpdateUser           func(childComplexity int, input model.UpdateUserInput) int
+		AcceptGroupInvitation     func(childComplexity int, token string) int
+		AddEventToGroup           func(childComplexity int, groupID string, eventID string) int
+		AddUserToGroup            func(childComplexity int, groupID string, userID string) int
+		CreateEvent               func(childComplexity int, input model.CreateEventInput) int
+		CreateGroup               func(childComplexity int, input model.CreateGroupInput) int
+		DeleteEvent               func(childComplexity int, id string) int
+		DeleteGroup               func(childComplexity int, id string) int
+		DeleteUser                func(childComplexity int) int
+		GenerateGroupInviteLink   func(childComplexity int, groupID string) int
+		GenerateGroupInviteQRCode func(childComplexity int, groupID string) int
+		RemoveUserFromGroup       func(childComplexity int, groupID string, userID string) int
+		SendVerificationCode      func(childComplexity int, email string) int
+		Signin                    func(childComplexity int, email string, password string) int
+		Signup                    func(childComplexity int, input model.CreateUserInput, vcode string) int
+		UpdateGroup               func(childComplexity int, id string, input model.UpdateGroupInput) int
+		UpdateUser                func(childComplexity int, input model.UpdateUserInput) int
 	}
 
 	Query struct {
@@ -126,6 +129,9 @@ type MutationResolver interface {
 	AddUserToGroup(ctx context.Context, groupID string, userID string) (*model.Group, error)
 	RemoveUserFromGroup(ctx context.Context, groupID string, userID string) (*model.Group, error)
 	AddEventToGroup(ctx context.Context, groupID string, eventID string) (*model.Group, error)
+	GenerateGroupInviteLink(ctx context.Context, groupID string) (string, error)
+	GenerateGroupInviteQRCode(ctx context.Context, groupID string) (string, error)
+	AcceptGroupInvitation(ctx context.Context, token string) (*model.Group, error)
 	CreateEvent(ctx context.Context, input model.CreateEventInput) (*model.Event, error)
 	DeleteEvent(ctx context.Context, id string) (bool, error)
 	SendVerificationCode(ctx context.Context, email string) (bool, error)
@@ -312,6 +318,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Group.UserIDs(childComplexity), true
 
+	case "Mutation.acceptGroupInvitation":
+		if e.complexity.Mutation.AcceptGroupInvitation == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_acceptGroupInvitation_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AcceptGroupInvitation(childComplexity, args["token"].(string)), true
+
 	case "Mutation.addEventToGroup":
 		if e.complexity.Mutation.AddEventToGroup == nil {
 			break
@@ -390,6 +408,30 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.DeleteUser(childComplexity), true
+
+	case "Mutation.generateGroupInviteLink":
+		if e.complexity.Mutation.GenerateGroupInviteLink == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_generateGroupInviteLink_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.GenerateGroupInviteLink(childComplexity, args["groupID"].(string)), true
+
+	case "Mutation.generateGroupInviteQRCode":
+		if e.complexity.Mutation.GenerateGroupInviteQRCode == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_generateGroupInviteQRCode_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.GenerateGroupInviteQRCode(childComplexity, args["groupID"].(string)), true
 
 	case "Mutation.removeUserFromGroup":
 		if e.complexity.Mutation.RemoveUserFromGroup == nil {
@@ -707,6 +749,29 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_acceptGroupInvitation_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Mutation_acceptGroupInvitation_argsToken(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["token"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_acceptGroupInvitation_argsToken(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+	if tmp, ok := rawArgs["token"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_addEventToGroup_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -805,7 +870,7 @@ func (ec *executionContext) field_Mutation_createEvent_argsInput(
 ) (model.CreateEventInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNCreateEventInput2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateEventInput(ctx, tmp)
+		return ec.unmarshalNCreateEventInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateEventInput(ctx, tmp)
 	}
 
 	var zeroVal model.CreateEventInput
@@ -828,7 +893,7 @@ func (ec *executionContext) field_Mutation_createGroup_argsInput(
 ) (model.CreateGroupInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNCreateGroupInput2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateGroupInput(ctx, tmp)
+		return ec.unmarshalNCreateGroupInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateGroupInput(ctx, tmp)
 	}
 
 	var zeroVal model.CreateGroupInput
@@ -874,6 +939,52 @@ func (ec *executionContext) field_Mutation_deleteGroup_argsID(
 ) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_generateGroupInviteLink_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Mutation_generateGroupInviteLink_argsGroupID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["groupID"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_generateGroupInviteLink_argsGroupID(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("groupID"))
+	if tmp, ok := rawArgs["groupID"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_generateGroupInviteQRCode_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Mutation_generateGroupInviteQRCode_argsGroupID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["groupID"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_generateGroupInviteQRCode_argsGroupID(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("groupID"))
+	if tmp, ok := rawArgs["groupID"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -1007,7 +1118,7 @@ func (ec *executionContext) field_Mutation_signup_argsInput(
 ) (model.CreateUserInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNCreateUserInput2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateUserInput(ctx, tmp)
+		return ec.unmarshalNCreateUserInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateUserInput(ctx, tmp)
 	}
 
 	var zeroVal model.CreateUserInput
@@ -1061,7 +1172,7 @@ func (ec *executionContext) field_Mutation_updateGroup_argsInput(
 ) (model.UpdateGroupInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNUpdateGroupInput2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUpdateGroupInput(ctx, tmp)
+		return ec.unmarshalNUpdateGroupInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUpdateGroupInput(ctx, tmp)
 	}
 
 	var zeroVal model.UpdateGroupInput
@@ -1084,7 +1195,7 @@ func (ec *executionContext) field_Mutation_updateUser_argsInput(
 ) (model.UpdateUserInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNUpdateUserInput2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUpdateUserInput(ctx, tmp)
+		return ec.unmarshalNUpdateUserInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUpdateUserInput(ctx, tmp)
 	}
 
 	var zeroVal model.UpdateUserInput
@@ -1153,7 +1264,7 @@ func (ec *executionContext) field_Query_eventsByMonth_argsInput(
 ) (model.MonthlyEventInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNMonthlyEventInput2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐMonthlyEventInput(ctx, tmp)
+		return ec.unmarshalNMonthlyEventInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐMonthlyEventInput(ctx, tmp)
 	}
 
 	var zeroVal model.MonthlyEventInput
@@ -1355,7 +1466,7 @@ func (ec *executionContext) _AuthUserResponse_User(ctx context.Context, field gr
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_AuthUserResponse_User(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2309,7 +2420,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 		if data, ok := tmp.(*model.User); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/app/presentation/graphql/graph/model.User`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.User`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2323,7 +2434,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2474,7 +2585,7 @@ func (ec *executionContext) _Mutation_createGroup(ctx context.Context, field gra
 		if data, ok := tmp.(*model.Group); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/app/presentation/graphql/graph/model.Group`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.Group`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2488,7 +2599,7 @@ func (ec *executionContext) _Mutation_createGroup(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.Group)
 	fc.Result = res
-	return ec.marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
+	return ec.marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2567,7 +2678,7 @@ func (ec *executionContext) _Mutation_updateGroup(ctx context.Context, field gra
 		if data, ok := tmp.(*model.Group); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/app/presentation/graphql/graph/model.Group`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.Group`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2581,7 +2692,7 @@ func (ec *executionContext) _Mutation_updateGroup(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.Group)
 	fc.Result = res
-	return ec.marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
+	return ec.marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2737,7 +2848,7 @@ func (ec *executionContext) _Mutation_addUserToGroup(ctx context.Context, field 
 		if data, ok := tmp.(*model.Group); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/app/presentation/graphql/graph/model.Group`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.Group`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2751,7 +2862,7 @@ func (ec *executionContext) _Mutation_addUserToGroup(ctx context.Context, field 
 	}
 	res := resTmp.(*model.Group)
 	fc.Result = res
-	return ec.marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
+	return ec.marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addUserToGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2830,7 +2941,7 @@ func (ec *executionContext) _Mutation_removeUserFromGroup(ctx context.Context, f
 		if data, ok := tmp.(*model.Group); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/app/presentation/graphql/graph/model.Group`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.Group`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2844,7 +2955,7 @@ func (ec *executionContext) _Mutation_removeUserFromGroup(ctx context.Context, f
 	}
 	res := resTmp.(*model.Group)
 	fc.Result = res
-	return ec.marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
+	return ec.marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_removeUserFromGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2923,7 +3034,7 @@ func (ec *executionContext) _Mutation_addEventToGroup(ctx context.Context, field
 		if data, ok := tmp.(*model.Group); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/app/presentation/graphql/graph/model.Group`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.Group`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2937,7 +3048,7 @@ func (ec *executionContext) _Mutation_addEventToGroup(ctx context.Context, field
 	}
 	res := resTmp.(*model.Group)
 	fc.Result = res
-	return ec.marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
+	return ec.marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addEventToGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2980,6 +3091,253 @@ func (ec *executionContext) fieldContext_Mutation_addEventToGroup(ctx context.Co
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_generateGroupInviteLink(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_generateGroupInviteLink(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		directive0 := func(rctx context.Context) (any, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().GenerateGroupInviteLink(rctx, fc.Args["groupID"].(string))
+		}
+
+		directive1 := func(ctx context.Context) (any, error) {
+			if ec.directives.IsAuthenticated == nil {
+				var zeroVal string
+				return zeroVal, errors.New("directive isAuthenticated is not implemented")
+			}
+			return ec.directives.IsAuthenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(string); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_generateGroupInviteLink(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_generateGroupInviteLink_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_generateGroupInviteQRCode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_generateGroupInviteQRCode(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		directive0 := func(rctx context.Context) (any, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().GenerateGroupInviteQRCode(rctx, fc.Args["groupID"].(string))
+		}
+
+		directive1 := func(ctx context.Context) (any, error) {
+			if ec.directives.IsAuthenticated == nil {
+				var zeroVal string
+				return zeroVal, errors.New("directive isAuthenticated is not implemented")
+			}
+			return ec.directives.IsAuthenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(string); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_generateGroupInviteQRCode(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_generateGroupInviteQRCode_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_acceptGroupInvitation(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_acceptGroupInvitation(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		directive0 := func(rctx context.Context) (any, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().AcceptGroupInvitation(rctx, fc.Args["token"].(string))
+		}
+
+		directive1 := func(ctx context.Context) (any, error) {
+			if ec.directives.IsAuthenticated == nil {
+				var zeroVal *model.Group
+				return zeroVal, errors.New("directive isAuthenticated is not implemented")
+			}
+			return ec.directives.IsAuthenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.Group); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.Group`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Group)
+	fc.Result = res
+	return ec.marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_acceptGroupInvitation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Group_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Group_name(ctx, field)
+			case "icon":
+				return ec.fieldContext_Group_icon(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Group_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Group_updatedAt(ctx, field)
+			case "userIDs":
+				return ec.fieldContext_Group_userIDs(ctx, field)
+			case "eventIDs":
+				return ec.fieldContext_Group_eventIDs(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_acceptGroupInvitation_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createEvent(ctx, field)
 	if err != nil {
@@ -3016,7 +3374,7 @@ func (ec *executionContext) _Mutation_createEvent(ctx context.Context, field gra
 		if data, ok := tmp.(*model.Event); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/app/presentation/graphql/graph/model.Event`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.Event`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3030,7 +3388,7 @@ func (ec *executionContext) _Mutation_createEvent(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.Event)
 	fc.Result = res
-	return ec.marshalNEvent2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEvent(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEvent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createEvent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3245,7 +3603,7 @@ func (ec *executionContext) _Mutation_signup(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*model.AuthUserResponse)
 	fc.Result = res
-	return ec.marshalNAuthUserResponse2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐAuthUserResponse(ctx, field.Selections, res)
+	return ec.marshalNAuthUserResponse2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐAuthUserResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_signup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3306,7 +3664,7 @@ func (ec *executionContext) _Mutation_signin(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*model.AuthUserResponse)
 	fc.Result = res
-	return ec.marshalNAuthUserResponse2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐAuthUserResponse(ctx, field.Selections, res)
+	return ec.marshalNAuthUserResponse2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐAuthUserResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_signin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3375,7 +3733,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		if data, ok := tmp.(*model.User); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/app/presentation/graphql/graph/model.User`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.User`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3389,7 +3747,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3463,7 +3821,7 @@ func (ec *executionContext) _Query_group(ctx context.Context, field graphql.Coll
 		if data, ok := tmp.(*model.Group); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/app/presentation/graphql/graph/model.Group`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.Group`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3477,7 +3835,7 @@ func (ec *executionContext) _Query_group(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*model.Group)
 	fc.Result = res
-	return ec.marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
+	return ec.marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_group(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3556,7 +3914,7 @@ func (ec *executionContext) _Query_event(ctx context.Context, field graphql.Coll
 		if data, ok := tmp.(*model.Event); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/app/presentation/graphql/graph/model.Event`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.Event`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3570,7 +3928,7 @@ func (ec *executionContext) _Query_event(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*model.Event)
 	fc.Result = res
-	return ec.marshalNEvent2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEvent(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEvent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_event(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6848,6 +7206,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "generateGroupInviteLink":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_generateGroupInviteLink(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "generateGroupInviteQRCode":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_generateGroupInviteQRCode(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "acceptGroupInvitation":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_acceptGroupInvitation(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "createEvent":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createEvent(ctx, field)
@@ -7463,11 +7842,11 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAuthUserResponse2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐAuthUserResponse(ctx context.Context, sel ast.SelectionSet, v model.AuthUserResponse) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthUserResponse2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐAuthUserResponse(ctx context.Context, sel ast.SelectionSet, v model.AuthUserResponse) graphql.Marshaler {
 	return ec._AuthUserResponse(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAuthUserResponse2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐAuthUserResponse(ctx context.Context, sel ast.SelectionSet, v *model.AuthUserResponse) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthUserResponse2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐAuthUserResponse(ctx context.Context, sel ast.SelectionSet, v *model.AuthUserResponse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -7492,17 +7871,17 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNCreateEventInput2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateEventInput(ctx context.Context, v any) (model.CreateEventInput, error) {
+func (ec *executionContext) unmarshalNCreateEventInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateEventInput(ctx context.Context, v any) (model.CreateEventInput, error) {
 	res, err := ec.unmarshalInputCreateEventInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateGroupInput2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateGroupInput(ctx context.Context, v any) (model.CreateGroupInput, error) {
+func (ec *executionContext) unmarshalNCreateGroupInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateGroupInput(ctx context.Context, v any) (model.CreateGroupInput, error) {
 	res, err := ec.unmarshalInputCreateGroupInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateUserInput2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateUserInput(ctx context.Context, v any) (model.CreateUserInput, error) {
+func (ec *executionContext) unmarshalNCreateUserInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateUserInput(ctx context.Context, v any) (model.CreateUserInput, error) {
 	res, err := ec.unmarshalInputCreateUserInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -7522,11 +7901,11 @@ func (ec *executionContext) marshalNDateTime2timeᚐTime(ctx context.Context, se
 	return res
 }
 
-func (ec *executionContext) marshalNEvent2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEvent(ctx context.Context, sel ast.SelectionSet, v model.Event) graphql.Marshaler {
+func (ec *executionContext) marshalNEvent2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEvent(ctx context.Context, sel ast.SelectionSet, v model.Event) graphql.Marshaler {
 	return ec._Event(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEvent(ctx context.Context, sel ast.SelectionSet, v *model.Event) graphql.Marshaler {
+func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEvent(ctx context.Context, sel ast.SelectionSet, v *model.Event) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -7536,11 +7915,11 @@ func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋonion0904ᚋappᚋpr
 	return ec._Event(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGroup2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx context.Context, sel ast.SelectionSet, v model.Group) graphql.Marshaler {
+func (ec *executionContext) marshalNGroup2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx context.Context, sel ast.SelectionSet, v model.Group) graphql.Marshaler {
 	return ec._Group(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx context.Context, sel ast.SelectionSet, v *model.Group) graphql.Marshaler {
+func (ec *executionContext) marshalNGroup2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroup(ctx context.Context, sel ast.SelectionSet, v *model.Group) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -7565,7 +7944,7 @@ func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNMonthlyEventInput2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐMonthlyEventInput(ctx context.Context, v any) (model.MonthlyEventInput, error) {
+func (ec *executionContext) unmarshalNMonthlyEventInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐMonthlyEventInput(ctx context.Context, v any) (model.MonthlyEventInput, error) {
 	res, err := ec.unmarshalInputMonthlyEventInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -7615,21 +7994,21 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	return ret
 }
 
-func (ec *executionContext) unmarshalNUpdateGroupInput2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUpdateGroupInput(ctx context.Context, v any) (model.UpdateGroupInput, error) {
+func (ec *executionContext) unmarshalNUpdateGroupInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUpdateGroupInput(ctx context.Context, v any) (model.UpdateGroupInput, error) {
 	res, err := ec.unmarshalInputUpdateGroupInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateUserInput2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUpdateUserInput(ctx context.Context, v any) (model.UpdateUserInput, error) {
+func (ec *executionContext) unmarshalNUpdateUserInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUpdateUserInput(ctx context.Context, v any) (model.UpdateUserInput, error) {
 	res, err := ec.unmarshalInputUpdateUserInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋonion0904ᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")

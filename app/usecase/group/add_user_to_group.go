@@ -22,7 +22,6 @@ type AddUserToGroupUseCaseDto struct {
 	GroupID string
 }
 
-//
 func (uc *AddUserToGroupUseCase) Run(ctx context.Context, dto AddUserToGroupUseCaseDto) (*groupDomain.Group,error) {
 	err := uc.groupRepo.AddUserToGroup(ctx, dto.GroupID,dto.UserID )
 	if err != nil {
