@@ -2,8 +2,9 @@ package event
 
 import (
 	"context"
-	eventDomain "github.com/onion0904/CarShareSystem/app/domain/event"
 	"time"
+
+	eventDomain "github.com/onion0904/CarShareSystem/app/domain/event"
 )
 
 type FindEventUseCase struct {

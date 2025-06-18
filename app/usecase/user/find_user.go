@@ -2,8 +2,9 @@ package user
 
 import (
 	"context"
-	userDomain "github.com/onion0904/CarShareSystem/app/domain/user"
 	"time"
+
+	userDomain "github.com/onion0904/CarShareSystem/app/domain/user"
 )
 
 type FindUserUseCase struct {

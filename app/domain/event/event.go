@@ -1,11 +1,12 @@
 package event
 
 import (
+	"time"
+	"unicode/utf8"
+
 	errDomain "github.com/onion0904/CarShareSystem/app/domain/error"
 	pkgTime "github.com/onion0904/CarShareSystem/pkg/time"
 	"github.com/onion0904/CarShareSystem/pkg/ulid"
-	"time"
-	"unicode/utf8"
 )
 
 type Event struct {

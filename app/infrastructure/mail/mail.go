@@ -1,9 +1,10 @@
 package mail
 
 import (
-	"github.com/jordan-wright/email"
 	"log"
 	"net/smtp"
+
+	"github.com/jordan-wright/email"
 
 	"github.com/onion0904/CarShareSystem/app/config"
 	mailDomain "github.com/onion0904/CarShareSystem/app/domain/mail"

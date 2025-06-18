@@ -1,10 +1,11 @@
 package group
 
 import (
-	errDomain "github.com/onion0904/CarShareSystem/app/domain/error"
-	"github.com/onion0904/CarShareSystem/pkg/ulid"
 	"time"
 	"unicode/utf8"
+
+	errDomain "github.com/onion0904/CarShareSystem/app/domain/error"
+	"github.com/onion0904/CarShareSystem/pkg/ulid"
 )
 
 type Group struct {
