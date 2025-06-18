@@ -49,7 +49,7 @@ func validateToken(token string) (string, error) {
 	if strings.HasPrefix(token, "Bearer ") {
 		token = strings.TrimPrefix(token, "Bearer ")
 	}
-	claims, err := jwt.ParseJWT(token,[]byte(secretkey))
+	claims, err := jwt.ParseJWT(token, []byte(secretkey))
 	if err != nil {
 		return "", err
 	}

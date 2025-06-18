@@ -1,28 +1,28 @@
 package group
 
 import (
-    "context"
-    "encoding/base64"
-    "fmt"
+	"context"
+	"encoding/base64"
+	"fmt"
 
-    groupDomain "github.com/onion0904/CarShareSystem/app/domain/group"
-    "github.com/onion0904/CarShareSystem/app/config" // config をインポート
-	"github.com/onion0904/CarShareSystem/pkg/jwt"     // jwt をインポート
-    "github.com/skip2/go-qrcode" // QRコード生成ライブラリ
+	"github.com/onion0904/CarShareSystem/app/config" // config をインポート
+	groupDomain "github.com/onion0904/CarShareSystem/app/domain/group"
+	"github.com/onion0904/CarShareSystem/pkg/jwt" // jwt をインポート
+	"github.com/skip2/go-qrcode"                  // QRコード生成ライブラリ
 )
 
 type GroupInviteService struct {
-    groupRepo groupDomain.GroupRepository // グループのリポジトリ
-    baseURL   string          // 招待リンクのベースURL
+	groupRepo groupDomain.GroupRepository // グループのリポジトリ
+	baseURL   string                      // 招待リンクのベースURL
 }
 
 func NewGroupInviteService(
 	groupRepo groupDomain.GroupRepository, baseURL string,
 ) *GroupInviteService {
-    return &GroupInviteService{
-        groupRepo: groupRepo,
-        baseURL:   baseURL,
-    }
+	return &GroupInviteService{
+		groupRepo: groupRepo,
+		baseURL:   baseURL,
+	}
 }
 
 // 招待リンクを生成

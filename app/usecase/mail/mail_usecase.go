@@ -3,12 +3,12 @@ package user
 import (
 	"context"
 	"sync"
-	
+
 	mailDomain "github.com/onion0904/CarShareSystem/app/domain/mail"
 )
 
 type SendEmailUseCase struct {
-	mailService mailDomain.MailService
+	mailService       mailDomain.MailService
 	VerificationCodes map[string]string
 	CodeMutex         sync.Mutex
 }

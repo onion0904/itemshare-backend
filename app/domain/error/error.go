@@ -9,5 +9,5 @@ func (e *Error) Error() string {
 }
 
 func NewError(description string) *Error {
-    return &Error{description: description}
+	return &Error{description: description}
 }

@@ -34,9 +34,9 @@ func Start() {
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
-			DB: DB,
+			DB:           DB,
 			EmailUseCase: usecase_mail.NewSendEmailUseCase(mail_Service.NewMailRepository()),
-			BaseURL: cfg.InviteGroup.BaseURL,
+			BaseURL:      cfg.InviteGroup.BaseURL,
 		},
 		Directives: graph.Directive,
 	}))
@@ -46,17 +46,17 @@ func Start() {
 	// GET / POST：GraphQLクエリを HTTP 経由で受け取るため。
 	srv.AddTransport(transport.GET{})
 	srv.AddTransport(transport.POST{})
-	
+
 	// GraphQLクエリのキャッシュを有効化。LRU（最近使っていないものから削除）
 	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
-	
+
 	// GraphQLのスキーマをクエリで確認できる「introspection」機能をオンにしてる。GraphQL Playgroundなどでスキーマの構造が見えるのはこれのおかげ。
 	srv.Use(extension.Introspection{})
 	// クライアントが「ハッシュ化されたクエリ」を使って通信することをサポート（帯域の節約になる）。
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New[string](100),
 	})
-	
+
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", mymiddleware.AuthMiddleware(srv))
 

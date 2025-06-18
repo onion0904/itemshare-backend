@@ -19,18 +19,18 @@ func NewCheckExistUserUseCase(
 	}
 }
 
-func (uc *CheckExistUserUseCase) Run(ctx context.Context, email string, password string) (bool,error) {
-	user, err := uc.userRepo.FindUserByEmail(ctx,email)
+func (uc *CheckExistUserUseCase) Run(ctx context.Context, email string, password string) (bool, error) {
+	user, err := uc.userRepo.FindUserByEmail(ctx, email)
 	if err != nil {
 		return false, nil
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password()), []byte(password))
-    if err != nil {
-        if err == bcrypt.ErrMismatchedHashAndPassword {
-            return false, nil
-        }
-        return false, err
-    }
+	if err != nil {
+		if err == bcrypt.ErrMismatchedHashAndPassword {
+			return false, nil
+		}
+		return false, err
+	}
 
-    return true, nil
+	return true, nil
 }

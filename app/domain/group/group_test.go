@@ -23,16 +23,16 @@ func TestReconstruct(t *testing.T) {
 		{
 			name: "ok case: Reconstruct & Getter",
 			args: args{
-				id:       "01F8B9Z6G9WBJK9XJH5M7RQK5X",  // 有効なULIDの例
-				name:     "Test Group",
-                icon:     "group.jpg",
+				id:   "01F8B9Z6G9WBJK9XJH5M7RQK5X", // 有効なULIDの例
+				name: "Test Group",
+				icon: "group.jpg",
 			},
 			want: &Group{
 				id:       "01F8B9Z6G9WBJK9XJH5M7RQK5X",
-                name:     "Test Group",
-                userIDs:  nil,
-                eventIDs: nil,
-                icon:     "group.jpg",
+				name:     "Test Group",
+				userIDs:  nil,
+				eventIDs: nil,
+				icon:     "group.jpg",
 			},
 			wantErr: false,
 		},
@@ -82,31 +82,31 @@ func TestNewGroup(t *testing.T) {
 		{
 			name: "ok case: New",
 			args: args{
-				name:     "Test Group",
-                icon:     "group.jpg",
+				name: "Test Group",
+				icon: "group.jpg",
 			},
 			want: &Group{
 				id:       "01F8B9Z6G9WBJK9XJH5M7RQK5X",
-                name:     "Test Group",
-                userIDs:  nil,
-                eventIDs: nil,
-                icon:     "group.jpg",
+				name:     "Test Group",
+				userIDs:  nil,
+				eventIDs: nil,
+				icon:     "group.jpg",
 			},
 			wantErr: false,
 		},
 		{
 			name: "error case: small group name",
 			args: args{
-				name:     "",
-                icon:     "group.jpg",
+				name: "",
+				icon: "group.jpg",
 			},
 			wantErr: true,
 		},
 		{
 			name: "error case: big group name",
 			args: args{
-				name:     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                icon:     "group.jpg",
+				name: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				icon: "group.jpg",
 			},
 			wantErr: true,
 		},
@@ -145,25 +145,25 @@ func Test_newGroup(t *testing.T) {
 		{
 			name: "ok case: new",
 			args: args{
-				id:       "01F8B9Z6G9WBJK9XJH5M7RQK5X",   // 有効なULIDの例
-				name:     "Test Group",
-                icon:     "group.jpg",
+				id:   "01F8B9Z6G9WBJK9XJH5M7RQK5X", // 有効なULIDの例
+				name: "Test Group",
+				icon: "group.jpg",
 			},
 			want: &Group{
 				id:       "01F8B9Z6G9WBJK9XJH5M7RQK5X",
-                name:     "Test Group",
-                userIDs:  nil,
-                eventIDs: nil,
-                icon:     "group.jpg",
+				name:     "Test Group",
+				userIDs:  nil,
+				eventIDs: nil,
+				icon:     "group.jpg",
 			},
 			wantErr: false,
 		},
 		{
 			name: "error case: id",
 			args: args{
-				id:       "id",
-				name:     "Test Group",
-                icon:     "group.jpg",
+				id:   "id",
+				name: "Test Group",
+				icon: "group.jpg",
 			},
 			wantErr: true,
 		},
@@ -181,7 +181,6 @@ func Test_newGroup(t *testing.T) {
 		})
 	}
 }
-
 
 func TestUser_SetCreatedAt(t *testing.T) {
 	group := &Group{}

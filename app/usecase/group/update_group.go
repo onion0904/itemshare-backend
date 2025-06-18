@@ -18,25 +18,25 @@ func NewUpdateUseCase(
 }
 
 type UpdateUseCaseDto struct {
-	Name string
+	Name    string
 	UsersID []string
-	Icon string
+	Icon    string
 }
 
-func (uc *UpdateUseCase) Run(ctx context.Context,groupID string, dto UpdateUseCaseDto) (*groupDomain.Group,error) {
+func (uc *UpdateUseCase) Run(ctx context.Context, groupID string, dto UpdateUseCaseDto) (*groupDomain.Group, error) {
 	// dtoからuserへ変換
 
-	group , err := uc.groupRepo.FindGroup(ctx, groupID)
+	group, err := uc.groupRepo.FindGroup(ctx, groupID)
 	if err != nil {
-        return nil,err
-    }
-	ngroup, err := groupDomain.Reconstruct(groupID,dto.Name, group.UserIDs(), group.EventIDs(),dto.Icon)
+		return nil, err
+	}
+	ngroup, err := groupDomain.Reconstruct(groupID, dto.Name, group.UserIDs(), group.EventIDs(), dto.Icon)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	err = uc.groupRepo.Update(ctx, ngroup)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	return uc.groupRepo.FindGroup(ctx,ngroup.ID())
+	return uc.groupRepo.FindGroup(ctx, ngroup.ID())
 }

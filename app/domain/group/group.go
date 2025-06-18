@@ -1,23 +1,21 @@
 package group
 
 import (
-	"unicode/utf8"
-	"github.com/onion0904/CarShareSystem/pkg/ulid"
 	errDomain "github.com/onion0904/CarShareSystem/app/domain/error"
+	"github.com/onion0904/CarShareSystem/pkg/ulid"
 	"time"
+	"unicode/utf8"
 )
 
-
 type Group struct {
-	id string
-	name string
-	userIDs []string
-	eventIDs []string
-	icon string
+	id        string
+	name      string
+	userIDs   []string
+	eventIDs  []string
+	icon      string
 	createdAt time.Time
 	updatedAt time.Time
 }
-
 
 func Reconstruct(
 	id string,
@@ -66,11 +64,11 @@ func newGroup(
 	}
 
 	return &Group{
-		id:          id,
-		name:        name,
-		userIDs:     userIDs,
-		eventIDs:    eventIDs,
-		icon:        icon,
+		id:       id,
+		name:     name,
+		userIDs:  userIDs,
+		eventIDs: eventIDs,
+		icon:     icon,
 	}, nil
 }
 
@@ -87,29 +85,28 @@ func (p *Group) UserIDs() []string {
 }
 
 func (p *Group) EventIDs() []string {
-    return p.eventIDs
+	return p.eventIDs
 }
 
 func (p *Group) Icon() string {
-    return p.icon
+	return p.icon
 }
 
 func (p *Group) CreatedAt() time.Time {
-    return p.createdAt
+	return p.createdAt
 }
 
 func (p *Group) UpdatedAt() time.Time {
-    return p.updatedAt
+	return p.updatedAt
 }
 
-func (u *Group) SetCreatedAt(t time.Time){
+func (u *Group) SetCreatedAt(t time.Time) {
 	u.createdAt = t
 }
 
-func (u *Group) SetUpdatedAt(t time.Time){
-    u.updatedAt = t
+func (u *Group) SetUpdatedAt(t time.Time) {
+	u.updatedAt = t
 }
-
 
 const (
 	nameLengthMin = 1

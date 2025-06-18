@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	errDomain "github.com/onion0904/CarShareSystem/app/domain/error"
-    "github.com/onion0904/CarShareSystem/app/domain/group"
+	"github.com/onion0904/CarShareSystem/app/domain/group"
 	"github.com/onion0904/CarShareSystem/app/infrastructure/db"
 	dbgen "github.com/onion0904/CarShareSystem/app/infrastructure/db/sqlc/dbgen"
 )
@@ -19,55 +19,54 @@ func NewGroupRepository(db *sql.DB) group.GroupRepository {
 	return &groupRepository{db: db}
 }
 
-func (gr *groupRepository)Update(ctx context.Context, group *group.Group) error {
-	query := db.GetQuery(ctx)
-
-	
-	err := query.UpsertGroup(ctx,dbgen.UpsertGroupParams{
-		Name: group.Name(), 
-		Icon: group.Icon(), 
-		ID: group.ID(),
-	})
-	if err!= nil {
-        return err
-    }
-	return nil
-}
-	
-func (gr *groupRepository)Save(ctx context.Context ,group *group.Group) error {
+func (gr *groupRepository) Update(ctx context.Context, group *group.Group) error {
 	query := db.GetQuery(ctx)
 
 	err := query.UpsertGroup(ctx, dbgen.UpsertGroupParams{
-        ID:   group.ID(),
-        Name: group.Name(), 
-        Icon: group.Icon(),
-    })
-	if err!= nil {
-        return err
-    }
+		Name: group.Name(),
+		Icon: group.Icon(),
+		ID:   group.ID(),
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
-	
-func (gr *groupRepository)Delete(ctx context.Context , groupID string) error {
+
+func (gr *groupRepository) Save(ctx context.Context, group *group.Group) error {
+	query := db.GetQuery(ctx)
+
+	err := query.UpsertGroup(ctx, dbgen.UpsertGroupParams{
+		ID:   group.ID(),
+		Name: group.Name(),
+		Icon: group.Icon(),
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (gr *groupRepository) Delete(ctx context.Context, groupID string) error {
 	query := db.GetQuery(ctx)
 
 	err := query.DeleteGroup(ctx, groupID)
-	if err!= nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 	return nil
 }
-	
-func (gr *groupRepository)FindGroup(ctx context.Context,groupID string) (*group.Group, error) {
+
+func (gr *groupRepository) FindGroup(ctx context.Context, groupID string) (*group.Group, error) {
 	DB := db.GetDB()
-	tx, err := DB.BeginTx(ctx,nil)
-	if err!= nil {
-        return nil, err
-    }
+	tx, err := DB.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
 	defer tx.Rollback()
-	
+
 	query := db.GetQuery(ctx).WithTx(tx)
-	
+
 	g, err := query.FindGroup(ctx, groupID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -82,9 +81,9 @@ func (gr *groupRepository)FindGroup(ctx context.Context,groupID string) (*group.
 	}
 
 	eventIDs, err := query.GetEventIDsByGroupID(ctx, groupID)
-	if err!= nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
 
 	ng, err := group.Reconstruct(
 		g.ID,
@@ -106,41 +105,41 @@ func (gr *groupRepository)FindGroup(ctx context.Context,groupID string) (*group.
 	return ng, nil
 }
 
-func (gr *groupRepository)AddUserToGroup(ctx context.Context ,groupID string, userID string) error {
+func (gr *groupRepository) AddUserToGroup(ctx context.Context, groupID string, userID string) error {
 	query := db.GetQuery(ctx)
 
-    err := query.AddUserToGroup(ctx, dbgen.AddUserToGroupParams{
-        Groupid: groupID,
-        Userid: userID,
-    })
-	if err!= nil {
-        return err
-    }
+	err := query.AddUserToGroup(ctx, dbgen.AddUserToGroupParams{
+		Groupid: groupID,
+		Userid:  userID,
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-func (gr *groupRepository)AddEventToGroup(ctx context.Context ,groupID string, eventID string) error {
+func (gr *groupRepository) AddEventToGroup(ctx context.Context, groupID string, eventID string) error {
 	query := db.GetQuery(ctx)
 
-    err := query.AddEventToGroup(ctx, dbgen.AddEventToGroupParams{
-        Groupid: groupID,
-        Eventid: eventID,
-    })
-	if err!= nil {
-        return err
-    }
+	err := query.AddEventToGroup(ctx, dbgen.AddEventToGroupParams{
+		Groupid: groupID,
+		Eventid: eventID,
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-func (gr *groupRepository)RemoveUserFromGroup(ctx context.Context ,groupID string, userID string) error {
+func (gr *groupRepository) RemoveUserFromGroup(ctx context.Context, groupID string, userID string) error {
 	query := db.GetQuery(ctx)
 
-    err := query.RemoveUserFromGroup(ctx, dbgen.RemoveUserFromGroupParams{
-        Groupid: groupID,
-        Userid: userID,
-    })
-	if err!= nil {
-        return err
-    }
+	err := query.RemoveUserFromGroup(ctx, dbgen.RemoveUserFromGroupParams{
+		Groupid: groupID,
+		Userid:  userID,
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }

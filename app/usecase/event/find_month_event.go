@@ -27,6 +27,6 @@ func (uc *FindMonthEventUseCase) Run(ctx context.Context, year int32, month int3
 		return nil, err
 	}
 	return &FindMonthEventUseCaseDto{
-        EventIDs: eventIDs,
-    }, nil
+		EventIDs: eventIDs,
+	}, nil
 }
