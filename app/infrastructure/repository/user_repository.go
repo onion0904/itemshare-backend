@@ -56,8 +56,7 @@ func (ur *userRepository) FindUser(ctx context.Context, UserID string) (*user.Us
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback() // エラー時のロールバック保証
-	defer func(){
+	defer func(){// エラー時のロールバック保証
 		if err := tx.Rollback(); err != nil && err != sql.ErrTxDone {
 			log.Printf("rollback failed: %v", err)
 		}
@@ -117,8 +116,7 @@ func (ur *userRepository) FindUserByEmail(ctx context.Context, email string) (*u
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback() // エラー時のロールバック保証
-	defer func(){
+	defer func(){// エラー時のロールバック保証
 		if err := tx.Rollback(); err != nil && err != sql.ErrTxDone {
 			log.Printf("rollback failed: %v", err)
 		}

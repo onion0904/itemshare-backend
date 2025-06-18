@@ -64,7 +64,6 @@ func (gr *groupRepository) FindGroup(ctx context.Context, groupID string) (*grou
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback()
 	defer func(){
 		if err := tx.Rollback(); err != nil && err != sql.ErrTxDone {
 			log.Printf("rollback failed: %v", err)
