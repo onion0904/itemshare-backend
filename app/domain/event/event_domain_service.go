@@ -87,7 +87,7 @@ func (c *EventDomainService) validSetableEvents(ctx context.Context, oldEvent, n
 		return errors.New("すでに重要なイベントが登録されています。")
 	}
 	err := c.EventRepo.DeleteEvent(ctx, oldEvent.id)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 	return nil
