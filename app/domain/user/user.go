@@ -2,31 +2,31 @@ package user
 
 import (
 	"net/mail"
-	"unicode/utf8"
-	"github.com/onion0904/CarShareSystem/pkg/ulid"
-	errDomain "github.com/onion0904/CarShareSystem/app/domain/error"
 	"time"
+	"unicode/utf8"
+
+	errDomain "github.com/onion0904/CarShareSystem/app/domain/error"
+	"github.com/onion0904/CarShareSystem/pkg/ulid"
 )
 
-
 type User struct {
-	id string
-	lastName string
+	id        string
+	lastName  string
 	firstName string
-	email string
-	password string
-	icon string
-	groupIDs []string
-	eventIDs []string
+	email     string
+	password  string
+	icon      string
+	groupIDs  []string
+	eventIDs  []string
 	createdAt time.Time
 	updatedAt time.Time
 }
 
 func Reconstruct(
 	id string,
-    lastName string,
-    firstName string,
-    email string,
+	lastName string,
+	firstName string,
+	email string,
 	password string,
 	icon string,
 	groupIDs []string,
@@ -34,9 +34,9 @@ func Reconstruct(
 ) (*User, error) {
 	return newUser(
 		id,
-        lastName,
-        firstName,
-        email,
+		lastName,
+		firstName,
+		email,
 		password,
 		icon,
 		groupIDs,
@@ -65,9 +65,9 @@ func NewUser(
 
 func newUser(
 	id string,
-    lastName string,
-    firstName string,
-    email string,
+	lastName string,
+	firstName string,
+	email string,
 	password string,
 	icon string,
 	groupIDs []string,
@@ -90,16 +90,16 @@ func newUser(
 		return nil, errDomain.NewError("メールアドレスの値が不正です。")
 	}
 
-    return &User{
-        id:           id,
-        lastName:     lastName,
-        firstName:    firstName,
-        email:        email,
-		password:     password,
-		icon:         icon,
-		groupIDs:     groupIDs,
-		eventIDs:     eventIDs,
-    }, nil
+	return &User{
+		id:        id,
+		lastName:  lastName,
+		firstName: firstName,
+		email:     email,
+		password:  password,
+		icon:      icon,
+		groupIDs:  groupIDs,
+		eventIDs:  eventIDs,
+	}, nil
 }
 
 func (u *User) ID() string {
@@ -119,7 +119,7 @@ func (u *User) Email() string {
 }
 
 func (u *User) Password() string {
-    return u.password
+	return u.password
 }
 
 func (u *User) Icon() string {
@@ -127,30 +127,30 @@ func (u *User) Icon() string {
 }
 
 func (u *User) GroupIDs() []string {
-    return u.groupIDs
+	return u.groupIDs
 }
 
 func (u *User) EventIDs() []string {
-    return u.eventIDs
+	return u.eventIDs
 }
 
 func (u *User) CreatedAt() time.Time {
-    return u.createdAt
+	return u.createdAt
 }
 
 func (u *User) UpdatedAt() time.Time {
-    return u.updatedAt
+	return u.updatedAt
 }
 
-func (u *User) SetCreatedAt(t time.Time){
+func (u *User) SetCreatedAt(t time.Time) {
 	u.createdAt = t
 }
 
-func (u *User) SetUpdatedAt(t time.Time){
-    u.updatedAt = t
+func (u *User) SetUpdatedAt(t time.Time) {
+	u.updatedAt = t
 }
 
 const (
 	nameLengthMin = 1
-    nameLengthMax = 50
+	nameLengthMax = 50
 )

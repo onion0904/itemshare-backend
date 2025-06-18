@@ -1,11 +1,12 @@
 package event
 
 import (
+	"time"
+	"unicode/utf8"
+
 	errDomain "github.com/onion0904/CarShareSystem/app/domain/error"
 	pkgTime "github.com/onion0904/CarShareSystem/pkg/time"
 	"github.com/onion0904/CarShareSystem/pkg/ulid"
-	"time"
-	"unicode/utf8"
 )
 
 type Event struct {
@@ -14,17 +15,17 @@ type Event struct {
 	together    bool
 	description string
 	// Eventの年月日とそのDate型
-	year        int32
-	month       int32
-	day         int32
-	date        time.Time
+	year  int32
+	month int32
+	day   int32
+	date  time.Time
 	// 作成日時と更新日時
-	createdAt   time.Time
-	updatedAt   time.Time
+	createdAt time.Time
+	updatedAt time.Time
 	// 開始日と終了日
-	startDate   time.Time
-	endDate     time.Time
-	important   bool
+	startDate time.Time
+	endDate   time.Time
+	important bool
 }
 
 func Reconstruct(
@@ -108,9 +109,10 @@ func newEvent(
 
 	// 月ごとの日数チェック
 	var daysInMonth int32 = 31
-	if month == 4 || month == 6 || month == 9 || month == 11 {
+	switch month {
+	case 4, 6, 9, 11:
 		daysInMonth = 30
-	} else if month == 2 {
+	case 2:
 		// 閏年チェック
 		if (year%4 == 0 && year%100 != 0) || year%400 == 0 {
 			daysInMonth = 29

@@ -1,11 +1,11 @@
-name: Deploy to Koyeb
+name: deploy
 
 on:
   push:
-    branches: [ main , koyeb-actions]
+    branches: [main]
 
 jobs:
-  deploy:
+  deploy-koyeb:
     runs-on: ubuntu-latest
     environment: carshare-backend
     concurrency:

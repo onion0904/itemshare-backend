@@ -2,8 +2,9 @@ package event
 
 import (
 	"context"
-	eventDomain "github.com/onion0904/CarShareSystem/app/domain/event"
 	"time"
+
+	eventDomain "github.com/onion0904/CarShareSystem/app/domain/event"
 )
 
 type FindEventUseCase struct {
@@ -20,14 +21,14 @@ func NewFindEventUseCase(
 
 type FindEventUseCaseDto struct {
 	ID          string
-	UserID     string
+	UserID      string
 	Together    bool
 	Description string
 	Year        int32
 	Month       int32
 	Day         int32
 	Date        time.Time
-	CreatedAt 	time.Time
+	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	StartDate   time.Time
 	EndDate     time.Time
@@ -41,7 +42,7 @@ func (uc *FindEventUseCase) Run(ctx context.Context, eventID string) (*FindEvent
 	}
 	return &FindEventUseCaseDto{
 		ID:          event.ID(),
-		UserID:     event.UserID(),
+		UserID:      event.UserID(),
 		Together:    event.Together(),
 		Description: event.Description(),
 		Year:        event.Year(),
@@ -49,7 +50,7 @@ func (uc *FindEventUseCase) Run(ctx context.Context, eventID string) (*FindEvent
 		Day:         event.Day(),
 		Date:        event.Date(),
 		CreatedAt:   event.CreatedAt(),
-        UpdatedAt:   event.UpdatedAt(),
+		UpdatedAt:   event.UpdatedAt(),
 		StartDate:   event.StartDate(),
 		EndDate:     event.EndDate(),
 		Important:   event.Important(),

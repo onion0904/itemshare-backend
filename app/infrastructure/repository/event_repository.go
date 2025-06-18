@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	errDomain "github.com/onion0904/CarShareSystem/app/domain/error"
-    "github.com/onion0904/CarShareSystem/app/domain/event"
+	"github.com/onion0904/CarShareSystem/app/domain/event"
 	"github.com/onion0904/CarShareSystem/app/infrastructure/db"
 	dbgen "github.com/onion0904/CarShareSystem/app/infrastructure/db/sqlc/dbgen"
 )
@@ -19,12 +19,12 @@ func NewEventRepository(db *sql.DB) event.EventRepository {
 	return &eventRepository{db: db}
 }
 
-func (er *eventRepository)SaveEvent(ctx context.Context, event *event.Event) error {
+func (er *eventRepository) SaveEvent(ctx context.Context, event *event.Event) error {
 	query := db.GetQuery(ctx)
 
-	err := query.UpsertEvent(ctx ,dbgen.UpsertEventParams{
+	err := query.UpsertEvent(ctx, dbgen.UpsertEventParams{
 		ID:          event.ID(),
-		UserID:     event.UserID(),
+		UserID:      event.UserID(),
 		Together:    event.Together(),
 		Description: event.Description(),
 		Year:        event.Year(),
@@ -33,23 +33,23 @@ func (er *eventRepository)SaveEvent(ctx context.Context, event *event.Event) err
 		StartDate:   event.StartDate(),
 		EndDate:     event.EndDate(),
 	})
-	if err!= nil {
+	if err != nil {
 		return err
 	}
 	return nil
 }
-	
-func (er *eventRepository)DeleteEvent(ctx context.Context , eventID string) error {
+
+func (er *eventRepository) DeleteEvent(ctx context.Context, eventID string) error {
 	query := db.GetQuery(ctx)
 
 	err := query.DeleteEvent(ctx, eventID)
-	if err!= nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 	return nil
 }
-	
-func (er *eventRepository)FindEvent(ctx context.Context, eventID string) (*event.Event, error) {
+
+func (er *eventRepository) FindEvent(ctx context.Context, eventID string) (*event.Event, error) {
 	query := db.GetQuery(ctx)
 
 	e, err := query.FindEvent(ctx, eventID)
@@ -62,15 +62,15 @@ func (er *eventRepository)FindEvent(ctx context.Context, eventID string) (*event
 
 	ne, err := event.Reconstruct(
 		e.ID,
-        e.UserID,
-        e.Together,
-        e.Description,
-        e.Year,
-        e.Month,
-        e.Day,
+		e.UserID,
+		e.Together,
+		e.Description,
+		e.Year,
+		e.Month,
+		e.Day,
 		e.Date,
-        e.StartDate,
-        e.EndDate,
+		e.StartDate,
+		e.EndDate,
 		e.Important,
 	)
 	if err != nil {
@@ -81,33 +81,33 @@ func (er *eventRepository)FindEvent(ctx context.Context, eventID string) (*event
 	return ne, nil
 }
 
-func (er *eventRepository)FindDayOfEvent(ctx context.Context, year, month,day int32) (*event.Event, error) {
+func (er *eventRepository) FindDayOfEvent(ctx context.Context, year, month, day int32) (*event.Event, error) {
 	query := db.GetQuery(ctx)
 
 	InputFindDayOfEventParams := dbgen.FindDayOfEventParams{
-		Year: year,
+		Year:  year,
 		Month: month,
-		Day: day,
+		Day:   day,
 	}
 	e, err := query.FindDayOfEvent(ctx, InputFindDayOfEventParams)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
-		return nil,nil
+		return nil, nil
 	}
 
 	ne, err := event.Reconstruct(
 		e.ID,
-        e.UserID,
-        e.Together,
-        e.Description,
-        e.Year,
-        e.Month,
-        e.Day,
+		e.UserID,
+		e.Together,
+		e.Description,
+		e.Year,
+		e.Month,
+		e.Day,
 		e.Date,
-        e.StartDate,
-        e.EndDate,
+		e.StartDate,
+		e.EndDate,
 		e.Important,
 	)
 	if err != nil {
@@ -117,15 +117,15 @@ func (er *eventRepository)FindDayOfEvent(ctx context.Context, year, month,day in
 	ne.SetUpdatedAt(e.UpdatedAt)
 	return ne, nil
 }
-	
-func (er *eventRepository)FindMonthEventIDs(ctx context.Context, year int32, month int32) ([]string, error) {
+
+func (er *eventRepository) FindMonthEventIDs(ctx context.Context, year int32, month int32) ([]string, error) {
 	query := db.GetQuery(ctx)
 
 	eventIDs, err := query.FindMonthEventIDs(ctx, dbgen.FindMonthEventIDsParams{
 		Year:  year,
-        Month: month,
+		Month: month,
 	})
-	if err!= nil {
+	if err != nil {
 		return nil, err
 	}
 	return eventIDs, nil

@@ -23,34 +23,34 @@ func TestFindUserByEmailUseCase_Run(t *testing.T) {
 		wantErr  bool
 	}{
 		{
-			name: "ok case: FindUserUseCase",
+			name:  "ok case: FindUserUseCase",
 			email: "example@onion.com",
 			mockFunc: func() {
 				mockUserRepo.
-						EXPECT().
-						FindUserByEmail(gomock.Any(), gomock.Any()).
-						DoAndReturn(func(ctx context.Context, email string) (*userDomain.User, error){
-							return reconstructUser(
-								"01F8B9Z6G9WBJK9XJH5M7RQK5X",
-								"onion",
-								"gratin",
-								email,
-								"password",
-								"icon",
-								nil,
-								nil,
-							)
-						})
+					EXPECT().
+					FindUserByEmail(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, email string) (*userDomain.User, error) {
+						return reconstructUser(
+							"01F8B9Z6G9WBJK9XJH5M7RQK5X",
+							"onion",
+							"gratin",
+							email,
+							"password",
+							"icon",
+							nil,
+							nil,
+						)
+					})
 			},
 			want: &FindUserByEmailPasswordUseCaseDto{
-				ID: "01F8B9Z6G9WBJK9XJH5M7RQK5X",
-				LastName: "onion",
+				ID:        "01F8B9Z6G9WBJK9XJH5M7RQK5X",
+				LastName:  "onion",
 				FirstName: "gratin",
-				Email: "example@onion.com",
-				Password: "password",
-				Icon: "icon",
-				GroupIDs: nil,
-				EventIDs: nil,
+				Email:     "example@onion.com",
+				Password:  "password",
+				Icon:      "icon",
+				GroupIDs:  nil,
+				EventIDs:  nil,
 			},
 			wantErr: false,
 		},

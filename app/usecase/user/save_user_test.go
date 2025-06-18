@@ -15,55 +15,54 @@ func TestSaveUseCase_Run(t *testing.T) {
 	mockUserRepo := userDomain.NewMockUserRepository(ctrl)
 	uc := NewSaveUserUseCase(mockUserRepo)
 
-
 	tests := []struct {
-		name    string
-		dto     SaveUseCaseDto
+		name     string
+		dto      SaveUseCaseDto
 		mockFunc func()
-		want    *FindUserUseCaseDto
-		wantErr bool
+		want     *FindUserUseCaseDto
+		wantErr  bool
 	}{
 		{
 			name: "ok case: SaveUserUseCase",
 			dto: SaveUseCaseDto{
-				LastName: "onion",
+				LastName:  "onion",
 				FirstName: "gratin",
-				Email: "example@onion.com",
-				Password: "pass",
-				Icon: "icon",
+				Email:     "example@onion.com",
+				Password:  "pass",
+				Icon:      "icon",
 			},
-			mockFunc: func() {				
+			mockFunc: func() {
 				mockUserRepo.EXPECT().
 					Save(gomock.Any(), gomock.Any()).
 					DoAndReturn(func(ctx context.Context, user *userDomain.User) error {
 						return nil
 					})
-				
+
 				mockUserRepo.
-						EXPECT().
-						FindUser(gomock.Any(), gomock.Any()).
-						DoAndReturn(func(ctx context.Context, id string) (*userDomain.User, error){
-							return reconstructUser(
-								"01F8B9Z6G9WBJK9XJH5M7RQK5X",
-								"onion",
-								"gratin",
-								"example@onion.com",
-								"pass",
-								"icon",
-								nil,
-								nil,
-							)
-						})
+					EXPECT().
+					FindUser(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, id string) (*userDomain.User, error) {
+						return reconstructUser(
+							"01F8B9Z6G9WBJK9XJH5M7RQK5X",
+							"onion",
+							"gratin",
+							"example@onion.com",
+							"pass",
+							"icon",
+							nil,
+							nil,
+						)
+					})
 			},
 			want: &FindUserUseCaseDto{
-				ID: "01F8B9Z6G9WBJK9XJH5M7RQK5X",
-				LastName: "onion",
+				ID:        "01F8B9Z6G9WBJK9XJH5M7RQK5X",
+				LastName:  "onion",
 				FirstName: "gratin",
-				Email: "example@onion.com",
-				Password: "pass",
-				Icon: "icon",
-				GroupIDs: nil,
-				EventIDs: nil,
+				Email:     "example@onion.com",
+				Password:  "pass",
+				Icon:      "icon",
+				GroupIDs:  nil,
+				EventIDs:  nil,
 			},
 			wantErr: false,
 		},

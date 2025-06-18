@@ -239,7 +239,7 @@ func (r *mutationResolver) AcceptGroupInvitation(ctx context.Context, token stri
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// 結果をGraphQLモデルに変換して返す
 	return &model.Group{
 		ID:        group.ID(),

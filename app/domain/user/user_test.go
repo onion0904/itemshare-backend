@@ -26,7 +26,7 @@ func TestReconstruct(t *testing.T) {
 		{
 			name: "ok case: Reconstruct & Getter",
 			args: args{
-				id:        "01F8B9Z6G9WBJK9XJH5M7RQK5X",  // 有効なULIDの例
+				id:        "01F8B9Z6G9WBJK9XJH5M7RQK5X", // 有効なULIDの例
 				lastName:  "John",
 				firstName: "Doe",
 				email:     "john@example.com",
@@ -134,8 +134,8 @@ func TestNewUser(t *testing.T) {
 		{
 			name: "error case: big lastName",
 			args: args{
-				lastName: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-				firstName:  "hogehoge",
+				lastName:  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				firstName: "hogehoge",
 				email:     "hogehoge",
 				password:  "password",
 				icon:      "icon.jpg",
@@ -145,8 +145,8 @@ func TestNewUser(t *testing.T) {
 		{
 			name: "error case: small firstname",
 			args: args{
-				lastName: "hogehoge",
-				firstName:  "",
+				lastName:  "hogehoge",
+				firstName: "",
 				email:     "hogehoge",
 				password:  "password",
 				icon:      "icon.jpg",
@@ -193,8 +193,6 @@ func TestNewUser(t *testing.T) {
 	}
 }
 
-
-
 func Test_newUser(t *testing.T) {
 	type args struct {
 		id        string
@@ -215,7 +213,7 @@ func Test_newUser(t *testing.T) {
 		{
 			name: "ok case: new",
 			args: args{
-				id:        "01F8B9Z6G9WBJK9XJH5M7RQK5X",   // 有効なULIDの例
+				id:        "01F8B9Z6G9WBJK9XJH5M7RQK5X", // 有効なULIDの例
 				lastName:  "John",
 				firstName: "Doe",
 				email:     "john@example.com",
@@ -260,7 +258,6 @@ func Test_newUser(t *testing.T) {
 		})
 	}
 }
-
 
 func TestUser_SetCreatedAt(t *testing.T) {
 	user := &User{}

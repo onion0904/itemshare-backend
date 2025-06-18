@@ -17,9 +17,9 @@ const maxRetries = 5
 const delay = 5 * time.Second
 
 var (
-	once      sync.Once
-	query     *dbgen.Queries
-	dbcon     *sql.DB
+	once  sync.Once
+	query *dbgen.Queries
+	dbcon *sql.DB
 )
 
 // contextからQueriesを取得する。contextにQueriesが存在しない場合は、パッケージ変数からQueriesを取得する

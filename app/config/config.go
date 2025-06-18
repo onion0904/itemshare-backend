@@ -6,23 +6,23 @@ import (
 )
 
 type Config struct {
-	Server  Server
-	DB      DBConfig
-	Mail    Mail
-	JWT     JWT
+	Server      Server
+	DB          DBConfig
+	Mail        Mail
+	JWT         JWT
 	InviteGroup InviteGroup
 }
 
 type DBConfig struct {
-	DB_URL   string
+	DB_URL string
 }
 
 type Server struct {
 	Port string
 }
 
-type Mail struct{
-	GmailPass string
+type Mail struct {
+	GmailPass   string
 	SenderEmail string
 }
 
@@ -30,7 +30,7 @@ type JWT struct {
 	Secret string
 }
 
-type InviteGroup struct{
+type InviteGroup struct {
 	BaseURL string
 }
 

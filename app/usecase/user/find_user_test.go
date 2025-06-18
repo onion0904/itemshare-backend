@@ -27,30 +27,30 @@ func TestFindUserUseCase_Run(t *testing.T) {
 			id:   "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 			mockFunc: func() {
 				mockUserRepo.
-						EXPECT().
-						FindUser(gomock.Any(), gomock.Any()).
-						DoAndReturn(func(ctx context.Context, id string) (*userDomain.User, error){
-							return reconstructUser(
-								id,
-								"onion",
-								"gratin",
-								"example@onion.com",
-								"pass",
-								"icon",
-								nil,
-								nil,
-							)
-						})
+					EXPECT().
+					FindUser(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, id string) (*userDomain.User, error) {
+						return reconstructUser(
+							id,
+							"onion",
+							"gratin",
+							"example@onion.com",
+							"pass",
+							"icon",
+							nil,
+							nil,
+						)
+					})
 			},
 			want: &FindUserUseCaseDto{
-				ID: "01F8B9Z6G9WBJK9XJH5M7RQK5X",
-				LastName: "onion",
+				ID:        "01F8B9Z6G9WBJK9XJH5M7RQK5X",
+				LastName:  "onion",
 				FirstName: "gratin",
-				Email: "example@onion.com",
-				Password: "pass",
-				Icon: "icon",
-				GroupIDs: nil,
-				EventIDs: nil,
+				Email:     "example@onion.com",
+				Password:  "pass",
+				Icon:      "icon",
+				GroupIDs:  nil,
+				EventIDs:  nil,
 			},
 			wantErr: false,
 		},
@@ -74,9 +74,9 @@ func TestFindUserUseCase_Run(t *testing.T) {
 
 func reconstructUser(
 	id string,
-    lastName string,
-    firstName string,
-    email string,
+	lastName string,
+	firstName string,
+	email string,
 	password string,
 	icon string,
 	groupIDs []string,

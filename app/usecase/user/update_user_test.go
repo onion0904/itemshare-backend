@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"go.uber.org/mock/gomock"
 	"github.com/samber/lo"
+	"go.uber.org/mock/gomock"
 
 	userDomain "github.com/onion0904/CarShareSystem/app/domain/user"
 )
@@ -19,70 +19,70 @@ func TestUpdateUseCaseRun(t *testing.T) {
 	uc := NewUpdateUserUseCase(mockUserRepo)
 
 	tests := []struct {
-		name  string
-		id    string
-		dto UpdateUseCaseDto
+		name     string
+		id       string
+		dto      UpdateUseCaseDto
 		mockFunc func()
-		want    *FindUserUseCaseDto
-		wantErr bool
+		want     *FindUserUseCaseDto
+		wantErr  bool
 	}{
 		{
 			name: "ok case: UpdateUserUseCase",
-			id: "01F8B9Z6G9WBJK9XJH5M7RQK5X",
+			id:   "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 			dto: UpdateUseCaseDto{
-				LastName: lo.ToPtr("Updated"),
+				LastName:  lo.ToPtr("Updated"),
 				FirstName: lo.ToPtr("User"),
-				Email: lo.ToPtr("updated@example.com"),
-				Icon: lo.ToPtr("Updated Icon"),
+				Email:     lo.ToPtr("updated@example.com"),
+				Icon:      lo.ToPtr("Updated Icon"),
 			},
 			mockFunc: func() {
 				mockUserRepo.
-						EXPECT().
-						FindUser(gomock.Any(), gomock.Any()).
-						DoAndReturn(func(ctx context.Context, id string) (*userDomain.User, error){
-							return reconstructUser(
-								"01F8B9Z6G9WBJK9XJH5M7RQK5X",
-								"onion",
-								"gratin",
-								"example@onion.com",
-								"pass",
-								"icon",
-								nil,
-								nil,
-							)
-						})
-				
+					EXPECT().
+					FindUser(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, id string) (*userDomain.User, error) {
+						return reconstructUser(
+							"01F8B9Z6G9WBJK9XJH5M7RQK5X",
+							"onion",
+							"gratin",
+							"example@onion.com",
+							"pass",
+							"icon",
+							nil,
+							nil,
+						)
+					})
+
 				mockUserRepo.EXPECT().
-						Update(gomock.Any(),gomock.Any()).
-						DoAndReturn(func(ctx context.Context, user *userDomain.User) error {
-							return nil
-						})
-				
-						mockUserRepo.
-						EXPECT().
-						FindUser(gomock.Any(), gomock.Any()).
-						DoAndReturn(func(ctx context.Context, id string) (*userDomain.User, error){
-							return reconstructUser(
-								"01F8B9Z6G9WBJK9XJH5M7RQK5X",
-								"Updated",
-								"User",
-								"updated@example.com",
-								"pass",
-								"Updated Icon",
-								nil,
-								nil,
-							)
-						})
+					Update(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, user *userDomain.User) error {
+						return nil
+					})
+
+				mockUserRepo.
+					EXPECT().
+					FindUser(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, id string) (*userDomain.User, error) {
+						return reconstructUser(
+							"01F8B9Z6G9WBJK9XJH5M7RQK5X",
+							"Updated",
+							"User",
+							"updated@example.com",
+							"pass",
+							"Updated Icon",
+							nil,
+							nil,
+						)
+					})
 			},
 			want: &FindUserUseCaseDto{
-				ID: "01F8B9Z6G9WBJK9XJH5M7RQK5X",
-				LastName: "Updated",
+				ID:        "01F8B9Z6G9WBJK9XJH5M7RQK5X",
+				LastName:  "Updated",
 				FirstName: "User",
-				Email: "updated@example.com",
-				Password: "pass",
-				Icon: "Updated Icon",
-				GroupIDs: nil,
-				EventIDs: nil,
+				Email:     "updated@example.com",
+				Password:  "pass",
+				Icon:      "Updated Icon",
+				GroupIDs:  nil,
+				EventIDs:  nil,
 			},
 			wantErr: false,
 		},
