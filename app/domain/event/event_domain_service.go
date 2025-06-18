@@ -34,6 +34,10 @@ func (c *EventDomainService) SaveEventService(ctx context.Context, event *Event)
 	}
 	oldEvent, err := c.EventRepo.FindDayOfEvent(ctx, event.year, event.month, event.day)
 
+	if err != nil {
+		return err
+	}
+
 	if oldEvent != nil {
 		err = c.validSetableEvents(ctx, oldEvent, event)
 		if err != nil {
@@ -82,7 +86,10 @@ func (c *EventDomainService) validSetableEvents(ctx context.Context, oldEvent, n
 	} else if oldEvent.important && !newEvent.important {
 		return errors.New("すでに重要なイベントが登録されています。")
 	}
-	c.EventRepo.DeleteEvent(ctx, oldEvent.id)
+	err := c.EventRepo.DeleteEvent(ctx, oldEvent.id)
+	if err != nil{
+		return err
+	}
 	return nil
 }
 

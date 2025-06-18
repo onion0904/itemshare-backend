@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"log"
 	"context"
 	"database/sql"
 	"errors"
@@ -56,6 +57,11 @@ func (ur *userRepository) FindUser(ctx context.Context, UserID string) (*user.Us
 		return nil, err
 	}
 	defer tx.Rollback() // エラー時のロールバック保証
+	defer func(){
+		if err := tx.Rollback(); err != nil && err != sql.ErrTxDone {
+			log.Printf("rollback failed: %v", err)
+		}
+	}()
 
 	query := db.GetQuery(ctx).WithTx(tx) // query変数にトランザクション適用
 
@@ -112,6 +118,11 @@ func (ur *userRepository) FindUserByEmail(ctx context.Context, email string) (*u
 		return nil, err
 	}
 	defer tx.Rollback() // エラー時のロールバック保証
+	defer func(){
+		if err := tx.Rollback(); err != nil && err != sql.ErrTxDone {
+			log.Printf("rollback failed: %v", err)
+		}
+	}()
 
 	query := db.GetQuery(ctx).WithTx(tx)
 

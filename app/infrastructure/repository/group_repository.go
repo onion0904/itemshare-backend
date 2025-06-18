@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 
 	errDomain "github.com/onion0904/CarShareSystem/app/domain/error"
 	"github.com/onion0904/CarShareSystem/app/domain/group"
@@ -64,6 +65,11 @@ func (gr *groupRepository) FindGroup(ctx context.Context, groupID string) (*grou
 		return nil, err
 	}
 	defer tx.Rollback()
+	defer func(){
+		if err := tx.Rollback(); err != nil && err != sql.ErrTxDone {
+			log.Printf("rollback failed: %v", err)
+		}
+	}()
 
 	query := db.GetQuery(ctx).WithTx(tx)
 

@@ -46,9 +46,7 @@ func GetUserID(ctx context.Context) (string, bool) {
 func validateToken(token string) (string, error) {
 	config := config.GetConfig()
 	secretkey := config.JWT.Secret
-	if strings.HasPrefix(token, "Bearer ") {
-		token = strings.TrimPrefix(token, "Bearer ")
-	}
+	token = strings.TrimPrefix(token, "Bearer ")
 	claims, err := jwt.ParseJWT(token, []byte(secretkey))
 	if err != nil {
 		return "", err
