@@ -37,3 +37,20 @@ jobs:
 
       - name: テストの実行
         run: go test ./...
+
+  vulncheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Goをセットアップ
+        uses: actions/setup-go@v5
+        with: 
+          go-version-file: go.mod
+          
+      - name: govulncheck をインストール
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: govulncheck を実行
+        run: govulncheck ./...
