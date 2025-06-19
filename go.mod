@@ -1,6 +1,6 @@
 module github.com/onion0904/CarShareSystem
 
-go 1.24.2
+go 1.24.4
 
 require (
 	github.com/99designs/gqlgen v0.17.73
