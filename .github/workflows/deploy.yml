@@ -1,43 +1,43 @@
-name: deploy
+# name: deploy
 
-on:
-  push:
-    branches: [main]
+# on:
+#   push:
+#     branches: [main]
 
-jobs:
-  deploy-koyeb:
-    runs-on: ubuntu-latest
-    environment: carshare-backend
-    concurrency:
-      group: koyeb-${{ github.ref_name }}
-      cancel-in-progress: true
+# jobs:
+#   deploy-koyeb:
+#     runs-on: ubuntu-latest
+#     environment: carshare-backend
+#     concurrency:
+#       group: koyeb-${{ github.ref_name }}
+#       cancel-in-progress: true
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.24.4'
+#       - name: Set up Go
+#         uses: actions/setup-go@v4
+#         with:
+#           go-version: '1.24.4'
 
-      - name: Install Koyeb CLI
-        uses: koyeb-community/koyeb-actions@v2
-        with:
-          api_token: ${{ secrets.KOYEB_API_TOKEN }}
+#       - name: Install Koyeb CLI
+#         uses: koyeb-community/koyeb-actions@v2
+#         with:
+#           api_token: ${{ secrets.KOYEB_API_TOKEN }}
 
-      - name: Deploy to Koyeb
-        uses: koyeb/action-git-deploy@v1
-        with:
-          app-name: my-go-api           # Koyeb 上の App 名
-          service-name: api-service     # Service 名
-          git-branch: ${{ github.ref_name }}
-          git-builder: docker
-          git-docker-dockerfile: Dockerfile
-          privileged: true
-          service-instance-type: free
-          service-regions: was
-          service-min-instances: 0
-          service-ports: "8080:http"    # Koyeb 側のポートマッピング
-          service-routes: "/:8080"      # ルーティング設定
-          service-env: DATABASE_URL=${{ secrets.DATABASE_URL }},SERVER_PORT=${{ secrets.SERVER_PORT }},GMAIL_APP_PASS=${{ secrets.GMAIL_APP_PASS }},SENDER_EMAIL=${{ secrets.SENDER_EMAIL }},JWT_SECRET=${{ secrets.JWT_SECRET }},
+#       - name: Deploy to Koyeb
+#         uses: koyeb/action-git-deploy@v1
+#         with:
+#           app-name: my-go-api           # Koyeb 上の App 名
+#           service-name: api-service     # Service 名
+#           git-branch: ${{ github.ref_name }}
+#           git-builder: docker
+#           git-docker-dockerfile: Dockerfile
+#           privileged: true
+#           service-instance-type: free
+#           service-regions: was
+#           service-min-instances: 0
+#           service-ports: "8080:http"    # Koyeb 側のポートマッピング
+#           service-routes: "/:8080"      # ルーティング設定
+#           service-env: DATABASE_URL=${{ secrets.DATABASE_URL }},SERVER_PORT=${{ secrets.SERVER_PORT }},GMAIL_APP_PASS=${{ secrets.GMAIL_APP_PASS }},SENDER_EMAIL=${{ secrets.SENDER_EMAIL }},JWT_SECRET=${{ secrets.JWT_SECRET }},
