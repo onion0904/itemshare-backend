@@ -67,7 +67,6 @@ const findGroup = `-- name: FindGroup :one
 SELECT
     id,
     name,
-    icon,
     created_at,
     updated_at
 FROM "groups"
@@ -80,7 +79,6 @@ func (q *Queries) FindGroup(ctx context.Context, groupid string) (Group, error) 
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
-		&i.Icon,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -167,31 +165,27 @@ const upsertGroup = `-- name: UpsertGroup :exec
 INSERT INTO "groups" (
     id,
     name,
-    icon,
     created_at,
     updated_at
 )
 VALUES (
     $1,
     $2,
-    $3,
     NOW(),
     NOW()
 )
 ON CONFLICT (id) DO UPDATE
 SET
     name        = EXCLUDED.name,
-    icon        = EXCLUDED.icon,
     updated_at  = NOW()
 `
 
 type UpsertGroupParams struct {
 	ID   string
 	Name string
-	Icon string
 }
 
 func (q *Queries) UpsertGroup(ctx context.Context, arg UpsertGroupParams) error {
-	_, err := q.db.ExecContext(ctx, upsertGroup, arg.ID, arg.Name, arg.Icon)
+	_, err := q.db.ExecContext(ctx, upsertGroup, arg.ID, arg.Name)
 	return err
 }

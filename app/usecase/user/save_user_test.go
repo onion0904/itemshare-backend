@@ -29,7 +29,6 @@ func TestSaveUseCase_Run(t *testing.T) {
 				FirstName: "gratin",
 				Email:     "example@onion.com",
 				Password:  "pass",
-				Icon:      "icon",
 			},
 			mockFunc: func() {
 				mockUserRepo.EXPECT().
@@ -48,7 +47,6 @@ func TestSaveUseCase_Run(t *testing.T) {
 							"gratin",
 							"example@onion.com",
 							"pass",
-							"icon",
 							nil,
 							nil,
 						)
@@ -60,7 +58,6 @@ func TestSaveUseCase_Run(t *testing.T) {
 				FirstName: "gratin",
 				Email:     "example@onion.com",
 				Password:  "pass",
-				Icon:      "icon",
 				GroupIDs:  nil,
 				EventIDs:  nil,
 			},

@@ -32,7 +32,7 @@ func (uc *AddEventToGroupUseCase) Run(ctx context.Context, dto AddEventToGroupUs
 	if err != nil {
 		return nil, err
 	}
-	group, err = groupDomain.Reconstruct(group.ID(), group.Name(), group.UserIDs(), group.EventIDs(), group.Icon())
+	group, err = groupDomain.Reconstruct(group.ID(), group.Name(), group.UserIDs(), group.EventIDs())
 	if err != nil {
 		return nil, err
 	}

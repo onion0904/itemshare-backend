@@ -5,7 +5,6 @@ INSERT INTO users (
     first_name,
     email,
     password,
-    icon,
     created_at,
     updated_at
 )
@@ -15,7 +14,6 @@ VALUES (
     sqlc.arg(first_name),
     sqlc.arg(email),
     sqlc.arg(password),
-    sqlc.arg(icon),
     NOW(),
     NOW()
 )
@@ -25,7 +23,6 @@ SET
     first_name  = EXCLUDED.first_name,
     email       = EXCLUDED.email,
     password    = EXCLUDED.password,
-    icon        = EXCLUDED.icon,
     updated_at  = NOW();  
 
 
@@ -36,7 +33,6 @@ SELECT
     first_name,
     email,
     password,
-    icon,
     created_at,
     updated_at
 FROM users
@@ -50,7 +46,6 @@ SELECT
     first_name,
     email,
     password,
-    icon,
     created_at,
     updated_at
 FROM users

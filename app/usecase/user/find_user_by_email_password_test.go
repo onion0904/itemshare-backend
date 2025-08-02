@@ -36,7 +36,6 @@ func TestFindUserByEmailUseCase_Run(t *testing.T) {
 							"gratin",
 							email,
 							"password",
-							"icon",
 							nil,
 							nil,
 						)
@@ -48,7 +47,6 @@ func TestFindUserByEmailUseCase_Run(t *testing.T) {
 				FirstName: "gratin",
 				Email:     "example@onion.com",
 				Password:  "password",
-				Icon:      "icon",
 				GroupIDs:  nil,
 				EventIDs:  nil,
 			},

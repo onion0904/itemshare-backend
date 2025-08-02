@@ -24,7 +24,6 @@ type CreateEventInput struct {
 type CreateGroupInput struct {
 	Name   string `json:"name"`
 	UserID string `json:"userId"`
-	Icon   string `json:"icon"`
 }
 
 type CreateUserInput struct {
@@ -32,7 +31,6 @@ type CreateUserInput struct {
 	FirstName string `json:"firstName"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
-	Icon      string `json:"icon"`
 }
 
 type Event struct {
@@ -54,7 +52,6 @@ type Event struct {
 type Group struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
-	Icon      string    `json:"icon"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 	UserIDs   []string  `json:"userIDs"`
@@ -80,7 +77,6 @@ type UpdateEventInput struct {
 
 type UpdateGroupInput struct {
 	Name *string `json:"name,omitempty"`
-	Icon *string `json:"icon,omitempty"`
 }
 
 type UpdateUserInput struct {
@@ -88,7 +84,6 @@ type UpdateUserInput struct {
 	FirstName *string `json:"firstName,omitempty"`
 	Email     *string `json:"email,omitempty"`
 	Password  *string `json:"password,omitempty"`
-	Icon      *string `json:"icon,omitempty"`
 }
 
 type User struct {
@@ -97,7 +92,6 @@ type User struct {
 	FirstName string    `json:"firstName"`
 	Email     string    `json:"email"`
 	Password  string    `json:"password"`
-	Icon      string    `json:"icon"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 	GroupIDs  []string  `json:"groupIDs"`

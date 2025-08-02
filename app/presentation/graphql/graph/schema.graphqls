@@ -11,7 +11,6 @@ type User {
   firstName: String!
   email: String!
   password: String!
-  icon: String!
   createdAt: DateTime!
   updatedAt: DateTime!
   groupIDs: [String!]!
@@ -22,7 +21,6 @@ type User {
 type Group {
   id: String!
   name: String!
-  icon: String!
   createdAt: DateTime!
   updatedAt: DateTime!
   userIDs: [String!]!
@@ -65,7 +63,6 @@ input CreateUserInput {
   firstName: String!
   email: String!
   password: String!
-  icon: String!
 }
 
 input UpdateUserInput {
@@ -73,18 +70,15 @@ input UpdateUserInput {
   firstName: String
   email: String
   password: String
-  icon: String
 }
 
 input CreateGroupInput {
   name: String!
   userId: String!
-  icon: String!
 }
 
 input UpdateGroupInput {
   name: String
-  icon: String
 }
 
 input CreateEventInput {

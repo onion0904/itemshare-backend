@@ -24,7 +24,6 @@ type SaveUseCaseDto struct {
 	FirstName string
 	Email     string
 	Password  string
-	Icon      string
 }
 
 func (uc *SaveUseCase) Run(ctx context.Context, dto SaveUseCaseDto) (*FindUserUseCaseDto, error) {
@@ -35,7 +34,7 @@ func (uc *SaveUseCase) Run(ctx context.Context, dto SaveUseCaseDto) (*FindUserUs
 	}
 
 	// dtoからuserへ変換
-	nuser, err := userDomain.NewUser(dto.LastName, dto.FirstName, dto.Email, string(password), dto.Icon)
+	nuser, err := userDomain.NewUser(dto.LastName, dto.FirstName, dto.Email, string(password))
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +52,6 @@ func (uc *SaveUseCase) Run(ctx context.Context, dto SaveUseCaseDto) (*FindUserUs
 		FirstName: user.FirstName(),
 		Email:     user.Email(),
 		Password:  user.Password(),
-		Icon:      user.Icon(),
 		GroupIDs:  user.GroupIDs(),
 		EventIDs:  user.EventIDs(),
 		CreatedAt: user.CreatedAt(),

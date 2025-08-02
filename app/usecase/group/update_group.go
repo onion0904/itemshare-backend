@@ -21,7 +21,6 @@ func NewUpdateUseCase(
 type UpdateUseCaseDto struct {
 	Name    string
 	UsersID []string
-	Icon    string
 }
 
 func (uc *UpdateUseCase) Run(ctx context.Context, groupID string, dto UpdateUseCaseDto) (*groupDomain.Group, error) {
@@ -31,7 +30,7 @@ func (uc *UpdateUseCase) Run(ctx context.Context, groupID string, dto UpdateUseC
 	if err != nil {
 		return nil, err
 	}
-	ngroup, err := groupDomain.Reconstruct(groupID, dto.Name, group.UserIDs(), group.EventIDs(), dto.Icon)
+	ngroup, err := groupDomain.Reconstruct(groupID, dto.Name, group.UserIDs(), group.EventIDs())
 	if err != nil {
 		return nil, err
 	}

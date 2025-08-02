@@ -23,7 +23,6 @@ type UpdateUseCaseDto struct {
 	LastName  *string
 	FirstName *string
 	Email     *string
-	Icon      *string
 }
 
 func (uc *UpdateUseCase) Run(ctx context.Context, id string, dto UpdateUseCaseDto) (*FindUserUseCaseDto, error) {
@@ -33,7 +32,7 @@ func (uc *UpdateUseCase) Run(ctx context.Context, id string, dto UpdateUseCaseDt
 	}
 	defaultValue(&dto)
 
-	nuser, err := userDomain.Reconstruct(id, *dto.LastName, *dto.FirstName, *dto.Email, user.Password(), *dto.Icon, user.GroupIDs(), user.EventIDs())
+	nuser, err := userDomain.Reconstruct(id, *dto.LastName, *dto.FirstName, *dto.Email, user.Password(), user.GroupIDs(), user.EventIDs())
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +50,6 @@ func (uc *UpdateUseCase) Run(ctx context.Context, id string, dto UpdateUseCaseDt
 		FirstName: updatedUser.FirstName(),
 		Email:     updatedUser.Email(),
 		Password:  updatedUser.Password(),
-		Icon:      updatedUser.Icon(),
 		GroupIDs:  updatedUser.GroupIDs(),
 		EventIDs:  updatedUser.EventIDs(),
 		CreatedAt: updatedUser.CreatedAt(),

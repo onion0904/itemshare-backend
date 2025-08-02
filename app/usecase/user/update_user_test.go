@@ -33,7 +33,6 @@ func TestUpdateUseCaseRun(t *testing.T) {
 				LastName:  lo.ToPtr("Updated"),
 				FirstName: lo.ToPtr("User"),
 				Email:     lo.ToPtr("updated@example.com"),
-				Icon:      lo.ToPtr("Updated Icon"),
 			},
 			mockFunc: func() {
 				mockUserRepo.
@@ -46,7 +45,6 @@ func TestUpdateUseCaseRun(t *testing.T) {
 							"gratin",
 							"example@onion.com",
 							"pass",
-							"icon",
 							nil,
 							nil,
 						)
@@ -68,7 +66,6 @@ func TestUpdateUseCaseRun(t *testing.T) {
 							"User",
 							"updated@example.com",
 							"pass",
-							"Updated Icon",
 							nil,
 							nil,
 						)
@@ -80,7 +77,6 @@ func TestUpdateUseCaseRun(t *testing.T) {
 				FirstName: "User",
 				Email:     "updated@example.com",
 				Password:  "pass",
-				Icon:      "Updated Icon",
 				GroupIDs:  nil,
 				EventIDs:  nil,
 			},

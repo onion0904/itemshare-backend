@@ -27,7 +27,6 @@ type Event struct {
 type Group struct {
 	ID        string
 	Name      string
-	Icon      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -48,7 +47,6 @@ type User struct {
 	FirstName string
 	Email     string
 	Password  string
-	Icon      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

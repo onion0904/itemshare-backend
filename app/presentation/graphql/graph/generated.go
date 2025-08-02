@@ -74,7 +74,6 @@ type ComplexityRoot struct {
 		CreatedAt func(childComplexity int) int
 		EventIDs  func(childComplexity int) int
 		ID        func(childComplexity int) int
-		Icon      func(childComplexity int) int
 		Name      func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
 		UserIDs   func(childComplexity int) int
@@ -113,7 +112,6 @@ type ComplexityRoot struct {
 		FirstName func(childComplexity int) int
 		GroupIDs  func(childComplexity int) int
 		ID        func(childComplexity int) int
-		Icon      func(childComplexity int) int
 		LastName  func(childComplexity int) int
 		Password  func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
@@ -289,13 +287,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Group.ID(childComplexity), true
-
-	case "Group.icon":
-		if e.complexity.Group.Icon == nil {
-			break
-		}
-
-		return e.complexity.Group.Icon(childComplexity), true
 
 	case "Group.name":
 		if e.complexity.Group.Name == nil {
@@ -589,13 +580,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.User.ID(childComplexity), true
-
-	case "User.icon":
-		if e.complexity.User.Icon == nil {
-			break
-		}
-
-		return e.complexity.User.Icon(childComplexity), true
 
 	case "User.lastName":
 		if e.complexity.User.LastName == nil {
@@ -1487,8 +1471,6 @@ func (ec *executionContext) fieldContext_AuthUserResponse_User(_ context.Context
 				return ec.fieldContext_User_email(ctx, field)
 			case "password":
 				return ec.fieldContext_User_password(ctx, field)
-			case "icon":
-				return ec.fieldContext_User_icon(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -2164,50 +2146,6 @@ func (ec *executionContext) fieldContext_Group_name(_ context.Context, field gra
 	return fc, nil
 }
 
-func (ec *executionContext) _Group_icon(ctx context.Context, field graphql.CollectedField, obj *model.Group) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Group_icon(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Icon, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Group_icon(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Group",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Group_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Group) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Group_createdAt(ctx, field)
 	if err != nil {
@@ -2455,8 +2393,6 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 				return ec.fieldContext_User_email(ctx, field)
 			case "password":
 				return ec.fieldContext_User_password(ctx, field)
-			case "icon":
-				return ec.fieldContext_User_icon(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -2614,8 +2550,6 @@ func (ec *executionContext) fieldContext_Mutation_createGroup(ctx context.Contex
 				return ec.fieldContext_Group_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Group_name(ctx, field)
-			case "icon":
-				return ec.fieldContext_Group_icon(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Group_createdAt(ctx, field)
 			case "updatedAt":
@@ -2707,8 +2641,6 @@ func (ec *executionContext) fieldContext_Mutation_updateGroup(ctx context.Contex
 				return ec.fieldContext_Group_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Group_name(ctx, field)
-			case "icon":
-				return ec.fieldContext_Group_icon(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Group_createdAt(ctx, field)
 			case "updatedAt":
@@ -2877,8 +2809,6 @@ func (ec *executionContext) fieldContext_Mutation_addUserToGroup(ctx context.Con
 				return ec.fieldContext_Group_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Group_name(ctx, field)
-			case "icon":
-				return ec.fieldContext_Group_icon(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Group_createdAt(ctx, field)
 			case "updatedAt":
@@ -2970,8 +2900,6 @@ func (ec *executionContext) fieldContext_Mutation_removeUserFromGroup(ctx contex
 				return ec.fieldContext_Group_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Group_name(ctx, field)
-			case "icon":
-				return ec.fieldContext_Group_icon(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Group_createdAt(ctx, field)
 			case "updatedAt":
@@ -3063,8 +2991,6 @@ func (ec *executionContext) fieldContext_Mutation_addEventToGroup(ctx context.Co
 				return ec.fieldContext_Group_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Group_name(ctx, field)
-			case "icon":
-				return ec.fieldContext_Group_icon(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Group_createdAt(ctx, field)
 			case "updatedAt":
@@ -3310,8 +3236,6 @@ func (ec *executionContext) fieldContext_Mutation_acceptGroupInvitation(ctx cont
 				return ec.fieldContext_Group_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Group_name(ctx, field)
-			case "icon":
-				return ec.fieldContext_Group_icon(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Group_createdAt(ctx, field)
 			case "updatedAt":
@@ -3768,8 +3692,6 @@ func (ec *executionContext) fieldContext_Query_user(_ context.Context, field gra
 				return ec.fieldContext_User_email(ctx, field)
 			case "password":
 				return ec.fieldContext_User_password(ctx, field)
-			case "icon":
-				return ec.fieldContext_User_icon(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_User_createdAt(ctx, field)
 			case "updatedAt":
@@ -3850,8 +3772,6 @@ func (ec *executionContext) fieldContext_Query_group(ctx context.Context, field 
 				return ec.fieldContext_Group_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Group_name(ctx, field)
-			case "icon":
-				return ec.fieldContext_Group_icon(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Group_createdAt(ctx, field)
 			case "updatedAt":
@@ -4399,50 +4319,6 @@ func (ec *executionContext) _User_password(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext_User_password(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _User_icon(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_icon(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Icon, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_icon(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -6658,7 +6534,7 @@ func (ec *executionContext) unmarshalInputCreateGroupInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "userId", "icon"}
+	fieldsInOrder := [...]string{"name", "userId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6679,13 +6555,6 @@ func (ec *executionContext) unmarshalInputCreateGroupInput(ctx context.Context, 
 				return it, err
 			}
 			it.UserID = data
-		case "icon":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("icon"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Icon = data
 		}
 	}
 
@@ -6699,7 +6568,7 @@ func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"lastName", "firstName", "email", "password", "icon"}
+	fieldsInOrder := [...]string{"lastName", "firstName", "email", "password"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6734,13 +6603,6 @@ func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, o
 				return it, err
 			}
 			it.Password = data
-		case "icon":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("icon"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Icon = data
 		}
 	}
 
@@ -6829,7 +6691,7 @@ func (ec *executionContext) unmarshalInputUpdateGroupInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "icon"}
+	fieldsInOrder := [...]string{"name"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6843,13 +6705,6 @@ func (ec *executionContext) unmarshalInputUpdateGroupInput(ctx context.Context, 
 				return it, err
 			}
 			it.Name = data
-		case "icon":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("icon"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Icon = data
 		}
 	}
 
@@ -6863,7 +6718,7 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"lastName", "firstName", "email", "password", "icon"}
+	fieldsInOrder := [...]string{"lastName", "firstName", "email", "password"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6898,13 +6753,6 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 				return it, err
 			}
 			it.Password = data
-		case "icon":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("icon"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Icon = data
 		}
 	}
 
@@ -7080,11 +6928,6 @@ func (ec *executionContext) _Group(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "name":
 			out.Values[i] = ec._Group_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "icon":
-			out.Values[i] = ec._Group_icon(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -7456,11 +7299,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "password":
 			out.Values[i] = ec._User_password(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "icon":
-			out.Values[i] = ec._User_icon(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

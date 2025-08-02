@@ -2,21 +2,18 @@
 INSERT INTO "groups" (
     id,
     name,
-    icon,
     created_at,
     updated_at
 )
 VALUES (
     sqlc.arg(id),
     sqlc.arg(name),
-    sqlc.arg(icon),
     NOW(),
     NOW()
 )
 ON CONFLICT (id) DO UPDATE
 SET
     name        = EXCLUDED.name,
-    icon        = EXCLUDED.icon,
     updated_at  = NOW();
 
 -- name: DeleteGroup :exec
@@ -27,7 +24,6 @@ WHERE id = sqlc.arg(groupID);
 SELECT
     id,
     name,
-    icon,
     created_at,
     updated_at
 FROM "groups"

@@ -26,7 +26,6 @@ SELECT
     first_name,
     email,
     password,
-    icon,
     created_at,
     updated_at
 FROM users
@@ -42,7 +41,6 @@ func (q *Queries) FindUserByEmail(ctx context.Context, email string) (User, erro
 		&i.FirstName,
 		&i.Email,
 		&i.Password,
-		&i.Icon,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -56,7 +54,6 @@ SELECT
     first_name,
     email,
     password,
-    icon,
     created_at,
     updated_at
 FROM users
@@ -72,7 +69,6 @@ func (q *Queries) FindUserByID(ctx context.Context, id string) (User, error) {
 		&i.FirstName,
 		&i.Email,
 		&i.Password,
-		&i.Icon,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -144,7 +140,6 @@ INSERT INTO users (
     first_name,
     email,
     password,
-    icon,
     created_at,
     updated_at
 )
@@ -154,7 +149,6 @@ VALUES (
     $3,
     $4,
     $5,
-    $6,
     NOW(),
     NOW()
 )
@@ -164,7 +158,6 @@ SET
     first_name  = EXCLUDED.first_name,
     email       = EXCLUDED.email,
     password    = EXCLUDED.password,
-    icon        = EXCLUDED.icon,
     updated_at  = NOW()
 `
 
@@ -174,7 +167,6 @@ type UpsertUserParams struct {
 	FirstName string
 	Email     string
 	Password  string
-	Icon      string
 }
 
 func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) error {
@@ -184,7 +176,6 @@ func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) error {
 		arg.FirstName,
 		arg.Email,
 		arg.Password,
-		arg.Icon,
 	)
 	return err
 }

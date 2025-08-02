@@ -13,7 +13,6 @@ type Group struct {
 	name      string
 	userIDs   []string
 	eventIDs  []string
-	icon      string
 	createdAt time.Time
 	updatedAt time.Time
 }
@@ -23,28 +22,24 @@ func Reconstruct(
 	name string,
 	userIDs []string,
 	eventIDs []string,
-	icon string,
 ) (*Group, error) {
 	return newGroup(
 		id,
 		name,
 		userIDs,
 		eventIDs,
-		icon,
 	)
 }
 
 func NewGroup(
 	name string,
 	userIDs []string,
-	icon string,
 ) (*Group, error) {
 	return newGroup(
 		ulid.NewUlid(),
 		name,
 		userIDs,
 		nil,
-		icon,
 	)
 }
 
@@ -53,7 +48,6 @@ func newGroup(
 	name string,
 	userIDs []string,
 	eventIDs []string,
-	icon string,
 ) (*Group, error) {
 	// ownerIDのバリデーション
 	if !ulid.IsValid(id) {
@@ -69,7 +63,6 @@ func newGroup(
 		name:     name,
 		userIDs:  userIDs,
 		eventIDs: eventIDs,
-		icon:     icon,
 	}, nil
 }
 
@@ -87,10 +80,6 @@ func (p *Group) UserIDs() []string {
 
 func (p *Group) EventIDs() []string {
 	return p.eventIDs
-}
-
-func (p *Group) Icon() string {
-	return p.icon
 }
 
 func (p *Group) CreatedAt() time.Time {

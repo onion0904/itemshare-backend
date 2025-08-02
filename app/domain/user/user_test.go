@@ -13,7 +13,6 @@ func TestReconstruct(t *testing.T) {
 		firstName string
 		email     string
 		password  string
-		icon      string
 		groupIDs  []string
 		eventIDs  []string
 	}
@@ -31,7 +30,6 @@ func TestReconstruct(t *testing.T) {
 				firstName: "Doe",
 				email:     "john@example.com",
 				password:  "password",
-				icon:      "icon.jpg",
 			},
 			want: &User{
 				id:        "01F8B9Z6G9WBJK9XJH5M7RQK5X",
@@ -39,7 +37,6 @@ func TestReconstruct(t *testing.T) {
 				firstName: "Doe",
 				email:     "john@example.com",
 				password:  "password",
-				icon:      "icon.jpg",
 				groupIDs:  nil,
 				eventIDs:  nil,
 			},
@@ -48,7 +45,7 @@ func TestReconstruct(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Reconstruct(tt.args.id, tt.args.lastName, tt.args.firstName, tt.args.email, tt.args.password, tt.args.icon, tt.args.groupIDs, tt.args.eventIDs)
+			got, err := Reconstruct(tt.args.id, tt.args.lastName, tt.args.firstName, tt.args.email, tt.args.password, tt.args.groupIDs, tt.args.eventIDs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Reconstruct() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -72,9 +69,6 @@ func TestReconstruct(t *testing.T) {
 			if got.Password() != tt.args.password {
 				t.Errorf("got.Password() = %v, want %v", got.Password(), tt.args.password)
 			}
-			if got.Icon() != tt.args.icon {
-				t.Errorf("got.Icon() = %v, want %v", got.Icon(), tt.args.icon)
-			}
 			if len(got.GroupIDs()) != 0 {
 				t.Errorf("got.GroupIDs() = %v, want empty slice", got.GroupIDs())
 			}
@@ -91,7 +85,6 @@ func TestNewUser(t *testing.T) {
 		firstName string
 		email     string
 		password  string
-		icon      string
 	}
 	tests := []struct {
 		name    string
@@ -106,7 +99,6 @@ func TestNewUser(t *testing.T) {
 				firstName: "Doe",
 				email:     "john@example.com",
 				password:  "password",
-				icon:      "icon.jpg",
 			},
 			want: &User{
 				id:        "01F8B9Z6G9WBJK9XJH5M7RQK5X",
@@ -114,7 +106,6 @@ func TestNewUser(t *testing.T) {
 				firstName: "Doe",
 				email:     "john@example.com",
 				password:  "password",
-				icon:      "icon.jpg",
 				groupIDs:  nil,
 				eventIDs:  nil,
 			},
@@ -127,7 +118,6 @@ func TestNewUser(t *testing.T) {
 				firstName: "hogehoge",
 				email:     "hogehoge",
 				password:  "password",
-				icon:      "icon.jpg",
 			},
 			wantErr: true,
 		},
@@ -138,7 +128,6 @@ func TestNewUser(t *testing.T) {
 				firstName: "hogehoge",
 				email:     "hogehoge",
 				password:  "password",
-				icon:      "icon.jpg",
 			},
 			wantErr: true,
 		},
@@ -149,7 +138,6 @@ func TestNewUser(t *testing.T) {
 				firstName: "",
 				email:     "hogehoge",
 				password:  "password",
-				icon:      "icon.jpg",
 			},
 			wantErr: true,
 		},
@@ -160,7 +148,6 @@ func TestNewUser(t *testing.T) {
 				firstName: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 				email:     "hogehoge",
 				password:  "password",
-				icon:      "icon.jpg",
 			},
 			wantErr: true,
 		},
@@ -171,14 +158,13 @@ func TestNewUser(t *testing.T) {
 				firstName: "hoge",
 				email:     "",
 				password:  "password",
-				icon:      "icon.jpg",
 			},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewUser(tt.args.lastName, tt.args.firstName, tt.args.email, tt.args.password, tt.args.icon)
+			got, err := NewUser(tt.args.lastName, tt.args.firstName, tt.args.email, tt.args.password)
 			if got != nil {
 				got.id = "01F8B9Z6G9WBJK9XJH5M7RQK5X" //ulidがランダムで生成されるため
 			}
@@ -200,7 +186,6 @@ func Test_newUser(t *testing.T) {
 		firstName string
 		email     string
 		password  string
-		icon      string
 		groupIDs  []string
 		eventIDs  []string
 	}
@@ -218,7 +203,6 @@ func Test_newUser(t *testing.T) {
 				firstName: "Doe",
 				email:     "john@example.com",
 				password:  "password",
-				icon:      "icon.jpg",
 			},
 			want: &User{
 				id:        "01F8B9Z6G9WBJK9XJH5M7RQK5X",
@@ -226,7 +210,6 @@ func Test_newUser(t *testing.T) {
 				firstName: "Doe",
 				email:     "john@example.com",
 				password:  "password",
-				icon:      "icon.jpg",
 				groupIDs:  nil,
 				eventIDs:  nil,
 			},
@@ -240,14 +223,13 @@ func Test_newUser(t *testing.T) {
 				firstName: "hogehoge",
 				email:     "hogehoge",
 				password:  "password",
-				icon:      "icon.jpg",
 			},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := newUser(tt.args.id, tt.args.lastName, tt.args.firstName, tt.args.email, tt.args.password, tt.args.icon, tt.args.groupIDs, tt.args.eventIDs)
+			got, err := newUser(tt.args.id, tt.args.lastName, tt.args.firstName, tt.args.email, tt.args.password, tt.args.groupIDs, tt.args.eventIDs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("newUser() error = %v, wantErr %v", err, tt.wantErr)
 				return
