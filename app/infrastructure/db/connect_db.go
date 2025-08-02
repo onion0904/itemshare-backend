@@ -57,7 +57,7 @@ func NewMainDB(cnf config.DBConfig) *sql.DB {
 	return dbcon
 }
 
-// dbに接続する：最大5回リトライする
+// supabaseのdbに接続する：最大5回リトライする
 func connect(db_url string) (*sql.DB, error) {
 	for i := 0; i < maxRetries; i++ {
 		db, err := sql.Open("postgres", db_url)
@@ -99,4 +99,43 @@ func getQueriesWithContext(ctx context.Context) *dbgen.Queries {
 		return nil
 	}
 	return queries
+}
+
+func LocalNewMainDB(cnf config.DBConfig) *sql.DB {
+	once.Do(func() {
+		dbcon, err := localConnect(cnf.DB_HOST,cnf.DB_PORT,cnf.DB_USER,cnf.DB_PASSWORD,cnf.DB_NAME)
+		if err != nil {
+			panic(err)
+		}
+		q := dbgen.New(dbcon)
+		SetQuery(q)
+		SetDB(dbcon)
+	})
+
+	return dbcon
+}
+
+// localDBに接続する：最大5回リトライする
+func localConnect(host, port, user, password, dbname string) (*sql.DB, error) {
+	for i := 0; i < maxRetries; i++ {
+		dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+			host, port, user, password, dbname)
+
+		// データベースに接続
+		db, err := sql.Open("postgres", dsn)
+		if err != nil {
+			log.Fatalf("Failed to open database: %v", err)
+		}
+
+		err = db.Ping()
+		if err == nil {
+			return db, nil
+		}
+
+		log.Printf("could not connect to db: %v", err)
+		log.Printf("retrying in %v seconds...", delay/time.Second)
+		time.Sleep(delay)
+	}
+
+	return nil, fmt.Errorf("could not connect to db after %d attempts", maxRetries)
 }
