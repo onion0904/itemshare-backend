@@ -32,7 +32,7 @@ func (uc *RemoveUserFromGroupUseCase) Run(ctx context.Context, dto RemoveUserFro
 	if err != nil {
 		return nil, err
 	}
-	group, err = groupDomain.Reconstruct(group.ID(), group.Name(), group.UserIDs(), group.EventIDs(), group.Icon())
+	group, err = groupDomain.Reconstruct(group.ID(), group.Name(), group.UserIDs(), group.EventIDs())
 	if err != nil {
 		return nil, err
 	}

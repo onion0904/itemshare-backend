@@ -34,7 +34,6 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		LastName:  input.LastName,
 		FirstName: input.FirstName,
 		Email:     input.Email,
-		Icon:      input.Icon,
 	}
 	user, err := update.Run(ctx, userID, DTO)
 	if err != nil {
@@ -46,7 +45,6 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		FirstName: user.FirstName,
 		Email:     user.Email,
 		Password:  user.Password,
-		Icon:      user.Icon,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 		GroupIDs:  user.GroupIDs,
@@ -75,7 +73,6 @@ func (r *mutationResolver) CreateGroup(ctx context.Context, input model.CreateGr
 
 	DTO := usecase_group.SaveUseCaseDto{
 		Name: input.Name,
-		Icon: input.Icon,
 	}
 
 	group, err := create.Run(ctx, DTO)
@@ -85,7 +82,6 @@ func (r *mutationResolver) CreateGroup(ctx context.Context, input model.CreateGr
 	ngroup := model.Group{
 		ID:        group.ID(),
 		Name:      group.Name(),
-		Icon:      group.Icon(),
 		CreatedAt: group.CreatedAt(),
 		UpdatedAt: group.UpdatedAt(),
 		UserIDs:   group.UserIDs(),
@@ -100,7 +96,6 @@ func (r *mutationResolver) UpdateGroup(ctx context.Context, id string, input mod
 	update := usecase_group.NewUpdateUseCase(groupRepo)
 	DTO := usecase_group.UpdateUseCaseDto{
 		Name: *input.Name,
-		Icon: *input.Icon,
 	}
 	group, err := update.Run(ctx, id, DTO)
 	if err != nil {
@@ -109,7 +104,6 @@ func (r *mutationResolver) UpdateGroup(ctx context.Context, id string, input mod
 	ngroup := model.Group{
 		ID:        group.ID(),
 		Name:      group.Name(),
-		Icon:      group.Icon(),
 		CreatedAt: group.CreatedAt(),
 		UpdatedAt: group.UpdatedAt(),
 		UserIDs:   group.UserIDs(),
@@ -144,7 +138,6 @@ func (r *mutationResolver) AddUserToGroup(ctx context.Context, groupID string, u
 	ngroup := model.Group{
 		ID:        group.ID(),
 		Name:      group.Name(),
-		Icon:      group.Icon(),
 		CreatedAt: group.CreatedAt(),
 		UpdatedAt: group.UpdatedAt(),
 		UserIDs:   group.UserIDs(),
@@ -168,7 +161,6 @@ func (r *mutationResolver) RemoveUserFromGroup(ctx context.Context, groupID stri
 	ngroup := model.Group{
 		ID:        group.ID(),
 		Name:      group.Name(),
-		Icon:      group.Icon(),
 		CreatedAt: group.CreatedAt(),
 		UpdatedAt: group.UpdatedAt(),
 		UserIDs:   group.UserIDs(),
@@ -192,7 +184,6 @@ func (r *mutationResolver) AddEventToGroup(ctx context.Context, groupID string, 
 	ngroup := model.Group{
 		ID:        group.ID(),
 		Name:      group.Name(),
-		Icon:      group.Icon(),
 		CreatedAt: group.CreatedAt(),
 		UpdatedAt: group.UpdatedAt(),
 		UserIDs:   group.UserIDs(),
@@ -244,7 +235,6 @@ func (r *mutationResolver) AcceptGroupInvitation(ctx context.Context, token stri
 	return &model.Group{
 		ID:        group.ID(),
 		Name:      group.Name(),
-		Icon:      group.Icon(),
 		CreatedAt: group.CreatedAt(),
 		UpdatedAt: group.UpdatedAt(),
 		UserIDs:   group.UserIDs(),
@@ -371,7 +361,6 @@ func (r *mutationResolver) Signup(ctx context.Context, input model.CreateUserInp
 		FirstName: input.FirstName,
 		Email:     input.Email,
 		Password:  input.Password,
-		Icon:      input.Icon,
 	}
 
 	user, err := create.Run(ctx, DTO)
@@ -384,7 +373,6 @@ func (r *mutationResolver) Signup(ctx context.Context, input model.CreateUserInp
 		FirstName: user.FirstName,
 		Email:     user.Email,
 		Password:  user.Password,
-		Icon:      user.Icon,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 		GroupIDs:  user.GroupIDs,
@@ -445,7 +433,6 @@ func (r *mutationResolver) Signin(ctx context.Context, email string, password st
 		FirstName: user.FirstName,
 		Email:     user.Email,
 		Password:  user.Password,
-		Icon:      user.Icon,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 		GroupIDs:  user.GroupIDs,
@@ -484,7 +471,6 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 		FirstName: user.FirstName,
 		Email:     user.Email,
 		Password:  user.Password,
-		Icon:      user.Icon,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 		GroupIDs:  user.GroupIDs,
@@ -504,7 +490,6 @@ func (r *queryResolver) Group(ctx context.Context, id string) (*model.Group, err
 	ngroup := model.Group{
 		ID:        group.ID,
 		Name:      group.Name,
-		Icon:      group.Icon,
 		CreatedAt: group.CreatedAt,
 		UpdatedAt: group.UpdatedAt,
 		UserIDs:   group.UserIDs,

@@ -24,7 +24,6 @@ type FindGroupUseCaseDto struct {
 	Name      string
 	UserIDs   []string
 	EventIDs  []string
-	Icon      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -39,7 +38,6 @@ func (uc *FindGroupUseCase) Run(ctx context.Context, groupID string) (*FindGroup
 		Name:      group.Name(),
 		UserIDs:   group.UserIDs(),
 		EventIDs:  group.EventIDs(),
-		Icon:      group.Icon(),
 		CreatedAt: group.CreatedAt(),
 		UpdatedAt: group.UpdatedAt(),
 	}, nil

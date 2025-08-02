@@ -25,7 +25,6 @@ type FindUserByEmailPasswordUseCaseDto struct {
 	FirstName string
 	Email     string
 	Password  string
-	Icon      string
 	GroupIDs  []string
 	EventIDs  []string
 	CreatedAt time.Time
@@ -43,7 +42,6 @@ func (uc *FindUserByEmailPasswordUseCase) Run(ctx context.Context, email string)
 		FirstName: user.FirstName(),
 		Email:     user.Email(),
 		Password:  user.Password(),
-		Icon:      user.Icon(),
 		GroupIDs:  user.GroupIDs(),
 		EventIDs:  user.EventIDs(),
 		CreatedAt: user.CreatedAt(),

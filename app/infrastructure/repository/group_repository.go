@@ -25,7 +25,6 @@ func (gr *groupRepository) Update(ctx context.Context, group *group.Group) error
 
 	err := query.UpsertGroup(ctx, dbgen.UpsertGroupParams{
 		Name: group.Name(),
-		Icon: group.Icon(),
 		ID:   group.ID(),
 	})
 	if err != nil {
@@ -40,7 +39,6 @@ func (gr *groupRepository) Save(ctx context.Context, group *group.Group) error {
 	err := query.UpsertGroup(ctx, dbgen.UpsertGroupParams{
 		ID:   group.ID(),
 		Name: group.Name(),
-		Icon: group.Icon(),
 	})
 	if err != nil {
 		return err
@@ -95,7 +93,6 @@ func (gr *groupRepository) FindGroup(ctx context.Context, groupID string) (*grou
 		g.Name,
 		userIDs,
 		eventIDs,
-		g.Icon,
 	)
 	if err != nil {
 		return nil, err

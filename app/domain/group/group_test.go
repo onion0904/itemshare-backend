@@ -12,7 +12,6 @@ func TestReconstruct(t *testing.T) {
 		name     string
 		userIDs  []string
 		eventIDs []string
-		icon     string
 	}
 	tests := []struct {
 		name    string
@@ -25,21 +24,19 @@ func TestReconstruct(t *testing.T) {
 			args: args{
 				id:   "01F8B9Z6G9WBJK9XJH5M7RQK5X", // 有効なULIDの例
 				name: "Test Group",
-				icon: "group.jpg",
 			},
 			want: &Group{
 				id:       "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 				name:     "Test Group",
 				userIDs:  nil,
 				eventIDs: nil,
-				icon:     "group.jpg",
 			},
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Reconstruct(tt.args.id, tt.args.name, tt.args.userIDs, tt.args.eventIDs, tt.args.icon)
+			got, err := Reconstruct(tt.args.id, tt.args.name, tt.args.userIDs, tt.args.eventIDs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Reconstruct() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -53,9 +50,6 @@ func TestReconstruct(t *testing.T) {
 			}
 			if got.Name() != tt.args.name {
 				t.Errorf("got.LastName() = %v, want %v", got.Name(), tt.args.name)
-			}
-			if got.Icon() != tt.args.icon {
-				t.Errorf("got.Icon() = %v, want %v", got.Icon(), tt.args.icon)
 			}
 			if len(got.UserIDs()) != 0 {
 				t.Errorf("got.GroupIDs() = %v, want empty slice", got.UserIDs())
@@ -71,7 +65,6 @@ func TestNewGroup(t *testing.T) {
 	type args struct {
 		name    string
 		userIDs []string
-		icon    string
 	}
 	tests := []struct {
 		name    string
@@ -83,14 +76,12 @@ func TestNewGroup(t *testing.T) {
 			name: "ok case: New",
 			args: args{
 				name: "Test Group",
-				icon: "group.jpg",
 			},
 			want: &Group{
 				id:       "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 				name:     "Test Group",
 				userIDs:  nil,
 				eventIDs: nil,
-				icon:     "group.jpg",
 			},
 			wantErr: false,
 		},
@@ -98,22 +89,19 @@ func TestNewGroup(t *testing.T) {
 			name: "error case: small group name",
 			args: args{
 				name: "",
-				icon: "group.jpg",
 			},
 			wantErr: true,
 		},
 		{
 			name: "error case: big group name",
 			args: args{
-				name: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-				icon: "group.jpg",
-			},
+				name: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",			},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewGroup(tt.args.name, tt.args.userIDs, tt.args.icon)
+			got, err := NewGroup(tt.args.name, tt.args.userIDs)
 			if got != nil {
 				got.id = "01F8B9Z6G9WBJK9XJH5M7RQK5X" //ulidがランダムで生成されるため
 			}
@@ -134,7 +122,6 @@ func Test_newGroup(t *testing.T) {
 		name     string
 		userIDs  []string
 		eventIDs []string
-		icon     string
 	}
 	tests := []struct {
 		name    string
@@ -147,14 +134,12 @@ func Test_newGroup(t *testing.T) {
 			args: args{
 				id:   "01F8B9Z6G9WBJK9XJH5M7RQK5X", // 有効なULIDの例
 				name: "Test Group",
-				icon: "group.jpg",
 			},
 			want: &Group{
 				id:       "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 				name:     "Test Group",
 				userIDs:  nil,
 				eventIDs: nil,
-				icon:     "group.jpg",
 			},
 			wantErr: false,
 		},
@@ -163,14 +148,13 @@ func Test_newGroup(t *testing.T) {
 			args: args{
 				id:   "id",
 				name: "Test Group",
-				icon: "group.jpg",
 			},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := newGroup(tt.args.id, tt.args.name, tt.args.userIDs, tt.args.eventIDs, tt.args.icon)
+			got, err := newGroup(tt.args.id, tt.args.name, tt.args.userIDs, tt.args.eventIDs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("newGroup() error = %v, wantErr %v", err, tt.wantErr)
 				return

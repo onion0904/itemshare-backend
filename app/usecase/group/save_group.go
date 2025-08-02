@@ -21,12 +21,11 @@ func NewSaveUseCase(
 type SaveUseCaseDto struct {
 	Name    string
 	UsersID []string
-	Icon    string
 }
 
 func (uc *SaveUseCase) Run(ctx context.Context, dto SaveUseCaseDto) (*groupDomain.Group, error) {
 	// dtoからuserへ変換
-	group, err := groupDomain.NewGroup(dto.Name, dto.UsersID, dto.Icon)
+	group, err := groupDomain.NewGroup(dto.Name, dto.UsersID)
 	if err != nil {
 		return nil, err
 	}

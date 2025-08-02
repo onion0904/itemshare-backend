@@ -36,7 +36,6 @@ func TestFindUserUseCase_Run(t *testing.T) {
 							"gratin",
 							"example@onion.com",
 							"pass",
-							"icon",
 							nil,
 							nil,
 						)
@@ -48,7 +47,6 @@ func TestFindUserUseCase_Run(t *testing.T) {
 				FirstName: "gratin",
 				Email:     "example@onion.com",
 				Password:  "pass",
-				Icon:      "icon",
 				GroupIDs:  nil,
 				EventIDs:  nil,
 			},
@@ -78,11 +76,10 @@ func reconstructUser(
 	firstName string,
 	email string,
 	password string,
-	icon string,
 	groupIDs []string,
 	eventIDs []string,
 ) (*userDomain.User, error) {
-	user, err := userDomain.Reconstruct(id, lastName, firstName, email, password, icon, groupIDs, eventIDs)
+	user, err := userDomain.Reconstruct(id, lastName, firstName, email, password, groupIDs, eventIDs)
 	if err != nil {
 		return nil, err
 	}
