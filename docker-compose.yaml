@@ -2,27 +2,42 @@ services:
   api:
     build:
       context: .
-      dockerfile: ./ops/docker/app/Dockerfile
+      dockerfile: ./Dockerfile
     env_file:
       - .env
     environment:
-      DB_HOST: ${DB_HOST}              # DBのホスト名
-      DB_PORT: ${DB_PORT}              # DBのポート番号
-      DB_USER: ${DB_USER}              # DBユーザー名
-      DB_PASSWORD: ${DB_PASSWORD}      # DBユーザーパスワード
-      DB_NAME: ${DB_NAME}              # 使用するデータベース名
-      ROOTPASS: ${ROOTPASS}              # DBのルートパスワード
-      DATABASE_URL: ${DATABASE_URL}      # supabaseのdatabaseのURL
-      SERVER_PORT: ${SERVER_PORT}        # サーバーポート
-      MAILGUN_DOMAIN: ${MAILGUN_DOMAIN}  # Mailgunのドメイン
-      MAILGUN_PRIVATE_API_KEY: ${MAILGUN_PRIVATE_API_KEY} # MailgunのAPIキー
-      SENDER_EMAIL: ${SENDER_EMAIL}        # 送信者のメールアドレス
-      RECIPIENT_EMAIL: ${RECIPIENT_EMAIL}      # 受信者のメールアドレス
-      JWT_SECRET: ${JWT_SECRET}          # JWTのシークレットキー
+      DB_HOST: ${DB_HOST}               # localDBのホスト名
+      DB_PORT: ${DB_PORT}               # localDBのポート番号
+      DB_USER: ${DB_USER}               # localDBユーザー名
+      DB_PASSWORD: ${DB_PASSWORD}       # localDBユーザーパスワード
+      DB_NAME: ${DB_NAME}               # localDB名
+      ROOTPASS: ${ROOTPASS}             # localDBのルートパスワード
+      DATABASE_URL: ${DATABASE_URL}     # supabaseのdatabaseのURL
+      SERVER_PORT: ${SERVER_PORT}       # サーバーポート
+      GMAIL_APP_PASS: ${GMAIL_APP_PASS} # gmailのapp password
+      SENDER_EMAIL: ${SENDER_EMAIL}     # 送信者のメールアドレス
+      JWT_SECRET: ${JWT_SECRET}         # JWTのシークレットキー
     ports:
-      - "8080:8080"                    # APIのポート
+      - "8080:8080"   
+    depends_on:
+      - db                
     working_dir: /app                  # 作業ディレクトリ
     tty: true                          # TTYを有効にする
+    restart: always
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15
+    container_name: local-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
     restart: always
     networks:
       - app-network
