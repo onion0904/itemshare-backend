@@ -11,6 +11,7 @@ import (
 type Event struct {
 	ID          string
 	UserID      string
+	ItemID      string
 	Together    bool
 	Description string
 	Year        int32
@@ -22,6 +23,13 @@ type Event struct {
 	Important   bool
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+}
+
+type EventRule struct {
+	UserID         string
+	ItemID         string
+	NormalLimit    int32
+	ImportantLimit int32
 }
 
 type Group struct {
@@ -39,6 +47,14 @@ type GroupEvent struct {
 type GroupUser struct {
 	GroupID string
 	UserID  string
+}
+
+type Item struct {
+	ID        string
+	GroupID   string
+	Name      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type User struct {

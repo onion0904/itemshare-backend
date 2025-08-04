@@ -16,7 +16,9 @@ import (
 	"github.com/onion0904/CarShareSystem/app/middleware"
 	"github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model"
 	usecase_event "github.com/onion0904/CarShareSystem/app/usecase/event"
+	usecase_eventRule "github.com/onion0904/CarShareSystem/app/usecase/eventRule"
 	usecase_group "github.com/onion0904/CarShareSystem/app/usecase/group"
+	usecase_item "github.com/onion0904/CarShareSystem/app/usecase/item"
 	usecase_mail "github.com/onion0904/CarShareSystem/app/usecase/mail"
 	usecase_user "github.com/onion0904/CarShareSystem/app/usecase/user"
 	"github.com/onion0904/CarShareSystem/pkg/jwt"
@@ -288,6 +290,54 @@ func (r *mutationResolver) DeleteEvent(ctx context.Context, id string) (bool, er
 	return true, nil
 }
 
+// CreateItem is the resolver for the createItem field.
+func (r *mutationResolver) CreateItem(ctx context.Context, input model.CreateItemInput) (*model.Item, error) {
+	itemRepo := repo.NewItemRepository(r.DB)
+	create := usecase_item.NewSaveItemUseCase(itemRepo)
+	DTO := usecase_item.SaveUseCaseDto{
+		Name:    input.Name,
+		GroupID: input.GroupID,
+	}
+	item, err := create.Run(ctx, DTO)
+	if err != nil {
+		return nil, err
+	}
+	nitem := model.Item{
+		ID:      item.ID,
+		Name:    item.Name,
+		GroupID: item.GroupID,
+	}
+	return &nitem, nil
+}
+
+// DeleteItem is the resolver for the deleteItem field.
+func (r *mutationResolver) DeleteItem(ctx context.Context, id string) (bool, error) {
+	itemRepo := repo.NewItemRepository(r.DB)
+	delete := usecase_item.NewDeleteUseCase(itemRepo)
+	err := delete.Run(ctx, id)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// UpsertEventRule is the resolver for the UpsertEventRule field.
+func (r *mutationResolver) UpsertEventRule(ctx context.Context, input model.UpsertEventRuleInput) (bool, error) {
+	eventRuleRepo := repo.NewEventRuleRepository(r.DB)
+	create := usecase_eventRule.NewUpsertUseCase(eventRuleRepo)
+	DTO := usecase_eventRule.UpsertUseCaseDto{
+		UserID:         input.UserID,
+		ItemID:         input.ItemID,
+		NormalLimit:    input.NormalLimit,
+		ImportantLimit: input.ImportantLimit,
+	}
+	err := create.Run(ctx, DTO)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 // SendVerificationCode is the resolver for the sendVerificationCode field.
 func (r *mutationResolver) SendVerificationCode(ctx context.Context, email string) (bool, error) {
 	if email == "" {
@@ -533,6 +583,42 @@ func (r *queryResolver) EventsByMonth(ctx context.Context, input model.MonthlyEv
 		return nil, err
 	}
 	return events.EventIDs, nil
+}
+
+// Item is the resolver for the item field.
+func (r *queryResolver) Item(ctx context.Context, id string) (*model.Item, error) {
+	itemRepo := repo.NewItemRepository(r.DB)
+	find := usecase_item.NewFindItemByIDUseCase(itemRepo)
+	item, err := find.Run(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	nitem := model.Item{
+		ID:      item.ID,
+		Name:    item.Name,
+		GroupID: item.GroupID,
+	}
+	return &nitem, nil
+}
+
+// ItemsBygroupID is the resolver for the itemsBygroupID field.
+func (r *queryResolver) ItemsBygroupID(ctx context.Context, groupID string) ([]*model.Item, error) {
+	itemRepo := repo.NewItemRepository(r.DB)
+	find := usecase_item.NewFindItemByGroupIDUseCase(itemRepo)
+	items, err := find.Run(ctx, groupID)
+	if err != nil {
+		return nil, err
+	}
+	var nitems []*model.Item
+	for _, item := range *items {
+		nitems = append(nitems,
+			&model.Item{
+				ID:      item.ID,
+				Name:    item.Name,
+				GroupID: item.GroupID,
+			})
+	}
+	return nitems, nil
 }
 
 // Mutation returns MutationResolver implementation.
