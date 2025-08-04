@@ -26,6 +26,11 @@ type CreateGroupInput struct {
 	UserID string `json:"userId"`
 }
 
+type CreateItemInput struct {
+	Name    string `json:"name"`
+	GroupID string `json:"groupID"`
+}
+
 type CreateUserInput struct {
 	LastName  string `json:"lastName"`
 	FirstName string `json:"firstName"`
@@ -49,6 +54,13 @@ type Event struct {
 	Important   bool      `json:"important"`
 }
 
+type EventRules struct {
+	UserID         string `json:"userID"`
+	ItemID         string `json:"itemID"`
+	NormalLimit    int32  `json:"normalLimit"`
+	ImportantLimit int32  `json:"importantLimit"`
+}
+
 type Group struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
@@ -56,6 +68,12 @@ type Group struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 	UserIDs   []string  `json:"userIDs"`
 	EventIDs  []string  `json:"eventIDs"`
+}
+
+type Item struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	GroupID string `json:"groupID"`
 }
 
 type MonthlyEventInput struct {
@@ -69,12 +87,6 @@ type Mutation struct {
 type Query struct {
 }
 
-type UpdateEventInput struct {
-	Together    *bool   `json:"together,omitempty"`
-	Description *string `json:"description,omitempty"`
-	Important   *bool   `json:"important,omitempty"`
-}
-
 type UpdateGroupInput struct {
 	Name *string `json:"name,omitempty"`
 }
@@ -84,6 +96,13 @@ type UpdateUserInput struct {
 	FirstName *string `json:"firstName,omitempty"`
 	Email     *string `json:"email,omitempty"`
 	Password  *string `json:"password,omitempty"`
+}
+
+type UpsertEventRuleInput struct {
+	UserID         string `json:"userID"`
+	ItemID         string `json:"itemID"`
+	NormalLimit    int32  `json:"NormalLimit"`
+	ImportantLimit int32  `json:"ImportantLimit"`
 }
 
 type User struct {

@@ -1,2 +1,3 @@
 # todo
-今は無い
+
+domainとrepoを参考にdomainserviceとresolverとusecaseを実装

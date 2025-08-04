@@ -44,6 +44,22 @@ type Event {
   important: Boolean!
 }
 
+# Item型の定義
+type Item {
+  id: String!
+  name: String!
+  groupID: String!
+}
+
+# EventRulesの定義
+type EventRules {
+  userID: String!
+  itemID: String!
+  normalLimit: Int!
+  importantLimit: Int!
+}
+
+
 # クエリの定義(データの取得のエンドポイント)
 type Query {
   # ユーザー関連
@@ -55,7 +71,16 @@ type Query {
   # イベント関連
   event(id: String!): Event! @isAuthenticated
   eventsByMonth(input: MonthlyEventInput!): [String!]! @isAuthenticated
+
+  # アイテム関連
+  item(id: String!): Item! @isAuthenticated
+  itemsBygroupID(groupID: String!): [Item!]! @isAuthenticated
 }
+
+
+
+
+
 
 # 入力型の定義
 input CreateUserInput {
@@ -91,21 +116,31 @@ input CreateEventInput {
   important: Boolean!
 }
 
-input UpdateEventInput {
-  together: Boolean
-  description: String
-  important: Boolean
-}
-
 input MonthlyEventInput {
   year: Int!
   month: Int!
+}
+
+input CreateItemInput {
+  name: String!
+  groupID: String!
+}
+
+input UpsertEventRuleInput {
+  userID: String!
+  itemID: String!
+  NormalLimit: Int!
+  ImportantLimit: Int!
 }
 
 type AuthUserResponse {
   token: String!
   User:  User!
 }
+
+
+
+
 
 # ミューテーションの定義(データの作成、更新、削除のエンドポイント)
 type Mutation {
@@ -134,6 +169,13 @@ type Mutation {
   # イベント関連
   createEvent(input: CreateEventInput!): Event! @isAuthenticated
   deleteEvent(id: String!): Boolean! @isAuthenticated
+
+  # アイテム関連
+  createItem(input: CreateItemInput!): Item! @isAuthenticated
+  deleteItem(id: String!): Boolean! @isAuthenticated
+
+  # イベントルール関連
+  UpsertEventRule(input: UpsertEventRuleInput!): Boolean! @isAuthenticated
 
   # メール、認証関連
   sendVerificationCode(email: String!): Boolean!
