@@ -33,5 +33,5 @@ func (uc *SaveUseCase) Run(ctx context.Context, dto SaveUseCaseDto) (*groupDomai
 	if err != nil {
 		return nil, err
 	}
-	return uc.groupRepo.FindGroup(ctx, group.ID())
+	return uc.groupRepo.FindGroupByID(ctx, group.ID())
 }

@@ -10,6 +10,7 @@ func TestReconstruct(t *testing.T) {
 	type args struct {
 		id          string
 		userID      string
+		itemID      string
 		together    bool
 		description string
 		year        int32
@@ -31,6 +32,7 @@ func TestReconstruct(t *testing.T) {
 			args: args{
 				id:          "01F8B9Z6G9WBJK9XJH5M7RQK5X", // 有効なULIDの例
 				userID:      "user123",
+				itemID:      "item123",
 				together:    true,
 				description: "Test Event",
 				year:        2000,
@@ -44,6 +46,7 @@ func TestReconstruct(t *testing.T) {
 			want: &Event{
 				id:          "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 				userID:      "user123",
+				itemID:      "item123",
 				together:    true,
 				description: "Test Event",
 				year:        2000,
@@ -59,7 +62,7 @@ func TestReconstruct(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Reconstruct(tt.args.id, tt.args.userID, tt.args.together, tt.args.description, tt.args.year, tt.args.month, tt.args.day, tt.args.date, tt.args.startDate, tt.args.endDate, tt.args.important)
+			got, err := Reconstruct(tt.args.id, tt.args.userID,tt.args.itemID, tt.args.together, tt.args.description, tt.args.year, tt.args.month, tt.args.day, tt.args.date, tt.args.startDate, tt.args.endDate, tt.args.important)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Reconstruct() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -72,6 +75,9 @@ func TestReconstruct(t *testing.T) {
 			}
 			if got.UserID() != tt.args.userID {
 				t.Errorf("got.UserID() = %v, want %v", got.UserID(), tt.args.userID)
+			}
+			if got.ItemID() != tt.args.itemID {
+				t.Errorf("got.ItemID() = %v, want %v", got.ItemID(), tt.args.itemID)
 			}
 			if got.Together() != tt.args.together {
 				t.Errorf("got.Together() = %v, want %v", got.Together(), tt.args.together)
@@ -107,6 +113,7 @@ func TestReconstruct(t *testing.T) {
 func TestNewEvent(t *testing.T) {
 	type args struct {
 		userID      string
+		itemID      string
 		together    bool
 		description string
 		year        int32
@@ -124,6 +131,7 @@ func TestNewEvent(t *testing.T) {
 			name: "ok case: New",
 			args: args{
 				userID:      "user123",
+				itemID:      "item123",
 				together:    true,
 				description: "Test Event",
 				year:        2004,
@@ -134,6 +142,7 @@ func TestNewEvent(t *testing.T) {
 			want: &Event{
 				id:          "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 				userID:      "user123",
+				itemID:      "item123",
 				together:    true,
 				description: "Test Event",
 				year:        2004,
@@ -147,6 +156,7 @@ func TestNewEvent(t *testing.T) {
 			name: "error case: description",
 			args: args{
 				userID:      "user123",
+				itemID:      "item123",
 				together:    true,
 				description: "",
 				year:        2004,
@@ -160,6 +170,7 @@ func TestNewEvent(t *testing.T) {
 			name: "error case: description",
 			args: args{
 				userID:      "user123",
+				itemID:      "item123",
 				together:    true,
 				description: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 				year:        2004,
@@ -172,7 +183,7 @@ func TestNewEvent(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewEvent(tt.args.userID, tt.args.together, tt.args.description, tt.args.year, tt.args.month, tt.args.day, tt.args.important)
+			got, err := NewEvent(tt.args.userID,tt.args.itemID, tt.args.together, tt.args.description, tt.args.year, tt.args.month, tt.args.day, tt.args.important)
 			if got != nil {
 				got.id = "01F8B9Z6G9WBJK9XJH5M7RQK5X" //ulidがランダムで生成されるため
 				// 現在の時刻になるため
@@ -197,6 +208,7 @@ func Test_newEvent(t *testing.T) {
 	type args struct {
 		id          string
 		userID      string
+		itemID      string
 		together    bool
 		description string
 		year        int32
@@ -218,6 +230,7 @@ func Test_newEvent(t *testing.T) {
 			args: args{
 				id:          "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 				userID:      "user123",
+				itemID:      "item123",
 				together:    true,
 				description: "Test Event",
 				year:        2000,
@@ -231,6 +244,7 @@ func Test_newEvent(t *testing.T) {
 			want: &Event{
 				id:          "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 				userID:      "user123",
+				itemID:      "item123",
 				together:    true,
 				description: "Test Event",
 				year:        2000,
@@ -248,6 +262,7 @@ func Test_newEvent(t *testing.T) {
 			args: args{
 				id:          "id",
 				userID:      "user123",
+				itemID:      "item123",
 				together:    true,
 				description: "Test Event",
 				year:        2000,
@@ -265,6 +280,7 @@ func Test_newEvent(t *testing.T) {
 			args: args{
 				id:          "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 				userID:      "user123",
+				itemID:      "item123",
 				together:    true,
 				description: "Test year",
 				year:        0,
@@ -282,6 +298,7 @@ func Test_newEvent(t *testing.T) {
 			args: args{
 				id:          "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 				userID:      "user123",
+				itemID:      "item123",
 				together:    true,
 				description: "Test year",
 				year:        2000,
@@ -299,6 +316,7 @@ func Test_newEvent(t *testing.T) {
 			args: args{
 				id:          "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 				userID:      "user123",
+				itemID:      "item123",
 				together:    true,
 				description: "Test year",
 				year:        2000,
@@ -316,6 +334,7 @@ func Test_newEvent(t *testing.T) {
 			args: args{
 				id:          "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 				userID:      "user123",
+				itemID:      "item123",
 				together:    true,
 				description: "Test year",
 				year:        2025,
@@ -333,6 +352,7 @@ func Test_newEvent(t *testing.T) {
 			args: args{
 				id:          "01F8B9Z6G9WBJK9XJH5M7RQK5X",
 				userID:      "user123",
+				itemID:      "item123",
 				together:    true,
 				description: "Test year",
 				year:        2024,
@@ -348,7 +368,7 @@ func Test_newEvent(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := newEvent(tt.args.id, tt.args.userID, tt.args.together, tt.args.description, tt.args.year, tt.args.month, tt.args.day, tt.args.date, tt.args.startDate, tt.args.endDate, tt.args.important)
+			got, err := newEvent(tt.args.id, tt.args.userID,tt.args.itemID, tt.args.together, tt.args.description, tt.args.year, tt.args.month, tt.args.day, tt.args.date, tt.args.startDate, tt.args.endDate, tt.args.important)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("newEvent() error = %v, wantErr %v", err, tt.wantErr)
 				return

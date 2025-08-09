@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/onion0904/CarShareSystem/app/config"
@@ -35,7 +34,6 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 	DTO := usecase_user.UpdateUseCaseDto{
 		LastName:  input.LastName,
 		FirstName: input.FirstName,
-		Email:     input.Email,
 	}
 	user, err := update.Run(ctx, userID, DTO)
 	if err != nil {
@@ -125,29 +123,6 @@ func (r *mutationResolver) DeleteGroup(ctx context.Context, id string) (bool, er
 	return true, nil
 }
 
-// AddUserToGroup is the resolver for the addUserToGroup field.
-func (r *mutationResolver) AddUserToGroup(ctx context.Context, groupID string, userID string) (*model.Group, error) {
-	groupRepo := repo.NewGroupRepository(r.DB)
-	addUser := usecase_group.NewAddUserToGroupUseCase(groupRepo)
-	DTO := usecase_group.AddUserToGroupUseCaseDto{
-		UserID:  userID,
-		GroupID: groupID,
-	}
-	group, err := addUser.Run(ctx, DTO)
-	if err != nil {
-		return nil, err
-	}
-	ngroup := model.Group{
-		ID:        group.ID(),
-		Name:      group.Name(),
-		CreatedAt: group.CreatedAt(),
-		UpdatedAt: group.UpdatedAt(),
-		UserIDs:   group.UserIDs(),
-		EventIDs:  group.EventIDs(),
-	}
-	return &ngroup, nil
-}
-
 // RemoveUserFromGroup is the resolver for the removeUserFromGroup field.
 func (r *mutationResolver) RemoveUserFromGroup(ctx context.Context, groupID string, userID string) (*model.Group, error) {
 	groupRepo := repo.NewGroupRepository(r.DB)
@@ -157,29 +132,6 @@ func (r *mutationResolver) RemoveUserFromGroup(ctx context.Context, groupID stri
 		GroupID: groupID,
 	}
 	group, err := removeUser.Run(ctx, DTO)
-	if err != nil {
-		return nil, err
-	}
-	ngroup := model.Group{
-		ID:        group.ID(),
-		Name:      group.Name(),
-		CreatedAt: group.CreatedAt(),
-		UpdatedAt: group.UpdatedAt(),
-		UserIDs:   group.UserIDs(),
-		EventIDs:  group.EventIDs(),
-	}
-	return &ngroup, nil
-}
-
-// AddEventToGroup is the resolver for the addEventToGroup field.
-func (r *mutationResolver) AddEventToGroup(ctx context.Context, groupID string, eventID string) (*model.Group, error) {
-	groupRepo := repo.NewGroupRepository(r.DB)
-	addEvent := usecase_group.NewAddEventToGroupUseCase(groupRepo)
-	DTO := usecase_group.AddEventToGroupUseCaseDto{
-		EventID: eventID,
-		GroupID: groupID,
-	}
-	group, err := addEvent.Run(ctx, DTO)
 	if err != nil {
 		return nil, err
 	}
@@ -245,11 +197,12 @@ func (r *mutationResolver) AcceptGroupInvitation(ctx context.Context, token stri
 }
 
 // CreateEvent is the resolver for the createEvent field.
-func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEventInput) (*model.Event, error) {
+func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEventInput, groupID string) (*model.Event, error) {
 	eventRepo := repo.NewEventRepository(r.DB)
 	create := usecase_event.NewEventUseCase(domain_event.NewEventDomainService(eventRepo))
-	DTO := usecase_event.AddEventUseCaseDTO{
+	AddEventUseCaseDTO := usecase_event.AddEventUseCaseDTO{
 		UsersID:     input.UserID,
+		ItemID:      input.ItemID,
 		Together:    input.Together,
 		Description: input.Description,
 		Year:        input.Year,
@@ -257,10 +210,22 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEv
 		Day:         input.Day,
 		Important:   input.Important,
 	}
-	event, err := create.Run(ctx, DTO)
+	event, err := create.Run(ctx, AddEventUseCaseDTO)
 	if err != nil {
 		return nil, err
 	}
+
+	groupRepo := repo.NewGroupRepository(r.DB)
+	addEvent := usecase_group.NewAddEventToGroupUseCase(groupRepo)
+	AddEventToGroupUseCaseDto := usecase_group.AddEventToGroupUseCaseDto{
+		EventID: event.ID(),
+		GroupID: groupID,
+	}
+	_, err = addEvent.Run(ctx, AddEventToGroupUseCaseDto)
+	if err != nil {
+		return nil, err
+	}
+
 	nevent := model.Event{
 		ID:          event.ID(),
 		UserID:      event.UserID(),
@@ -502,31 +467,44 @@ func (r *mutationResolver) Signin(ctx context.Context, email string, password st
 }
 
 // User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
 	userRepo := repo.NewUserRepository(r.DB)
 	find := usecase_user.NewFindUserUseCase(userRepo)
+	var user *usecase_user.FindUserUseCaseDto
+	var err error
 	//ctx から取った userID を使うことで 「なりすまし」を防ぐ
 	userID, ok := middleware.GetUserID(ctx)
 	if !ok {
-		fmt.Println("UserID:", userID)
-		return nil, errDomain.NewError("not authenticate")
+		// 本人じゃない時
+		user, err = find.Run(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		nuser := model.User{
+			ID:        user.ID,
+			LastName:  user.LastName,
+			FirstName: user.FirstName,
+		}
+		return &nuser, nil
+	} else {
+		// 本人の時
+		user, err = find.Run(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+		nuser := model.User{
+			ID:        user.ID,
+			LastName:  user.LastName,
+			FirstName: user.FirstName,
+			Email:     user.Email,
+			Password:  user.Password,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+			GroupIDs:  user.GroupIDs,
+			EventIDs:  user.EventIDs,
+		}
+		return &nuser, nil
 	}
-	user, err := find.Run(ctx, userID)
-	if err != nil {
-		return nil, err
-	}
-	nuser := model.User{
-		ID:        user.ID,
-		LastName:  user.LastName,
-		FirstName: user.FirstName,
-		Email:     user.Email,
-		Password:  user.Password,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		GroupIDs:  user.GroupIDs,
-		EventIDs:  user.EventIDs,
-	}
-	return &nuser, nil
 }
 
 // Group is the resolver for the group field.
@@ -546,6 +524,28 @@ func (r *queryResolver) Group(ctx context.Context, id string) (*model.Group, err
 		EventIDs:  group.EventIDs,
 	}
 	return &ngroup, nil
+}
+
+// GroupsByUserID is the resolver for the groupsByUserID field.
+func (r *queryResolver) GroupsByUserID(ctx context.Context, userID string) ([]*model.Group, error) {
+	groupRepo := repo.NewGroupRepository(r.DB)
+	find := usecase_group.NewFindGroupsByUserIDUseCase(groupRepo)
+	groups, err := find.Run(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*model.Group, len(groups))
+	for _, group := range groups {
+		result = append(result, &model.Group{
+			ID:        group.ID,
+			Name:      group.Name,
+			CreatedAt: group.CreatedAt,
+			UpdatedAt: group.UpdatedAt,
+			UserIDs:   group.UserIDs,
+			EventIDs:  group.EventIDs,
+		})
+	}
+	return result, nil
 }
 
 // Event is the resolver for the event field.
@@ -575,14 +575,59 @@ func (r *queryResolver) Event(ctx context.Context, id string) (*model.Event, err
 }
 
 // EventsByMonth is the resolver for the eventsByMonth field.
-func (r *queryResolver) EventsByMonth(ctx context.Context, input model.MonthlyEventInput) ([]string, error) {
+func (r *queryResolver) EventsByMonth(ctx context.Context, input model.MonthlyEventInput, groupID string) ([]*model.Event, error) {
 	eventRepo := repo.NewEventRepository(r.DB)
-	find := usecase_event.NewFindMonthEventUseCase(eventRepo)
-	events, err := find.Run(ctx, input.Year, input.Month)
+	find := usecase_event.NewFindMonthEventsOfGroupUseCase(eventRepo)
+	events, err := find.Run(ctx, input.Year, input.Month, groupID)
 	if err != nil {
 		return nil, err
 	}
-	return events.EventIDs, nil
+	result := make([]*model.Event, len(events))
+	for _, event := range result {
+		result = append(result, &model.Event{
+			ID:          event.ID,
+			UserID:      event.UserID,
+			Together:    event.Together,
+			Description: event.Description,
+			Year:        event.Year,
+			Month:       event.Month,
+			Day:         event.Day,
+			Date:        event.Date,
+			CreatedAt:   event.CreatedAt,
+			UpdatedAt:   event.UpdatedAt,
+			StartDate:   event.StartDate,
+			EndDate:     event.EndDate,
+			Important:   event.Important,
+		})
+	}
+
+	return result, nil
+}
+
+// EventsByDay is the resolver for the eventsByDay field.
+func (r *queryResolver) EventsByDay(ctx context.Context, input model.DailyEventInput, groupID string) (*model.Event, error) {
+	eventRepo := repo.NewEventRepository(r.DB)
+	find := usecase_event.NewFindDayEventOfGroupUseCase(eventRepo)
+	event, err := find.Run(ctx, input.Year, input.Month, input.Day, groupID)
+	if err != nil {
+		return nil, err
+	}
+	nevent := model.Event{
+		ID:          event.ID,
+		UserID:      event.UserID,
+		Together:    event.Together,
+		Description: event.Description,
+		Year:        event.Year,
+		Month:       event.Month,
+		Day:         event.Day,
+		Date:        event.Date,
+		CreatedAt:   event.CreatedAt,
+		UpdatedAt:   event.UpdatedAt,
+		StartDate:   event.StartDate,
+		EndDate:     event.EndDate,
+		Important:   event.Important,
+	}
+	return &nevent, nil
 }
 
 // Item is the resolver for the item field.

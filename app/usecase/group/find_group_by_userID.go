@@ -7,19 +7,19 @@ import (
 	groupDomain "github.com/onion0904/CarShareSystem/app/domain/group"
 )
 
-type FindGroupUseCase struct {
+type FindGroupsByUserIDUseCase struct {
 	groupRepo groupDomain.GroupRepository
 }
 
-func NewFindGroupUseCase(
+func NewFindGroupsByUserIDUseCase(
 	groupRepo groupDomain.GroupRepository,
-) *FindGroupUseCase {
-	return &FindGroupUseCase{
+) *FindGroupsByUserIDUseCase {
+	return &FindGroupsByUserIDUseCase{
 		groupRepo: groupRepo,
 	}
 }
 
-type FindGroupUseCaseDto struct {
+type FindGroupsByUserIDUseCaseDto struct {
 	ID        string
 	Name      string
 	UserIDs   []string
@@ -28,17 +28,21 @@ type FindGroupUseCaseDto struct {
 	UpdatedAt time.Time
 }
 
-func (uc *FindGroupUseCase) Run(ctx context.Context, groupID string) (*FindGroupUseCaseDto, error) {
-	group, err := uc.groupRepo.FindGroupByID(ctx, groupID)
+func (uc *FindGroupsByUserIDUseCase) Run(ctx context.Context, userID string) ([]*FindGroupsByUserIDUseCaseDto, error) {
+	groups, err := uc.groupRepo.FindGroupsByUserID(ctx,userID)
 	if err != nil {
 		return nil, err
 	}
-	return &FindGroupUseCaseDto{
+	result := make([]*FindGroupsByUserIDUseCaseDto,len(groups))
+	for _,group := range groups{
+		result = append(result, &FindGroupsByUserIDUseCaseDto{
 		ID:        group.ID(),
 		Name:      group.Name(),
 		UserIDs:   group.UserIDs(),
 		EventIDs:  group.EventIDs(),
 		CreatedAt: group.CreatedAt(),
 		UpdatedAt: group.UpdatedAt(),
-	}, nil
+	})}
+
+	return result, nil
 }

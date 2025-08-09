@@ -31,6 +31,7 @@ type Group {
 type Event {
   id: String!
   userID: String!
+  itemID: String!
   together: Boolean!
   description: String!
   year: Int!
@@ -63,14 +64,16 @@ type EventRules {
 # クエリの定義(データの取得のエンドポイント)
 type Query {
   # ユーザー関連
-  user: User! @isAuthenticated
+  user(id: String!): User! @isAuthenticated
 
   # グループ関連
   group(id: String!): Group! @isAuthenticated 
+  groupsByUserID(userID: String!): [Group!]! @isAuthenticated
 
   # イベント関連
   event(id: String!): Event! @isAuthenticated
-  eventsByMonth(input: MonthlyEventInput!): [String!]! @isAuthenticated
+  eventsByMonth(input: MonthlyEventInput!,groupID: String!): [Event!]! @isAuthenticated
+  eventsByDay(input: DailyEventInput!,groupID: String!): Event! @isAuthenticated
 
   # アイテム関連
   item(id: String!): Item! @isAuthenticated
@@ -93,8 +96,6 @@ input CreateUserInput {
 input UpdateUserInput {
   lastName: String
   firstName: String
-  email: String
-  password: String
 }
 
 input CreateGroupInput {
@@ -107,7 +108,8 @@ input UpdateGroupInput {
 }
 
 input CreateEventInput {
-  userId: String!
+  userID: String!
+  itemID: String!
   together: Boolean!
   description: String!
   year: Int!
@@ -119,6 +121,12 @@ input CreateEventInput {
 input MonthlyEventInput {
   year: Int!
   month: Int!
+}
+
+input DailyEventInput {
+  year: Int!
+  month: Int!
+  day: Int!
 }
 
 input CreateItemInput {
@@ -152,9 +160,7 @@ type Mutation {
   createGroup(input: CreateGroupInput!): Group! @isAuthenticated
   updateGroup(id: String!, input: UpdateGroupInput!): Group! @isAuthenticated
   deleteGroup(id: String!): Boolean! @isAuthenticated
-  addUserToGroup(groupID: String!, userID: String!): Group! @isAuthenticated
   removeUserFromGroup(groupID: String!, userID: String!): Group! @isAuthenticated
-  addEventToGroup(groupID: String!, eventID: String!): Group! @isAuthenticated
 
   # グループ招待
   """招待リンクを生成します"""
@@ -167,7 +173,7 @@ type Mutation {
   acceptGroupInvitation(token: String!): Group! @isAuthenticated
 
   # イベント関連
-  createEvent(input: CreateEventInput!): Event! @isAuthenticated
+  createEvent(input: CreateEventInput!, groupID: String!): Event! @isAuthenticated
   deleteEvent(id: String!): Boolean! @isAuthenticated
 
   # アイテム関連

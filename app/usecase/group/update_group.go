@@ -25,7 +25,7 @@ type UpdateUseCaseDto struct {
 
 func (uc *UpdateUseCase) Run(ctx context.Context, groupID string, dto UpdateUseCaseDto) (*groupDomain.Group, error) {
 	// dtoからuserへ変換
-	group, err := uc.groupRepo.FindGroup(ctx, groupID)
+	group, err := uc.groupRepo.FindGroupByID(ctx, groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -37,5 +37,5 @@ func (uc *UpdateUseCase) Run(ctx context.Context, groupID string, dto UpdateUseC
 	if err != nil {
 		return nil, err
 	}
-	return uc.groupRepo.FindGroup(ctx, ngroup.ID())
+	return uc.groupRepo.FindGroupByID(ctx, ngroup.ID())
 }

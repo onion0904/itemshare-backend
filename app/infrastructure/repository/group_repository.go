@@ -56,7 +56,7 @@ func (gr *groupRepository) Delete(ctx context.Context, groupID string) error {
 	return nil
 }
 
-func (gr *groupRepository) FindGroup(ctx context.Context, groupID string) (*group.Group, error) {
+func (gr *groupRepository) FindGroupByID(ctx context.Context, groupID string) (*group.Group, error) {
 	DB := db.GetDB()
 	tx, err := DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -105,6 +105,64 @@ func (gr *groupRepository) FindGroup(ctx context.Context, groupID string) (*grou
 	}
 
 	return ng, nil
+}
+
+func (gr *groupRepository) FindGroupsByUserID(ctx context.Context, userID string) ([]*group.Group, error) {
+	DB := db.GetDB()
+	tx, err := DB.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err := tx.Rollback(); err != nil && err != sql.ErrTxDone {
+			log.Printf("rollback failed: %v", err)
+		}
+	}()
+
+	query := db.GetQuery(ctx).WithTx(tx)
+
+	groups, err := query.FindGroupsByUserID(ctx,userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errDomain.NewError("Group not found")
+		}
+		return nil, err
+	}
+
+	result := make([]*group.Group,len(groups))
+
+	for _,g := range groups{
+		userIDs, err := query.GetUserIDsByGroupID(ctx, g.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		eventIDs, err := query.GetEventIDsByGroupID(ctx, g.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		ng, err := group.Reconstruct(
+			g.ID,
+			g.Name,
+			userIDs,
+			eventIDs,
+		)
+		if err != nil {
+			return nil, err
+		}
+		ng.SetCreatedAt(g.CreatedAt)
+		ng.SetUpdatedAt(g.UpdatedAt)
+
+		result = append(result, ng)
+	}
+	
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (gr *groupRepository) AddUserToGroup(ctx context.Context, groupID string, userID string) error {

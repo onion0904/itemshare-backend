@@ -2,6 +2,7 @@
 INSERT INTO events (
     id,
     user_id,
+    item_id,
     together,
     description,
     year,
@@ -17,6 +18,7 @@ INSERT INTO events (
 VALUES (
     sqlc.arg(id),
     sqlc.arg(user_id),
+    sqlc.arg(item_id),
     sqlc.arg(together),
     sqlc.arg(description),
     sqlc.arg(year),
@@ -32,6 +34,7 @@ VALUES (
 ON CONFLICT (id) DO UPDATE
 SET
     user_id     = EXCLUDED.user_id,
+    item_id     = EXCLUDED.item_id,
     together    = EXCLUDED.together,
     description = EXCLUDED.description,
     year        = EXCLUDED.year,
@@ -53,15 +56,28 @@ SELECT *
 FROM events
 WHERE id = sqlc.arg(eventID);
 
--- name: FindDayOfEvent :one
+-- name: FindDayEvents :many
 SELECT *
 FROM events
 WHERE year  = sqlc.arg(year)
     AND month = sqlc.arg(month)
     AND day = sqlc.arg(day);
 
--- name: FindMonthEventIDs :many
-SELECT id
-FROM events
-WHERE year  = sqlc.arg(year)
-    AND month = sqlc.arg(month);
+-- name: FindMonthEvents :many
+SELECT e.*
+FROM events e
+INNER JOIN group_events ge
+ON e.id = ge.event_id
+WHERE e.year = sqlc.arg(year)
+    AND e.month = sqlc.arg(month)
+    And ge.group_id = sqlc.arg(groupID);
+
+-- name: FindDayEvent :one
+SELECT e.*
+FROM events e
+INNER JOIN group_events ge
+ON e.id = ge.event_id
+WHERE e.year = sqlc.arg(year)
+    AND e.month = sqlc.arg(month)
+    AND e.day = sqlc.arg(day)
+    And ge.group_id = sqlc.arg(groupID);

@@ -12,7 +12,8 @@ type AuthUserResponse struct {
 }
 
 type CreateEventInput struct {
-	UserID      string `json:"userId"`
+	UserID      string `json:"userID"`
+	ItemID      string `json:"itemID"`
 	Together    bool   `json:"together"`
 	Description string `json:"description"`
 	Year        int32  `json:"year"`
@@ -38,9 +39,16 @@ type CreateUserInput struct {
 	Password  string `json:"password"`
 }
 
+type DailyEventInput struct {
+	Year  int32 `json:"year"`
+	Month int32 `json:"month"`
+	Day   int32 `json:"day"`
+}
+
 type Event struct {
 	ID          string    `json:"id"`
 	UserID      string    `json:"userID"`
+	ItemID      string    `json:"itemID"`
 	Together    bool      `json:"together"`
 	Description string    `json:"description"`
 	Year        int32     `json:"year"`
@@ -94,8 +102,6 @@ type UpdateGroupInput struct {
 type UpdateUserInput struct {
 	LastName  *string `json:"lastName,omitempty"`
 	FirstName *string `json:"firstName,omitempty"`
-	Email     *string `json:"email,omitempty"`
-	Password  *string `json:"password,omitempty"`
 }
 
 type UpsertEventRuleInput struct {
