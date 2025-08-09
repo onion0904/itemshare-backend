@@ -1,5 +1,3 @@
-userIDからgroup[]を取得
-
 addUserToGroupをusecaseにする
 acceptGroupInvitationとaddUserToGroupをつなげる
 

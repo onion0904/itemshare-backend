@@ -123,29 +123,6 @@ func (r *mutationResolver) DeleteGroup(ctx context.Context, id string) (bool, er
 	return true, nil
 }
 
-// AddUserToGroup is the resolver for the addUserToGroup field.
-func (r *mutationResolver) AddUserToGroup(ctx context.Context, groupID string, userID string) (*model.Group, error) {
-	groupRepo := repo.NewGroupRepository(r.DB)
-	addUser := usecase_group.NewAddUserToGroupUseCase(groupRepo)
-	DTO := usecase_group.AddUserToGroupUseCaseDto{
-		UserID:  userID,
-		GroupID: groupID,
-	}
-	group, err := addUser.Run(ctx, DTO)
-	if err != nil {
-		return nil, err
-	}
-	ngroup := model.Group{
-		ID:        group.ID(),
-		Name:      group.Name(),
-		CreatedAt: group.CreatedAt(),
-		UpdatedAt: group.UpdatedAt(),
-		UserIDs:   group.UserIDs(),
-		EventIDs:  group.EventIDs(),
-	}
-	return &ngroup, nil
-}
-
 // RemoveUserFromGroup is the resolver for the removeUserFromGroup field.
 func (r *mutationResolver) RemoveUserFromGroup(ctx context.Context, groupID string, userID string) (*model.Group, error) {
 	groupRepo := repo.NewGroupRepository(r.DB)
@@ -567,16 +544,17 @@ func (r *queryResolver) GroupsByUserID(ctx context.Context, userID string) ([]*m
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*model.Group,len(groups))
-	for _,group := range groups{
+	result := make([]*model.Group, len(groups))
+	for _, group := range groups {
 		result = append(result, &model.Group{
-		ID:        group.ID,
-		Name:      group.Name,
-		CreatedAt: group.CreatedAt,
-		UpdatedAt: group.UpdatedAt,
-		UserIDs:   group.UserIDs,
-		EventIDs:  group.EventIDs,
-	})}
+			ID:        group.ID,
+			Name:      group.Name,
+			CreatedAt: group.CreatedAt,
+			UpdatedAt: group.UpdatedAt,
+			UserIDs:   group.UserIDs,
+			EventIDs:  group.EventIDs,
+		})
+	}
 	return result, nil
 }
 

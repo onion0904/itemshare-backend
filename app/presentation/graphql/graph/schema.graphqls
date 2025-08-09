@@ -151,7 +151,6 @@ type Mutation {
   createGroup(input: CreateGroupInput!): Group! @isAuthenticated
   updateGroup(id: String!, input: UpdateGroupInput!): Group! @isAuthenticated
   deleteGroup(id: String!): Boolean! @isAuthenticated
-  addUserToGroup(groupID: String!, userID: String!): Group! @isAuthenticated
   removeUserFromGroup(groupID: String!, userID: String!): Group! @isAuthenticated
   addEventToGroup(groupID: String!, eventID: String!): Group! @isAuthenticated
 
