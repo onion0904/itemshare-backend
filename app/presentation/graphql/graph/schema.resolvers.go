@@ -147,7 +147,7 @@ func (r *mutationResolver) RemoveUserFromGroup(ctx context.Context, groupID stri
 }
 
 // AddEventToGroup is the resolver for the addEventToGroup field.
-func (r *mutationResolver) AddEventToGroup(ctx context.Context, groupID string, eventID string) (*model.Group, error) {
+func (r *mutationResolver) AddEventToGroup(ctx context.Context, groupID, eventID string) (*model.Group, error) {
 	groupRepo := repo.NewGroupRepository(r.DB)
 	addEvent := usecase_group.NewAddEventToGroupUseCase(groupRepo)
 	DTO := usecase_group.AddEventToGroupUseCaseDto{
@@ -220,10 +220,10 @@ func (r *mutationResolver) AcceptGroupInvitation(ctx context.Context, token stri
 }
 
 // CreateEvent is the resolver for the createEvent field.
-func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEventInput) (*model.Event, error) {
+func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEventInput, groupID string) (*model.Event, error) {
 	eventRepo := repo.NewEventRepository(r.DB)
 	create := usecase_event.NewEventUseCase(domain_event.NewEventDomainService(eventRepo))
-	DTO := usecase_event.AddEventUseCaseDTO{
+	AddEventUseCaseDTO := usecase_event.AddEventUseCaseDTO{
 		UsersID:     input.UserID,
 		Together:    input.Together,
 		Description: input.Description,
@@ -232,10 +232,22 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEv
 		Day:         input.Day,
 		Important:   input.Important,
 	}
-	event, err := create.Run(ctx, DTO)
+	event, err := create.Run(ctx, AddEventUseCaseDTO)
 	if err != nil {
 		return nil, err
 	}
+
+	groupRepo := repo.NewGroupRepository(r.DB)
+	addEvent := usecase_group.NewAddEventToGroupUseCase(groupRepo)
+	AddEventToGroupUseCaseDto := usecase_group.AddEventToGroupUseCaseDto{
+		EventID: event.ID(),
+		GroupID: groupID,
+	}
+	_, err = addEvent.Run(ctx, AddEventToGroupUseCaseDto)
+	if err != nil {
+		return nil, err
+	}
+	
 	nevent := model.Event{
 		ID:          event.ID(),
 		UserID:      event.UserID(),

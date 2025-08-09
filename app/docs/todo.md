@@ -1,6 +1,3 @@
-addUserToGroupをusecaseにする
-acceptGroupInvitationとaddUserToGroupをつなげる
-
 groupIDとyearとmonthでその月のeventを取得
 
 groupIDとyear,month,dayでeventを取得

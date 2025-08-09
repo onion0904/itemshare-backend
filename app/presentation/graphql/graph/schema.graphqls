@@ -152,7 +152,6 @@ type Mutation {
   updateGroup(id: String!, input: UpdateGroupInput!): Group! @isAuthenticated
   deleteGroup(id: String!): Boolean! @isAuthenticated
   removeUserFromGroup(groupID: String!, userID: String!): Group! @isAuthenticated
-  addEventToGroup(groupID: String!, eventID: String!): Group! @isAuthenticated
 
   # グループ招待
   """招待リンクを生成します"""
