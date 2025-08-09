@@ -574,14 +574,59 @@ func (r *queryResolver) Event(ctx context.Context, id string) (*model.Event, err
 }
 
 // EventsByMonth is the resolver for the eventsByMonth field.
-func (r *queryResolver) EventsByMonth(ctx context.Context, input model.MonthlyEventInput) ([]string, error) {
+func (r *queryResolver) EventsByMonth(ctx context.Context, input model.MonthlyEventInput, groupID string) ([]*model.Event, error) {
 	eventRepo := repo.NewEventRepository(r.DB)
-	find := usecase_event.NewFindMonthEventUseCase(eventRepo)
-	events, err := find.Run(ctx, input.Year, input.Month)
+	find := usecase_event.NewFindMonthEventsOfGroupUseCase(eventRepo)
+	events, err := find.Run(ctx, input.Year,input.Month,groupID)
 	if err != nil {
 		return nil, err
 	}
-	return events.EventIDs, nil
+	result := make([]*model.Event,len(events))
+	for _,event := range result{
+		result = append(result, &model.Event{
+			ID:          event.ID,
+			UserID:      event.UserID,
+			Together:    event.Together,
+			Description: event.Description,
+			Year:        event.Year,
+			Month:       event.Month,
+			Day:         event.Day,
+			Date:        event.Date,
+			CreatedAt:   event.CreatedAt,
+			UpdatedAt:   event.UpdatedAt,
+			StartDate:   event.StartDate,
+			EndDate:     event.EndDate,
+			Important:   event.Important,
+		})	
+	}
+
+	return result, nil
+}
+
+// EventsByDay is the resolver for the eventsByDay field.
+func (r *queryResolver) EventsByDay(ctx context.Context, input model.DailyEventInput, groupID string) (*model.Event, error) {
+	eventRepo := repo.NewEventRepository(r.DB)
+	find := usecase_event.NewFindDayEventOfGroupUseCase(eventRepo)
+	event, err := find.Run(ctx, input.Year, input.Month, input.Day, groupID)
+	if err != nil {
+		return nil, err
+	}
+	nevent := model.Event{
+		ID:          event.ID,
+		UserID:      event.UserID,
+		Together:    event.Together,
+		Description: event.Description,
+		Year:        event.Year,
+		Month:       event.Month,
+		Day:         event.Day,
+		Date:        event.Date,
+		CreatedAt:   event.CreatedAt,
+		UpdatedAt:   event.UpdatedAt,
+		StartDate:   event.StartDate,
+		EndDate:     event.EndDate,
+		Important:   event.Important,
+	}
+	return &nevent, nil
 }
 
 // Item is the resolver for the item field.

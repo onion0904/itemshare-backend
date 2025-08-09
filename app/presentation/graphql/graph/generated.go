@@ -114,7 +114,8 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Event          func(childComplexity int, id string) int
-		EventsByMonth  func(childComplexity int, input model.MonthlyEventInput) int
+		EventsByDay    func(childComplexity int, input model.DailyEventInput, groupID string) int
+		EventsByMonth  func(childComplexity int, input model.MonthlyEventInput, groupID string) int
 		Group          func(childComplexity int, id string) int
 		GroupsByUserID func(childComplexity int, userID string) int
 		Item           func(childComplexity int, id string) int
@@ -159,7 +160,8 @@ type QueryResolver interface {
 	Group(ctx context.Context, id string) (*model.Group, error)
 	GroupsByUserID(ctx context.Context, userID string) ([]*model.Group, error)
 	Event(ctx context.Context, id string) (*model.Event, error)
-	EventsByMonth(ctx context.Context, input model.MonthlyEventInput) ([]string, error)
+	EventsByMonth(ctx context.Context, input model.MonthlyEventInput, groupID string) ([]*model.Event, error)
+	EventsByDay(ctx context.Context, input model.DailyEventInput, groupID string) (*model.Event, error)
 	Item(ctx context.Context, id string) (*model.Item, error)
 	ItemsBygroupID(ctx context.Context, groupID string) ([]*model.Item, error)
 }
@@ -590,6 +592,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Event(childComplexity, args["id"].(string)), true
 
+	case "Query.eventsByDay":
+		if e.complexity.Query.EventsByDay == nil {
+			break
+		}
+
+		args, err := ec.field_Query_eventsByDay_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.EventsByDay(childComplexity, args["input"].(model.DailyEventInput), args["groupID"].(string)), true
+
 	case "Query.eventsByMonth":
 		if e.complexity.Query.EventsByMonth == nil {
 			break
@@ -600,7 +614,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.EventsByMonth(childComplexity, args["input"].(model.MonthlyEventInput)), true
+		return e.complexity.Query.EventsByMonth(childComplexity, args["input"].(model.MonthlyEventInput), args["groupID"].(string)), true
 
 	case "Query.group":
 		if e.complexity.Query.Group == nil {
@@ -737,6 +751,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateGroupInput,
 		ec.unmarshalInputCreateItemInput,
 		ec.unmarshalInputCreateUserInput,
+		ec.unmarshalInputDailyEventInput,
 		ec.unmarshalInputMonthlyEventInput,
 		ec.unmarshalInputUpdateGroupInput,
 		ec.unmarshalInputUpdateUserInput,
@@ -1361,6 +1376,47 @@ func (ec *executionContext) field_Query_event_argsID(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Query_eventsByDay_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Query_eventsByDay_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	arg1, err := ec.field_Query_eventsByDay_argsGroupID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["groupID"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Query_eventsByDay_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (model.DailyEventInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNDailyEventInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐDailyEventInput(ctx, tmp)
+	}
+
+	var zeroVal model.DailyEventInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_eventsByDay_argsGroupID(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("groupID"))
+	if tmp, ok := rawArgs["groupID"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Query_eventsByMonth_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1369,6 +1425,11 @@ func (ec *executionContext) field_Query_eventsByMonth_args(ctx context.Context, 
 		return nil, err
 	}
 	args["input"] = arg0
+	arg1, err := ec.field_Query_eventsByMonth_argsGroupID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["groupID"] = arg1
 	return args, nil
 }
 func (ec *executionContext) field_Query_eventsByMonth_argsInput(
@@ -1381,6 +1442,19 @@ func (ec *executionContext) field_Query_eventsByMonth_argsInput(
 	}
 
 	var zeroVal model.MonthlyEventInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_eventsByMonth_argsGroupID(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("groupID"))
+	if tmp, ok := rawArgs["groupID"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
 	return zeroVal, nil
 }
 
@@ -4606,12 +4680,12 @@ func (ec *executionContext) _Query_eventsByMonth(ctx context.Context, field grap
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		directive0 := func(rctx context.Context) (any, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().EventsByMonth(rctx, fc.Args["input"].(model.MonthlyEventInput))
+			return ec.resolvers.Query().EventsByMonth(rctx, fc.Args["input"].(model.MonthlyEventInput), fc.Args["groupID"].(string))
 		}
 
 		directive1 := func(ctx context.Context) (any, error) {
 			if ec.directives.IsAuthenticated == nil {
-				var zeroVal []string
+				var zeroVal []*model.Event
 				return zeroVal, errors.New("directive isAuthenticated is not implemented")
 			}
 			return ec.directives.IsAuthenticated(ctx, nil, directive0)
@@ -4624,10 +4698,10 @@ func (ec *executionContext) _Query_eventsByMonth(ctx context.Context, field grap
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]string); ok {
+		if data, ok := tmp.([]*model.Event); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []string`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.Event`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4639,9 +4713,9 @@ func (ec *executionContext) _Query_eventsByMonth(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]string)
+	res := resTmp.([]*model.Event)
 	fc.Result = res
-	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚕᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEventᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_eventsByMonth(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4651,7 +4725,35 @@ func (ec *executionContext) fieldContext_Query_eventsByMonth(ctx context.Context
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Event_id(ctx, field)
+			case "userID":
+				return ec.fieldContext_Event_userID(ctx, field)
+			case "together":
+				return ec.fieldContext_Event_together(ctx, field)
+			case "description":
+				return ec.fieldContext_Event_description(ctx, field)
+			case "year":
+				return ec.fieldContext_Event_year(ctx, field)
+			case "month":
+				return ec.fieldContext_Event_month(ctx, field)
+			case "day":
+				return ec.fieldContext_Event_day(ctx, field)
+			case "date":
+				return ec.fieldContext_Event_date(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Event_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Event_updatedAt(ctx, field)
+			case "startDate":
+				return ec.fieldContext_Event_startDate(ctx, field)
+			case "endDate":
+				return ec.fieldContext_Event_endDate(ctx, field)
+			case "important":
+				return ec.fieldContext_Event_important(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
 	}
 	defer func() {
@@ -4662,6 +4764,111 @@ func (ec *executionContext) fieldContext_Query_eventsByMonth(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_eventsByMonth_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_eventsByDay(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_eventsByDay(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		directive0 := func(rctx context.Context) (any, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().EventsByDay(rctx, fc.Args["input"].(model.DailyEventInput), fc.Args["groupID"].(string))
+		}
+
+		directive1 := func(ctx context.Context) (any, error) {
+			if ec.directives.IsAuthenticated == nil {
+				var zeroVal *model.Event
+				return zeroVal, errors.New("directive isAuthenticated is not implemented")
+			}
+			return ec.directives.IsAuthenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.Event); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.Event`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Event)
+	fc.Result = res
+	return ec.marshalNEvent2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEvent(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_eventsByDay(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Event_id(ctx, field)
+			case "userID":
+				return ec.fieldContext_Event_userID(ctx, field)
+			case "together":
+				return ec.fieldContext_Event_together(ctx, field)
+			case "description":
+				return ec.fieldContext_Event_description(ctx, field)
+			case "year":
+				return ec.fieldContext_Event_year(ctx, field)
+			case "month":
+				return ec.fieldContext_Event_month(ctx, field)
+			case "day":
+				return ec.fieldContext_Event_day(ctx, field)
+			case "date":
+				return ec.fieldContext_Event_date(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Event_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Event_updatedAt(ctx, field)
+			case "startDate":
+				return ec.fieldContext_Event_startDate(ctx, field)
+			case "endDate":
+				return ec.fieldContext_Event_endDate(ctx, field)
+			case "important":
+				return ec.fieldContext_Event_important(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_eventsByDay_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -7501,6 +7708,47 @@ func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputDailyEventInput(ctx context.Context, obj any) (model.DailyEventInput, error) {
+	var it model.DailyEventInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"year", "month", "day"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "year":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("year"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Year = data
+		case "month":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("month"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Month = data
+		case "day":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("day"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Day = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputMonthlyEventInput(ctx context.Context, obj any) (model.MonthlyEventInput, error) {
 	var it model.MonthlyEventInput
 	asMap := map[string]any{}
@@ -8252,6 +8500,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "eventsByDay":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_eventsByDay(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "item":
 			field := field
 
@@ -8790,6 +9060,11 @@ func (ec *executionContext) unmarshalNCreateUserInput2githubᚗcomᚋonion0904�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNDailyEventInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐDailyEventInput(ctx context.Context, v any) (model.DailyEventInput, error) {
+	res, err := ec.unmarshalInputDailyEventInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNDateTime2timeᚐTime(ctx context.Context, v any) (time.Time, error) {
 	res, err := graphql.UnmarshalTime(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -8807,6 +9082,50 @@ func (ec *executionContext) marshalNDateTime2timeᚐTime(ctx context.Context, se
 
 func (ec *executionContext) marshalNEvent2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEvent(ctx context.Context, sel ast.SelectionSet, v model.Event) graphql.Marshaler {
 	return ec._Event(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEvent2ᚕᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEventᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Event) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNEvent2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEvent(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEvent(ctx context.Context, sel ast.SelectionSet, v *model.Event) graphql.Marshaler {

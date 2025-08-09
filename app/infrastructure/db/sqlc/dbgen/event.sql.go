@@ -20,22 +20,31 @@ func (q *Queries) DeleteEvent(ctx context.Context, eventid string) error {
 	return err
 }
 
-const findDayOfEvent = `-- name: FindDayOfEvent :one
-SELECT id, user_id, item_id, together, description, year, month, day, date, start_date, end_date, important, created_at, updated_at
-FROM events
-WHERE year  = $1
-    AND month = $2
-    AND day = $3
+const findDayEvent = `-- name: FindDayEvent :one
+SELECT e.id, e.user_id, e.item_id, e.together, e.description, e.year, e.month, e.day, e.date, e.start_date, e.end_date, e.important, e.created_at, e.updated_at
+FROM events e
+INNER JOIN group_events ge
+ON e.id = ge.event_id
+WHERE e.year = $1
+    AND e.month = $2
+    AND e.day = $3
+    And ge.group_id = $4
 `
 
-type FindDayOfEventParams struct {
-	Year  int32
-	Month int32
-	Day   int32
+type FindDayEventParams struct {
+	Year    int32
+	Month   int32
+	Day     int32
+	Groupid string
 }
 
-func (q *Queries) FindDayOfEvent(ctx context.Context, arg FindDayOfEventParams) (Event, error) {
-	row := q.db.QueryRowContext(ctx, findDayOfEvent, arg.Year, arg.Month, arg.Day)
+func (q *Queries) FindDayEvent(ctx context.Context, arg FindDayEventParams) (Event, error) {
+	row := q.db.QueryRowContext(ctx, findDayEvent,
+		arg.Year,
+		arg.Month,
+		arg.Day,
+		arg.Groupid,
+	)
 	var i Event
 	err := row.Scan(
 		&i.ID,
@@ -54,6 +63,58 @@ func (q *Queries) FindDayOfEvent(ctx context.Context, arg FindDayOfEventParams) 
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const findDayEvents = `-- name: FindDayEvents :many
+SELECT id, user_id, item_id, together, description, year, month, day, date, start_date, end_date, important, created_at, updated_at
+FROM events
+WHERE year  = $1
+    AND month = $2
+    AND day = $3
+`
+
+type FindDayEventsParams struct {
+	Year  int32
+	Month int32
+	Day   int32
+}
+
+func (q *Queries) FindDayEvents(ctx context.Context, arg FindDayEventsParams) ([]Event, error) {
+	rows, err := q.db.QueryContext(ctx, findDayEvents, arg.Year, arg.Month, arg.Day)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Event
+	for rows.Next() {
+		var i Event
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.ItemID,
+			&i.Together,
+			&i.Description,
+			&i.Year,
+			&i.Month,
+			&i.Day,
+			&i.Date,
+			&i.StartDate,
+			&i.EndDate,
+			&i.Important,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const findEvent = `-- name: FindEvent :one
@@ -84,31 +145,50 @@ func (q *Queries) FindEvent(ctx context.Context, eventid string) (Event, error) 
 	return i, err
 }
 
-const findMonthEventIDs = `-- name: FindMonthEventIDs :many
-SELECT id
-FROM events
-WHERE year  = $1
-    AND month = $2
+const findMonthEvents = `-- name: FindMonthEvents :many
+SELECT e.id, e.user_id, e.item_id, e.together, e.description, e.year, e.month, e.day, e.date, e.start_date, e.end_date, e.important, e.created_at, e.updated_at
+FROM events e
+INNER JOIN group_events ge
+ON e.id = ge.event_id
+WHERE e.year = $1
+    AND e.month = $2
+    And ge.group_id = $3
 `
 
-type FindMonthEventIDsParams struct {
-	Year  int32
-	Month int32
+type FindMonthEventsParams struct {
+	Year    int32
+	Month   int32
+	Groupid string
 }
 
-func (q *Queries) FindMonthEventIDs(ctx context.Context, arg FindMonthEventIDsParams) ([]string, error) {
-	rows, err := q.db.QueryContext(ctx, findMonthEventIDs, arg.Year, arg.Month)
+func (q *Queries) FindMonthEvents(ctx context.Context, arg FindMonthEventsParams) ([]Event, error) {
+	rows, err := q.db.QueryContext(ctx, findMonthEvents, arg.Year, arg.Month, arg.Groupid)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []string
+	var items []Event
 	for rows.Next() {
-		var id string
-		if err := rows.Scan(&id); err != nil {
+		var i Event
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.ItemID,
+			&i.Together,
+			&i.Description,
+			&i.Year,
+			&i.Month,
+			&i.Day,
+			&i.Date,
+			&i.StartDate,
+			&i.EndDate,
+			&i.Important,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
 			return nil, err
 		}
-		items = append(items, id)
+		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err

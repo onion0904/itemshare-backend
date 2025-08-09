@@ -8,6 +8,7 @@ type EventRepository interface {
 	//以下はEventDomainService経由でなくてOKです
 	DeleteEvent(ctx context.Context, eventID string) error
 	FindEvent(ctx context.Context, eventID string) (*Event, error)
-	FindDayOfEvent(ctx context.Context, year, month, day int32) (*Event, error)
-	FindMonthEventIDs(ctx context.Context, year, month int32) (eventID []string, err error)
+	FindDayEvents(ctx context.Context, year, month, day int32) ([]*Event, error)
+	FindDayEventOfGroup(ctx context.Context, year, month, day int32, groupID string) (*Event, error)
+	FindMonthEventsOfGroup(ctx context.Context, year, month int32, groupID string) ([]*Event, error)
 }

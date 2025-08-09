@@ -28,11 +28,19 @@ func (c *EventDomainService) SaveEventService(ctx context.Context, event *Event)
 	// 今週に登録してる予約数を確認
 
 	// イベントの被りの制約を確認(引数にitemIDを追加)
-	oldEvent, _ := c.EventRepo.FindDayOfEvent(ctx, event.year, event.month, event.day)
-	if oldEvent != nil {
-		err := c.validSetableEvents(ctx, oldEvent, event)
-		if err != nil {
-			return err
+	oldEvents, _ := c.EventRepo.FindDayEvents(ctx, event.year, event.month, event.day)
+	if len(oldEvents) != 0 {
+		for _,oe := range oldEvents{
+			// Itemが被ってないかの確認(Todo)
+			err := c.validIsSameItemEvents(ctx, oe, event)
+			if err != nil {
+				return err
+			}
+			// 重要か普通の制約を確認
+			err = c.validImportantOrNormal(ctx, oe, event)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -45,7 +53,7 @@ func (c *EventDomainService) SaveEventService(ctx context.Context, event *Event)
 }
 
 // eventが被ったとき早い者勝ちにする。eventが被り、片方がimportantをtrueにしている場合はimportantの方を登録。両方importantのときは早い者勝ち。
-func (c *EventDomainService) validSetableEvents(ctx context.Context, oldEvent, newEvent *Event) error {
+func (c *EventDomainService) validImportantOrNormal(ctx context.Context, oldEvent, newEvent *Event) error {
 	if oldEvent.important && newEvent.important {
 		return errors.New("すでに重要なイベントが登録されています。")
 	} else if !oldEvent.important && !newEvent.important {

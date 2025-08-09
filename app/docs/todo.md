@@ -1,4 +1,4 @@
-groupIDとyearとmonthでその月のeventを取得
+groupIDとyearとmonthでその月のeventsを取得
 
 groupIDとyear,month,dayでeventを取得
 

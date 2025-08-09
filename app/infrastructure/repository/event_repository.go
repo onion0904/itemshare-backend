@@ -81,20 +81,61 @@ func (er *eventRepository) FindEvent(ctx context.Context, eventID string) (*even
 	return ne, nil
 }
 
-func (er *eventRepository) FindDayOfEvent(ctx context.Context, year, month, day int32) (*event.Event, error) {
+func (er *eventRepository) FindDayEvents(ctx context.Context, year, month, day int32) ([]*event.Event, error) {
 	query := db.GetQuery(ctx)
 
-	InputFindDayOfEventParams := dbgen.FindDayOfEventParams{
+	InputFindDayOfEventParams := dbgen.FindDayEventsParams{
 		Year:  year,
 		Month: month,
 		Day:   day,
 	}
-	e, err := query.FindDayOfEvent(ctx, InputFindDayOfEventParams)
+	events, err := query.FindDayEvents(ctx, InputFindDayOfEventParams)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, nil
+	}
+
+	result := make([]*event.Event,len(events)) 
+	for _,e := range events{
+		ne, err := event.Reconstruct(
+			e.ID,
+			e.UserID,
+			e.Together,
+			e.Description,
+			e.Year,
+			e.Month,
+			e.Day,
+			e.Date,
+			e.StartDate,
+			e.EndDate,
+			e.Important,
+		)
+		
+		if err != nil {
+			return nil, err
+		}
+		ne.SetCreatedAt(e.CreatedAt)
+		ne.SetUpdatedAt(e.UpdatedAt)
+
+		result = append(result, ne)
+	}
+	
+	return result, nil
+}
+
+func (er *eventRepository) FindDayEventOfGroup(ctx context.Context, year, month, day int32, groupID string) (*event.Event, error){
+	query := db.GetQuery(ctx)
+
+	e, err := query.FindDayEvent(ctx,dbgen.FindDayEventParams{
+		Year: year,
+		Month: month,
+		Day: day,
+		Groupid: groupID,
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	ne, err := event.Reconstruct(
@@ -110,23 +151,51 @@ func (er *eventRepository) FindDayOfEvent(ctx context.Context, year, month, day 
 		e.EndDate,
 		e.Important,
 	)
+	
 	if err != nil {
 		return nil, err
 	}
 	ne.SetCreatedAt(e.CreatedAt)
 	ne.SetUpdatedAt(e.UpdatedAt)
-	return ne, nil
-}
 
-func (er *eventRepository) FindMonthEventIDs(ctx context.Context, year int32, month int32) ([]string, error) {
+	return ne,err
+}
+	
+
+func (er *eventRepository) FindMonthEventsOfGroup(ctx context.Context, year, month int32, groupID string) ([]*event.Event, error) {
 	query := db.GetQuery(ctx)
 
-	eventIDs, err := query.FindMonthEventIDs(ctx, dbgen.FindMonthEventIDsParams{
-		Year:  year,
+	events, err := query.FindMonthEvents(ctx,dbgen.FindMonthEventsParams{
+		Year: year,
 		Month: month,
+		Groupid: groupID,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return eventIDs, nil
+	result := make([]*event.Event,len(events)) 
+	for _,e := range events{
+		ne, err := event.Reconstruct(
+			e.ID,
+			e.UserID,
+			e.Together,
+			e.Description,
+			e.Year,
+			e.Month,
+			e.Day,
+			e.Date,
+			e.StartDate,
+			e.EndDate,
+			e.Important,
+		)
+		
+		if err != nil {
+			return nil, err
+		}
+		ne.SetCreatedAt(e.CreatedAt)
+		ne.SetUpdatedAt(e.UpdatedAt)
+
+		result = append(result, ne)
+	}
+	return result, nil
 }

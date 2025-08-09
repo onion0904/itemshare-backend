@@ -38,6 +38,12 @@ type CreateUserInput struct {
 	Password  string `json:"password"`
 }
 
+type DailyEventInput struct {
+	Year  int32 `json:"year"`
+	Month int32 `json:"month"`
+	Day   int32 `json:"day"`
+}
+
 type Event struct {
 	ID          string    `json:"id"`
 	UserID      string    `json:"userID"`
