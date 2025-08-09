@@ -1,0 +1,13 @@
+userIDからgroup[]を取得
+
+addUserToGroupをusecaseにする
+acceptGroupInvitationとaddUserToGroupをつなげる
+
+groupIDとyearとmonthでその月のeventを取得
+
+groupIDとyear,month,dayでeventを取得
+
+createEventにItemIDを含める(予約の日に同じアイテムがあったらエラー)
+
+addEventGroupをusecaseにする
+createEventとaddEventGroupをつなげる

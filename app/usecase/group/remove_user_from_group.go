@@ -28,7 +28,7 @@ func (uc *RemoveUserFromGroupUseCase) Run(ctx context.Context, dto RemoveUserFro
 	if err != nil {
 		return nil, err
 	}
-	group, err := uc.groupRepo.FindGroup(ctx, dto.GroupID)
+	group, err := uc.groupRepo.FindGroupByID(ctx, dto.GroupID)
 	if err != nil {
 		return nil, err
 	}

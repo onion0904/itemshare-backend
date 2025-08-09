@@ -85,6 +85,42 @@ func (q *Queries) FindGroup(ctx context.Context, groupid string) (Group, error) 
 	return i, err
 }
 
+const findGroupsByUserID = `-- name: FindGroupsByUserID :many
+SELECT g.id, g.name, g.created_at, g.updated_at
+FROM groups g
+INNER JOIN group_users gu
+ON g.id = gu.group_id
+WHERE gu.user_id = $1
+`
+
+func (q *Queries) FindGroupsByUserID(ctx context.Context, userid string) ([]Group, error) {
+	rows, err := q.db.QueryContext(ctx, findGroupsByUserID, userid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Group
+	for rows.Next() {
+		var i Group
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getEventIDsByGroupID = `-- name: GetEventIDsByGroupID :many
 SELECT
     ge.event_id

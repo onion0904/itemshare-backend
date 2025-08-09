@@ -28,7 +28,7 @@ func (uc *AddUserToGroupUseCase) Run(ctx context.Context, dto AddUserToGroupUseC
 	if err != nil {
 		return nil, err
 	}
-	group, err := uc.groupRepo.FindGroup(ctx, dto.GroupID)
+	group, err := uc.groupRepo.FindGroupByID(ctx, dto.GroupID)
 	if err != nil {
 		return nil, err
 	}

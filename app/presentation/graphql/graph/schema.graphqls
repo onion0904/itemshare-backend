@@ -63,10 +63,11 @@ type EventRules {
 # クエリの定義(データの取得のエンドポイント)
 type Query {
   # ユーザー関連
-  user: User! @isAuthenticated
+  user(id: String!): User! @isAuthenticated
 
   # グループ関連
   group(id: String!): Group! @isAuthenticated 
+  groupsByUserID(userID: String!): [Group!]! @isAuthenticated
 
   # イベント関連
   event(id: String!): Event! @isAuthenticated
@@ -93,8 +94,6 @@ input CreateUserInput {
 input UpdateUserInput {
   lastName: String
   firstName: String
-  email: String
-  password: String
 }
 
 input CreateGroupInput {

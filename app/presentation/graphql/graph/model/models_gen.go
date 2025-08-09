@@ -94,8 +94,6 @@ type UpdateGroupInput struct {
 type UpdateUserInput struct {
 	LastName  *string `json:"lastName,omitempty"`
 	FirstName *string `json:"firstName,omitempty"`
-	Email     *string `json:"email,omitempty"`
-	Password  *string `json:"password,omitempty"`
 }
 
 type UpsertEventRuleInput struct {

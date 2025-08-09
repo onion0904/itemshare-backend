@@ -1,3 +1,0 @@
-# todo
-
-domainとrepoを参考にdomainserviceとresolverとusecaseを実装

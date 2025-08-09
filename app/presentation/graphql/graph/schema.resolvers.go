@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/onion0904/CarShareSystem/app/config"
@@ -35,7 +34,6 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 	DTO := usecase_user.UpdateUseCaseDto{
 		LastName:  input.LastName,
 		FirstName: input.FirstName,
-		Email:     input.Email,
 	}
 	user, err := update.Run(ctx, userID, DTO)
 	if err != nil {
@@ -502,31 +500,44 @@ func (r *mutationResolver) Signin(ctx context.Context, email string, password st
 }
 
 // User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
 	userRepo := repo.NewUserRepository(r.DB)
 	find := usecase_user.NewFindUserUseCase(userRepo)
+	var user *usecase_user.FindUserUseCaseDto
+	var err error
 	//ctx から取った userID を使うことで 「なりすまし」を防ぐ
 	userID, ok := middleware.GetUserID(ctx)
 	if !ok {
-		fmt.Println("UserID:", userID)
-		return nil, errDomain.NewError("not authenticate")
+		// 本人じゃない時
+		user, err = find.Run(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		nuser := model.User{
+			ID:        user.ID,
+			LastName:  user.LastName,
+			FirstName: user.FirstName,
+		}
+		return &nuser, nil
+	} else {
+		// 本人の時
+		user, err = find.Run(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+		nuser := model.User{
+			ID:        user.ID,
+			LastName:  user.LastName,
+			FirstName: user.FirstName,
+			Email:     user.Email,
+			Password:  user.Password,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+			GroupIDs:  user.GroupIDs,
+			EventIDs:  user.EventIDs,
+		}
+		return &nuser, nil
 	}
-	user, err := find.Run(ctx, userID)
-	if err != nil {
-		return nil, err
-	}
-	nuser := model.User{
-		ID:        user.ID,
-		LastName:  user.LastName,
-		FirstName: user.FirstName,
-		Email:     user.Email,
-		Password:  user.Password,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		GroupIDs:  user.GroupIDs,
-		EventIDs:  user.EventIDs,
-	}
-	return &nuser, nil
 }
 
 // Group is the resolver for the group field.
@@ -546,6 +557,27 @@ func (r *queryResolver) Group(ctx context.Context, id string) (*model.Group, err
 		EventIDs:  group.EventIDs,
 	}
 	return &ngroup, nil
+}
+
+// GroupsByUserID is the resolver for the groupsByUserID field.
+func (r *queryResolver) GroupsByUserID(ctx context.Context, userID string) ([]*model.Group, error) {
+	groupRepo := repo.NewGroupRepository(r.DB)
+	find := usecase_group.NewFindGroupsByUserIDUseCase(groupRepo)
+	groups, err := find.Run(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*model.Group,len(groups))
+	for _,group := range groups{
+		result = append(result, &model.Group{
+		ID:        group.ID,
+		Name:      group.Name,
+		CreatedAt: group.CreatedAt,
+		UpdatedAt: group.UpdatedAt,
+		UserIDs:   group.UserIDs,
+		EventIDs:  group.EventIDs,
+	})}
+	return result, nil
 }
 
 // Event is the resolver for the event field.

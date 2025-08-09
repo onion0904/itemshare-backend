@@ -32,7 +32,6 @@ func TestUpdateUseCaseRun(t *testing.T) {
 			dto: UpdateUseCaseDto{
 				LastName:  lo.ToPtr("Updated"),
 				FirstName: lo.ToPtr("User"),
-				Email:     lo.ToPtr("updated@example.com"),
 			},
 			mockFunc: func() {
 				mockUserRepo.

@@ -29,6 +29,13 @@ SELECT
 FROM "groups"
 WHERE id = sqlc.arg(groupID);
 
+-- name: FindGroupsByUserID :many
+SELECT g.*
+FROM groups g
+INNER JOIN group_users gu
+ON g.id = gu.group_id
+WHERE gu.user_id = sqlc.arg(userID);
+
 -- name: AddUserToGroup :exec
 INSERT INTO group_users (
     group_id,
