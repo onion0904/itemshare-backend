@@ -146,29 +146,6 @@ func (r *mutationResolver) RemoveUserFromGroup(ctx context.Context, groupID stri
 	return &ngroup, nil
 }
 
-// AddEventToGroup is the resolver for the addEventToGroup field.
-func (r *mutationResolver) AddEventToGroup(ctx context.Context, groupID, eventID string) (*model.Group, error) {
-	groupRepo := repo.NewGroupRepository(r.DB)
-	addEvent := usecase_group.NewAddEventToGroupUseCase(groupRepo)
-	DTO := usecase_group.AddEventToGroupUseCaseDto{
-		EventID: eventID,
-		GroupID: groupID,
-	}
-	group, err := addEvent.Run(ctx, DTO)
-	if err != nil {
-		return nil, err
-	}
-	ngroup := model.Group{
-		ID:        group.ID(),
-		Name:      group.Name(),
-		CreatedAt: group.CreatedAt(),
-		UpdatedAt: group.UpdatedAt(),
-		UserIDs:   group.UserIDs(),
-		EventIDs:  group.EventIDs(),
-	}
-	return &ngroup, nil
-}
-
 // GenerateGroupInviteLink is the resolver for the generateGroupInviteLink field.
 func (r *mutationResolver) GenerateGroupInviteLink(ctx context.Context, groupID string) (string, error) {
 	inviteService := usecase_group.NewGroupInviteService(repo.NewGroupRepository(r.DB), r.BaseURL)
@@ -247,7 +224,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEv
 	if err != nil {
 		return nil, err
 	}
-	
+
 	nevent := model.Event{
 		ID:          event.ID(),
 		UserID:      event.UserID(),

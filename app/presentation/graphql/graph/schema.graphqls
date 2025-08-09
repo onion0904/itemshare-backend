@@ -164,7 +164,7 @@ type Mutation {
   acceptGroupInvitation(token: String!): Group! @isAuthenticated
 
   # イベント関連
-  createEvent(input: CreateEventInput!): Event! @isAuthenticated
+  createEvent(input: CreateEventInput!, groupID: String!): Event! @isAuthenticated
   deleteEvent(id: String!): Boolean! @isAuthenticated
 
   # アイテム関連
