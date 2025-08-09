@@ -31,6 +31,7 @@ type Group {
 type Event {
   id: String!
   userID: String!
+  itemID: String!
   together: Boolean!
   description: String!
   year: Int!
@@ -107,7 +108,8 @@ input UpdateGroupInput {
 }
 
 input CreateEventInput {
-  userId: String!
+  userID: String!
+  itemID: String!
   together: Boolean!
   description: String!
   year: Int!

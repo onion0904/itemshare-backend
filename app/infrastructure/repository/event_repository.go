@@ -19,12 +19,13 @@ func NewEventRepository(db *sql.DB) event.EventRepository {
 	return &eventRepository{db: db}
 }
 
-func (er *eventRepository) SaveEvent(ctx context.Context, event *event.Event) error {
+func (er *eventRepository) UpsertEvent(ctx context.Context, event *event.Event) error {
 	query := db.GetQuery(ctx)
 
 	err := query.UpsertEvent(ctx, dbgen.UpsertEventParams{
 		ID:          event.ID(),
 		UserID:      event.UserID(),
+		ItemID: 	 event.ItemID(),
 		Together:    event.Together(),
 		Description: event.Description(),
 		Year:        event.Year(),
@@ -63,6 +64,7 @@ func (er *eventRepository) FindEvent(ctx context.Context, eventID string) (*even
 	ne, err := event.Reconstruct(
 		e.ID,
 		e.UserID,
+		e.ItemID,
 		e.Together,
 		e.Description,
 		e.Year,
@@ -102,6 +104,7 @@ func (er *eventRepository) FindDayEvents(ctx context.Context, year, month, day i
 		ne, err := event.Reconstruct(
 			e.ID,
 			e.UserID,
+			e.ItemID,
 			e.Together,
 			e.Description,
 			e.Year,
@@ -141,6 +144,7 @@ func (er *eventRepository) FindDayEventOfGroup(ctx context.Context, year, month,
 	ne, err := event.Reconstruct(
 		e.ID,
 		e.UserID,
+		e.ItemID,
 		e.Together,
 		e.Description,
 		e.Year,
@@ -178,6 +182,7 @@ func (er *eventRepository) FindMonthEventsOfGroup(ctx context.Context, year, mon
 		ne, err := event.Reconstruct(
 			e.ID,
 			e.UserID,
+			e.ItemID,
 			e.Together,
 			e.Description,
 			e.Year,

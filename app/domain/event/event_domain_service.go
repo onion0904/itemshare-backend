@@ -44,7 +44,7 @@ func (c *EventDomainService) SaveEventService(ctx context.Context, event *Event)
 		}
 	}
 
-	err := c.EventRepo.SaveEvent(ctx, event)
+	err := c.EventRepo.UpsertEvent(ctx, event)
 	if err != nil {
 		return err
 	}

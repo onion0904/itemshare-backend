@@ -1,5 +1,5 @@
-groupIDとyearとmonthでその月のeventsを取得
+createEvent に ItemID を含める(予約の日に同じアイテムがあったらエラー)
 
-groupIDとyear,month,dayでeventを取得
+デフォルト値 eventRule を追加
 
-createEventにItemIDを含める(予約の日に同じアイテムがあったらエラー)
+イベントの登録機能の domainservice を編集

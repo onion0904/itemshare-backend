@@ -202,6 +202,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEv
 	create := usecase_event.NewEventUseCase(domain_event.NewEventDomainService(eventRepo))
 	AddEventUseCaseDTO := usecase_event.AddEventUseCaseDTO{
 		UsersID:     input.UserID,
+		ItemID:      input.ItemID,
 		Together:    input.Together,
 		Description: input.Description,
 		Year:        input.Year,
@@ -577,12 +578,12 @@ func (r *queryResolver) Event(ctx context.Context, id string) (*model.Event, err
 func (r *queryResolver) EventsByMonth(ctx context.Context, input model.MonthlyEventInput, groupID string) ([]*model.Event, error) {
 	eventRepo := repo.NewEventRepository(r.DB)
 	find := usecase_event.NewFindMonthEventsOfGroupUseCase(eventRepo)
-	events, err := find.Run(ctx, input.Year,input.Month,groupID)
+	events, err := find.Run(ctx, input.Year, input.Month, groupID)
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*model.Event,len(events))
-	for _,event := range result{
+	result := make([]*model.Event, len(events))
+	for _, event := range result {
 		result = append(result, &model.Event{
 			ID:          event.ID,
 			UserID:      event.UserID,
@@ -597,7 +598,7 @@ func (r *queryResolver) EventsByMonth(ctx context.Context, input model.MonthlyEv
 			StartDate:   event.StartDate,
 			EndDate:     event.EndDate,
 			Important:   event.Important,
-		})	
+		})
 	}
 
 	return result, nil

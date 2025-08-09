@@ -62,6 +62,7 @@ type ComplexityRoot struct {
 		EndDate     func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Important   func(childComplexity int) int
+		ItemID      func(childComplexity int) int
 		Month       func(childComplexity int) int
 		StartDate   func(childComplexity int) int
 		Together    func(childComplexity int) int
@@ -247,6 +248,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Event.Important(childComplexity), true
+
+	case "Event.itemID":
+		if e.complexity.Event.ItemID == nil {
+			break
+		}
+
+		return e.complexity.Event.ItemID(childComplexity), true
 
 	case "Event.month":
 		if e.complexity.Event.Month == nil {
@@ -1857,6 +1865,50 @@ func (ec *executionContext) _Event_userID(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext_Event_userID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Event_itemID(ctx context.Context, field graphql.CollectedField, obj *model.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_itemID(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ItemID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Event_itemID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Event",
 		Field:      field,
@@ -3748,6 +3800,8 @@ func (ec *executionContext) fieldContext_Mutation_createEvent(ctx context.Contex
 				return ec.fieldContext_Event_id(ctx, field)
 			case "userID":
 				return ec.fieldContext_Event_userID(ctx, field)
+			case "itemID":
+				return ec.fieldContext_Event_itemID(ctx, field)
 			case "together":
 				return ec.fieldContext_Event_together(ctx, field)
 			case "description":
@@ -4625,6 +4679,8 @@ func (ec *executionContext) fieldContext_Query_event(ctx context.Context, field 
 				return ec.fieldContext_Event_id(ctx, field)
 			case "userID":
 				return ec.fieldContext_Event_userID(ctx, field)
+			case "itemID":
+				return ec.fieldContext_Event_itemID(ctx, field)
 			case "together":
 				return ec.fieldContext_Event_together(ctx, field)
 			case "description":
@@ -4730,6 +4786,8 @@ func (ec *executionContext) fieldContext_Query_eventsByMonth(ctx context.Context
 				return ec.fieldContext_Event_id(ctx, field)
 			case "userID":
 				return ec.fieldContext_Event_userID(ctx, field)
+			case "itemID":
+				return ec.fieldContext_Event_itemID(ctx, field)
 			case "together":
 				return ec.fieldContext_Event_together(ctx, field)
 			case "description":
@@ -4835,6 +4893,8 @@ func (ec *executionContext) fieldContext_Query_eventsByDay(ctx context.Context, 
 				return ec.fieldContext_Event_id(ctx, field)
 			case "userID":
 				return ec.fieldContext_Event_userID(ctx, field)
+			case "itemID":
+				return ec.fieldContext_Event_itemID(ctx, field)
 			case "together":
 				return ec.fieldContext_Event_together(ctx, field)
 			case "description":
@@ -7530,20 +7590,27 @@ func (ec *executionContext) unmarshalInputCreateEventInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "together", "description", "year", "month", "day", "important"}
+	fieldsInOrder := [...]string{"userID", "itemID", "together", "description", "year", "month", "day", "important"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+		case "userID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.UserID = data
+		case "itemID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("itemID"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ItemID = data
 		case "together":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("together"))
 			data, err := ec.unmarshalNBoolean2bool(ctx, v)
@@ -7962,6 +8029,11 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "userID":
 			out.Values[i] = ec._Event_userID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "itemID":
+			out.Values[i] = ec._Event_itemID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

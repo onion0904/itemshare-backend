@@ -12,6 +12,7 @@ import (
 type Event struct {
 	id          string
 	userID      string
+	itemID      string
 	together    bool
 	description string
 	// Eventの年月日とそのDate型
@@ -31,6 +32,7 @@ type Event struct {
 func Reconstruct(
 	id string,
 	userID string,
+	itemID string,
 	together bool,
 	description string,
 	year int32,
@@ -44,6 +46,7 @@ func Reconstruct(
 	return newEvent(
 		id,
 		userID,
+		itemID,
 		together,
 		description,
 		year,
@@ -58,6 +61,7 @@ func Reconstruct(
 
 func NewEvent(
 	userID string,
+	itemID string,
 	together bool,
 	description string,
 	year int32,
@@ -68,6 +72,7 @@ func NewEvent(
 	return newEvent(
 		ulid.NewUlid(),
 		userID,
+		itemID,
 		together,
 		description,
 		year,
@@ -83,6 +88,7 @@ func NewEvent(
 func newEvent(
 	id string,
 	userID string,
+	itemID string,
 	together bool,
 	description string,
 	year int32,
@@ -146,6 +152,10 @@ func (c *Event) ID() string {
 
 func (c *Event) UserID() string {
 	return c.userID
+}
+
+func (c *Event) ItemID() string {
+	return c.itemID
 }
 
 func (c *Event) Together() bool {

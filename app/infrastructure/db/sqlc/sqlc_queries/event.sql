@@ -2,6 +2,7 @@
 INSERT INTO events (
     id,
     user_id,
+    item_id,
     together,
     description,
     year,
@@ -17,6 +18,7 @@ INSERT INTO events (
 VALUES (
     sqlc.arg(id),
     sqlc.arg(user_id),
+    sqlc.arg(item_id),
     sqlc.arg(together),
     sqlc.arg(description),
     sqlc.arg(year),
@@ -32,6 +34,7 @@ VALUES (
 ON CONFLICT (id) DO UPDATE
 SET
     user_id     = EXCLUDED.user_id,
+    item_id     = EXCLUDED.item_id,
     together    = EXCLUDED.together,
     description = EXCLUDED.description,
     year        = EXCLUDED.year,

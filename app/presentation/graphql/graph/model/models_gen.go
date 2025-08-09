@@ -12,7 +12,8 @@ type AuthUserResponse struct {
 }
 
 type CreateEventInput struct {
-	UserID      string `json:"userId"`
+	UserID      string `json:"userID"`
+	ItemID      string `json:"itemID"`
 	Together    bool   `json:"together"`
 	Description string `json:"description"`
 	Year        int32  `json:"year"`
@@ -47,6 +48,7 @@ type DailyEventInput struct {
 type Event struct {
 	ID          string    `json:"id"`
 	UserID      string    `json:"userID"`
+	ItemID      string    `json:"itemID"`
 	Together    bool      `json:"together"`
 	Description string    `json:"description"`
 	Year        int32     `json:"year"`

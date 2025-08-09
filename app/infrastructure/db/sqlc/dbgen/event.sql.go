@@ -203,6 +203,7 @@ const upsertEvent = `-- name: UpsertEvent :exec
 INSERT INTO events (
     id,
     user_id,
+    item_id,
     together,
     description,
     year,
@@ -226,13 +227,15 @@ VALUES (
     $8,
     $9,
     $10,
+    $11,
     NOW(),
     NOW(),
-    $11
+    $12
 )
 ON CONFLICT (id) DO UPDATE
 SET
     user_id     = EXCLUDED.user_id,
+    item_id     = EXCLUDED.item_id,
     together    = EXCLUDED.together,
     description = EXCLUDED.description,
     year        = EXCLUDED.year,
@@ -248,6 +251,7 @@ SET
 type UpsertEventParams struct {
 	ID          string
 	UserID      string
+	ItemID      string
 	Together    bool
 	Description string
 	Year        int32
@@ -263,6 +267,7 @@ func (q *Queries) UpsertEvent(ctx context.Context, arg UpsertEventParams) error 
 	_, err := q.db.ExecContext(ctx, upsertEvent,
 		arg.ID,
 		arg.UserID,
+		arg.ItemID,
 		arg.Together,
 		arg.Description,
 		arg.Year,
