@@ -24,20 +24,20 @@ type FindItemByGroupIDUseCaseDto struct {
 	GroupID      string
 }
 
-func (uc *FindItemByGroupIDUseCase) Run(ctx context.Context, groupID string) (*[]FindItemByGroupIDUseCaseDto, error) {
+func (uc *FindItemByGroupIDUseCase) Run(ctx context.Context, groupID string) ([]*FindItemByGroupIDUseCaseDto, error) {
 	items, err := uc.itemRepo.FindItemsByGroupID(ctx, groupID)
 	if err != nil {
 		return nil, err
 	}
-	var dto []FindItemByGroupIDUseCaseDto
+	var dto []*FindItemByGroupIDUseCaseDto
 	for _,item := range *items{
 		dto = append(dto, 
-			FindItemByGroupIDUseCaseDto{
+			&FindItemByGroupIDUseCaseDto{
 				ID:          item.ID(),
 				Name: 		 item.Name(),
 				GroupID:     item.GroupID(),
 			})
 	}
 
-	return &dto,nil
+	return dto,nil
 }

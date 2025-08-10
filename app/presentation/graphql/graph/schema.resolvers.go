@@ -185,6 +185,23 @@ func (r *mutationResolver) AcceptGroupInvitation(ctx context.Context, token stri
 		return nil, err
 	}
 
+	findItemsByGroupIDUC := usecase_item.NewFindItemByGroupIDUseCase(repo.NewItemRepository(r.DB))
+	items,err := findItemsByGroupIDUC.Run(ctx,claims.GroupID)
+	if err != nil {
+		return nil, err
+	}
+
+	// eventRuleのデフォルト値の追加
+	upsertEventRuleUC := usecase_eventRule.NewUpsertUseCase(repo.NewEventRuleRepository(r.DB))
+	for _,item := range items{
+		upsertEventRuleUC.Run(ctx,usecase_eventRule.UpsertUseCaseDto{
+			UserID: userID,
+			ItemID: item.ID,
+			NormalLimit: 7,
+			ImportantLimit: 0,
+		})
+	}
+
 	// 結果をGraphQLモデルに変換して返す
 	return &model.Group{
 		ID:        group.ID(),
@@ -267,6 +284,22 @@ func (r *mutationResolver) CreateItem(ctx context.Context, input model.CreateIte
 	if err != nil {
 		return nil, err
 	}
+
+	findGroupUC := usecase_group.NewFindGroupUseCase(repo.NewGroupRepository(r.DB))
+	group,err := findGroupUC.Run(ctx,input.GroupID)
+	
+	upsertEventRuleUC := usecase_eventRule.NewUpsertUseCase(repo.NewEventRuleRepository(r.DB))
+
+	// eventRuleのデフォルト値の追加
+	for _,userID := range group.UserIDs{
+		upsertEventRuleUC.Run(ctx,usecase_eventRule.UpsertUseCaseDto{
+			UserID: userID,
+			ItemID: item.ID,
+			NormalLimit: 7,
+			ImportantLimit: 0,
+		})
+	}
+
 	nitem := model.Item{
 		ID:      item.ID,
 		Name:    item.Name,
