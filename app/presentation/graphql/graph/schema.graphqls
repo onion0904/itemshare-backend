@@ -73,7 +73,7 @@ type Query {
   # イベント関連
   event(id: String!): Event! @isAuthenticated
   eventsByMonth(input: MonthlyEventInput!,groupID: String!): [Event!]! @isAuthenticated
-  eventsByDay(input: DailyEventInput!,groupID: String!): Event! @isAuthenticated
+  eventsByDay(input: DailyEventInput!,groupID: String!): [Event!]! @isAuthenticated
 
   # アイテム関連
   item(id: String!): Item! @isAuthenticated

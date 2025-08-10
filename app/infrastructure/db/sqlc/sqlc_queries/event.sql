@@ -56,13 +56,6 @@ SELECT *
 FROM events
 WHERE id = sqlc.arg(eventID);
 
--- name: FindDayEvents :many
-SELECT *
-FROM events
-WHERE year  = sqlc.arg(year)
-    AND month = sqlc.arg(month)
-    AND day = sqlc.arg(day);
-
 -- name: FindMonthEvents :many
 SELECT e.*
 FROM events e
@@ -72,7 +65,7 @@ WHERE e.year = sqlc.arg(year)
     AND e.month = sqlc.arg(month)
     And ge.group_id = sqlc.arg(groupID);
 
--- name: FindDayEvent :one
+-- name: FindDayEvents :many
 SELECT e.*
 FROM events e
 INNER JOIN group_events ge
@@ -81,3 +74,12 @@ WHERE e.year = sqlc.arg(year)
     AND e.month = sqlc.arg(month)
     AND e.day = sqlc.arg(day)
     And ge.group_id = sqlc.arg(groupID);
+
+
+-- name: FindWeeklyEvents :many
+SELECT *
+FROM events
+WHERE
+    user_id = sqlc.arg(userID)
+    AND WEEK(date, 1) = WEEK(CAST(sqlc.arg(searchDate) AS DATE), 1)
+    AND YEAR(date) = YEAR(CAST(sqlc.arg(searchDate) AS DATE));

@@ -20,7 +20,7 @@ func (q *Queries) DeleteEvent(ctx context.Context, eventid string) error {
 	return err
 }
 
-const findDayEvent = `-- name: FindDayEvent :one
+const findDayEvents = `-- name: FindDayEvents :many
 SELECT e.id, e.user_id, e.item_id, e.together, e.description, e.year, e.month, e.day, e.date, e.start_date, e.end_date, e.important, e.created_at, e.updated_at
 FROM events e
 INNER JOIN group_events ge
@@ -31,56 +31,20 @@ WHERE e.year = $1
     And ge.group_id = $4
 `
 
-type FindDayEventParams struct {
+type FindDayEventsParams struct {
 	Year    int32
 	Month   int32
 	Day     int32
 	Groupid string
 }
 
-func (q *Queries) FindDayEvent(ctx context.Context, arg FindDayEventParams) (Event, error) {
-	row := q.db.QueryRowContext(ctx, findDayEvent,
+func (q *Queries) FindDayEvents(ctx context.Context, arg FindDayEventsParams) ([]Event, error) {
+	rows, err := q.db.QueryContext(ctx, findDayEvents,
 		arg.Year,
 		arg.Month,
 		arg.Day,
 		arg.Groupid,
 	)
-	var i Event
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.ItemID,
-		&i.Together,
-		&i.Description,
-		&i.Year,
-		&i.Month,
-		&i.Day,
-		&i.Date,
-		&i.StartDate,
-		&i.EndDate,
-		&i.Important,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const findDayEvents = `-- name: FindDayEvents :many
-SELECT id, user_id, item_id, together, description, year, month, day, date, start_date, end_date, important, created_at, updated_at
-FROM events
-WHERE year  = $1
-    AND month = $2
-    AND day = $3
-`
-
-type FindDayEventsParams struct {
-	Year  int32
-	Month int32
-	Day   int32
-}
-
-func (q *Queries) FindDayEvents(ctx context.Context, arg FindDayEventsParams) ([]Event, error) {
-	rows, err := q.db.QueryContext(ctx, findDayEvents, arg.Year, arg.Month, arg.Day)
 	if err != nil {
 		return nil, err
 	}
@@ -163,6 +127,58 @@ type FindMonthEventsParams struct {
 
 func (q *Queries) FindMonthEvents(ctx context.Context, arg FindMonthEventsParams) ([]Event, error) {
 	rows, err := q.db.QueryContext(ctx, findMonthEvents, arg.Year, arg.Month, arg.Groupid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Event
+	for rows.Next() {
+		var i Event
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.ItemID,
+			&i.Together,
+			&i.Description,
+			&i.Year,
+			&i.Month,
+			&i.Day,
+			&i.Date,
+			&i.StartDate,
+			&i.EndDate,
+			&i.Important,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findWeeklyEvents = `-- name: FindWeeklyEvents :many
+SELECT id, user_id, item_id, together, description, year, month, day, date, start_date, end_date, important, created_at, updated_at
+FROM events
+WHERE
+    user_id = $1
+    AND WEEK(date, 1) = WEEK(CAST($2 AS DATE), 1)
+    AND YEAR(date) = YEAR(CAST($2 AS DATE))
+`
+
+type FindWeeklyEventsParams struct {
+	Userid     string
+	Searchdate time.Time
+}
+
+func (q *Queries) FindWeeklyEvents(ctx context.Context, arg FindWeeklyEventsParams) ([]Event, error) {
+	rows, err := q.db.QueryContext(ctx, findWeeklyEvents, arg.Userid, arg.Searchdate)
 	if err != nil {
 		return nil, err
 	}

@@ -33,13 +33,13 @@ type AddEventUseCaseDTO struct {
 }
 
 // イベントを追加する
-func (uc *SaveEventUsecase) Run(ctx context.Context, dto AddEventUseCaseDTO) (*eventDomain.Event, error) {
+func (uc *SaveEventUsecase) Run(ctx context.Context, dto AddEventUseCaseDTO, groupID string) (*eventDomain.Event, error) {
 	event, err := eventDomain.NewEvent(dto.UsersID,dto.ItemID, dto.Together, dto.Description, dto.Year, dto.Month, dto.Day, dto.Important)
 	if err != nil {
 		return nil, err
 	}
 	// ドメイン層のサービスを呼び出し
-	err = uc.eventService.SaveEventService(ctx, event)
+	err = uc.eventService.SaveEventService(ctx, event,groupID)
 	if err != nil {
 		return nil, err
 	}
