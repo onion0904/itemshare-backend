@@ -186,20 +186,23 @@ func (r *mutationResolver) AcceptGroupInvitation(ctx context.Context, token stri
 	}
 
 	findItemsByGroupIDUC := usecase_item.NewFindItemByGroupIDUseCase(repo.NewItemRepository(r.DB))
-	items,err := findItemsByGroupIDUC.Run(ctx,claims.GroupID)
+	items, err := findItemsByGroupIDUC.Run(ctx, claims.GroupID)
 	if err != nil {
 		return nil, err
 	}
 
 	// eventRuleのデフォルト値の追加
 	upsertEventRuleUC := usecase_eventRule.NewUpsertUseCase(repo.NewEventRuleRepository(r.DB))
-	for _,item := range items{
-		upsertEventRuleUC.Run(ctx,usecase_eventRule.UpsertUseCaseDto{
-			UserID: userID,
-			ItemID: item.ID,
-			NormalLimit: 7,
+	for _, item := range items {
+		err := upsertEventRuleUC.Run(ctx, usecase_eventRule.UpsertUseCaseDto{
+			UserID:         userID,
+			ItemID:         item.ID,
+			NormalLimit:    7,
 			ImportantLimit: 0,
 		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// 結果をGraphQLモデルに変換して返す
@@ -216,7 +219,8 @@ func (r *mutationResolver) AcceptGroupInvitation(ctx context.Context, token stri
 // CreateEvent is the resolver for the createEvent field.
 func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEventInput, groupID string) (*model.Event, error) {
 	eventRepo := repo.NewEventRepository(r.DB)
-	create := usecase_event.NewEventUseCase(domain_event.NewEventDomainService(eventRepo))
+	eventRuleRepo := repo.NewEventRuleRepository(r.DB)
+	create := usecase_event.NewEventUseCase(domain_event.NewEventDomainService(eventRepo,eventRuleRepo))
 	AddEventUseCaseDTO := usecase_event.AddEventUseCaseDTO{
 		UsersID:     input.UserID,
 		ItemID:      input.ItemID,
@@ -227,7 +231,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEv
 		Day:         input.Day,
 		Important:   input.Important,
 	}
-	event, err := create.Run(ctx, AddEventUseCaseDTO)
+	event, err := create.Run(ctx, AddEventUseCaseDTO,groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -286,26 +290,28 @@ func (r *mutationResolver) CreateItem(ctx context.Context, input model.CreateIte
 	}
 
 	findGroupUC := usecase_group.NewFindGroupUseCase(repo.NewGroupRepository(r.DB))
-	group,err := findGroupUC.Run(ctx,input.GroupID)
-	
+	group, err := findGroupUC.Run(ctx, input.GroupID)
+
 	upsertEventRuleUC := usecase_eventRule.NewUpsertUseCase(repo.NewEventRuleRepository(r.DB))
 
 	// eventRuleのデフォルト値の追加
-	for _,userID := range group.UserIDs{
-		upsertEventRuleUC.Run(ctx,usecase_eventRule.UpsertUseCaseDto{
-			UserID: userID,
-			ItemID: item.ID,
-			NormalLimit: 7,
+	for _, userID := range group.UserIDs {
+		err := upsertEventRuleUC.Run(ctx, usecase_eventRule.UpsertUseCaseDto{
+			UserID:         userID,
+			ItemID:         item.ID,
+			NormalLimit:    7,
 			ImportantLimit: 0,
 		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	nitem := model.Item{
+	return &model.Item{
 		ID:      item.ID,
 		Name:    item.Name,
 		GroupID: item.GroupID,
-	}
-	return &nitem, nil
+	}, nil
 }
 
 // DeleteItem is the resolver for the deleteItem field.
@@ -638,29 +644,33 @@ func (r *queryResolver) EventsByMonth(ctx context.Context, input model.MonthlyEv
 }
 
 // EventsByDay is the resolver for the eventsByDay field.
-func (r *queryResolver) EventsByDay(ctx context.Context, input model.DailyEventInput, groupID string) (*model.Event, error) {
+func (r *queryResolver) EventsByDay(ctx context.Context, input model.DailyEventInput, groupID string) ([]*model.Event, error) {
 	eventRepo := repo.NewEventRepository(r.DB)
-	find := usecase_event.NewFindDayEventOfGroupUseCase(eventRepo)
-	event, err := find.Run(ctx, input.Year, input.Month, input.Day, groupID)
+	find := usecase_event.NewFindDayEventsOfGroupUseCase(eventRepo)
+	events, err := find.Run(ctx, input.Year, input.Month, input.Day, groupID)
 	if err != nil {
 		return nil, err
 	}
-	nevent := model.Event{
-		ID:          event.ID,
-		UserID:      event.UserID,
-		Together:    event.Together,
-		Description: event.Description,
-		Year:        event.Year,
-		Month:       event.Month,
-		Day:         event.Day,
-		Date:        event.Date,
-		CreatedAt:   event.CreatedAt,
-		UpdatedAt:   event.UpdatedAt,
-		StartDate:   event.StartDate,
-		EndDate:     event.EndDate,
-		Important:   event.Important,
+	result := make([]*model.Event, len(events))
+	for _, event := range events {
+		result = append(result, &model.Event{
+			ID:          event.ID,
+			UserID:      event.UserID,
+			Together:    event.Together,
+			Description: event.Description,
+			Year:        event.Year,
+			Month:       event.Month,
+			Day:         event.Day,
+			Date:        event.Date,
+			CreatedAt:   event.CreatedAt,
+			UpdatedAt:   event.UpdatedAt,
+			StartDate:   event.StartDate,
+			EndDate:     event.EndDate,
+			Important:   event.Important,
+		})
 	}
-	return &nevent, nil
+
+	return result, nil
 }
 
 // Item is the resolver for the item field.
@@ -688,7 +698,7 @@ func (r *queryResolver) ItemsBygroupID(ctx context.Context, groupID string) ([]*
 		return nil, err
 	}
 	var nitems []*model.Item
-	for _, item := range *items {
+	for _, item := range items {
 		nitems = append(nitems,
 			&model.Item{
 				ID:      item.ID,

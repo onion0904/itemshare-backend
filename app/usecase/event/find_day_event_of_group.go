@@ -7,19 +7,19 @@ import (
 	eventDomain "github.com/onion0904/CarShareSystem/app/domain/event"
 )
 
-type FindDayEventOfGroupUseCase struct {
+type FindDayEventsOfGroupUseCase struct {
 	eventRepo eventDomain.EventRepository
 }
 
-func NewFindDayEventOfGroupUseCase(
+func NewFindDayEventsOfGroupUseCase(
 	eventRepo eventDomain.EventRepository,
-) *FindDayEventOfGroupUseCase {
-	return &FindDayEventOfGroupUseCase{
+) *FindDayEventsOfGroupUseCase {
+	return &FindDayEventsOfGroupUseCase{
 		eventRepo: eventRepo,
 	}
 }
 
-type FindDayEventOfGroupUseCaseDto struct {
+type FindDayEventsOfGroupUseCaseDto struct {
 	ID          string
 	UserID      string
 	Together    bool
@@ -35,25 +35,29 @@ type FindDayEventOfGroupUseCaseDto struct {
 	Important   bool
 }
 
-func (uc *FindDayEventOfGroupUseCase) Run(ctx context.Context, year, month, day int32, groupID string) (*FindDayEventOfGroupUseCaseDto, error) {
-	e, err := uc.eventRepo.FindDayEventOfGroup(ctx,year,month,day,groupID)
+func (uc *FindDayEventsOfGroupUseCase) Run(ctx context.Context, year, month, day int32, groupID string) ([]*FindDayEventsOfGroupUseCaseDto, error) {
+	events, err := uc.eventRepo.FindDayEventsOfGroup(ctx,year,month,day,groupID)
 	if err != nil {
 		return nil, err
 	}
-	result := &FindDayEventOfGroupUseCaseDto{
-		ID:          e.ID(),
-		UserID:      e.UserID(),
-		Together:    e.Together(),
-		Description: e.Description(),
-		Year:        e.Year(),
-		Month:       e.Month(),
-		Day:         e.Day(),
-		Date:        e.Date(),
-		CreatedAt:   e.CreatedAt(),
-		UpdatedAt:   e.UpdatedAt(),
-		StartDate:   e.StartDate(),
-		EndDate:     e.EndDate(),
-		Important:   e.Important(),
+	result := make([]*FindDayEventsOfGroupUseCaseDto,len(events))
+	for _,event := range events{
+		result = append(result, &FindDayEventsOfGroupUseCaseDto{
+			ID:          event.ID(),
+			UserID:      event.UserID(),
+			Together:    event.Together(),
+			Description: event.Description(),
+			Year:        event.Year(),
+			Month:       event.Month(),
+			Day:         event.Day(),
+			Date:        event.Date(),
+			CreatedAt:   event.CreatedAt(),
+			UpdatedAt:   event.UpdatedAt(),
+			StartDate:   event.StartDate(),
+			EndDate:     event.EndDate(),
+			Important:   event.Important(),
+		})
 	}
+	
 	return result,err
 }

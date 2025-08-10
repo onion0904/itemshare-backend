@@ -162,7 +162,7 @@ type QueryResolver interface {
 	GroupsByUserID(ctx context.Context, userID string) ([]*model.Group, error)
 	Event(ctx context.Context, id string) (*model.Event, error)
 	EventsByMonth(ctx context.Context, input model.MonthlyEventInput, groupID string) ([]*model.Event, error)
-	EventsByDay(ctx context.Context, input model.DailyEventInput, groupID string) (*model.Event, error)
+	EventsByDay(ctx context.Context, input model.DailyEventInput, groupID string) ([]*model.Event, error)
 	Item(ctx context.Context, id string) (*model.Item, error)
 	ItemsBygroupID(ctx context.Context, groupID string) ([]*model.Item, error)
 }
@@ -4848,7 +4848,7 @@ func (ec *executionContext) _Query_eventsByDay(ctx context.Context, field graphq
 
 		directive1 := func(ctx context.Context) (any, error) {
 			if ec.directives.IsAuthenticated == nil {
-				var zeroVal *model.Event
+				var zeroVal []*model.Event
 				return zeroVal, errors.New("directive isAuthenticated is not implemented")
 			}
 			return ec.directives.IsAuthenticated(ctx, nil, directive0)
@@ -4861,10 +4861,10 @@ func (ec *executionContext) _Query_eventsByDay(ctx context.Context, field graphq
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*model.Event); ok {
+		if data, ok := tmp.([]*model.Event); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.Event`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/onion0904/CarShareSystem/app/presentation/graphql/graph/model.Event`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4876,9 +4876,9 @@ func (ec *executionContext) _Query_eventsByDay(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Event)
+	res := resTmp.([]*model.Event)
 	fc.Result = res
-	return ec.marshalNEvent2ᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEvent(ctx, field.Selections, res)
+	return ec.marshalNEvent2ᚕᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐEventᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_eventsByDay(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
