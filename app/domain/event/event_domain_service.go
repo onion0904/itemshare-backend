@@ -43,6 +43,9 @@ func (c *EventDomainService) SaveEventService(ctx context.Context, event *Event,
 
 	// 今週に登録してる予約数を確認
 	events, err := c.EventRepo.FindWeeklyEvents(ctx, event.year, event.month, event.day, event.userID)
+	if err != nil {
+		return err
+	}
 	for _, event := range events {
 		if event.important {
 			icount++
