@@ -22,10 +22,10 @@ func NewItemRepository(db *sql.DB) item.ItemRepository {
 func (ir *itemRepository) SaveItem(ctx context.Context, item *item.Item) error {
 	query := db.GetQuery(ctx)
 
-	err := query.InsertItem(ctx,dbgen.InsertItemParams{
-		ID: item.ID(),
+	err := query.InsertItem(ctx, dbgen.InsertItemParams{
+		ID:      item.ID(),
 		GroupID: item.GroupID(),
-		Name: item.Name(),
+		Name:    item.Name(),
 	})
 	if err != nil {
 		return err
@@ -46,7 +46,7 @@ func (ir *itemRepository) DeleteItem(ctx context.Context, itemID string) error {
 func (ir *itemRepository) FindItemByID(ctx context.Context, itemID string) (*item.Item, error) {
 	query := db.GetQuery(ctx)
 
-	i, err := query.GetItemByID(ctx,itemID)
+	i, err := query.GetItemByID(ctx, itemID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errDomain.NewError("Item not found")
@@ -68,7 +68,7 @@ func (ir *itemRepository) FindItemByID(ctx context.Context, itemID string) (*ite
 func (ir *itemRepository) FindItemsByGroupID(ctx context.Context, groupID string) (*[]item.Item, error) {
 	query := db.GetQuery(ctx)
 
-	is,err := query.GetItemsByGroupID(ctx,groupID)
+	is, err := query.GetItemsByGroupID(ctx, groupID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
@@ -77,7 +77,7 @@ func (ir *itemRepository) FindItemsByGroupID(ctx context.Context, groupID string
 	}
 
 	var result []item.Item
-	for _,i := range is{
+	for _, i := range is {
 		ni, err := item.Reconstruct(
 			i.ID,
 			i.Name,

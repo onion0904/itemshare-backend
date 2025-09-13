@@ -19,9 +19,9 @@ func NewFindItemByGroupIDUseCase(
 }
 
 type FindItemByGroupIDUseCaseDto struct {
-	ID          string
-	Name      string
-	GroupID      string
+	ID      string
+	Name    string
+	GroupID string
 }
 
 func (uc *FindItemByGroupIDUseCase) Run(ctx context.Context, groupID string) ([]*FindItemByGroupIDUseCaseDto, error) {
@@ -30,14 +30,14 @@ func (uc *FindItemByGroupIDUseCase) Run(ctx context.Context, groupID string) ([]
 		return nil, err
 	}
 	var dto []*FindItemByGroupIDUseCaseDto
-	for _,item := range *items{
-		dto = append(dto, 
+	for _, item := range *items {
+		dto = append(dto,
 			&FindItemByGroupIDUseCaseDto{
-				ID:          item.ID(),
-				Name: 		 item.Name(),
-				GroupID:     item.GroupID(),
+				ID:      item.ID(),
+				Name:    item.Name(),
+				GroupID: item.GroupID(),
 			})
 	}
 
-	return dto,nil
+	return dto, nil
 }

@@ -18,9 +18,9 @@ services:
       SENDER_EMAIL: ${SENDER_EMAIL}     # 送信者のメールアドレス
       JWT_SECRET: ${JWT_SECRET}         # JWTのシークレットキー
     ports:
-      - "8080:8080"   
+      - "8080:8080"
     depends_on:
-      - db                
+      - db
     working_dir: /app                  # 作業ディレクトリ
     tty: true                          # TTYを有効にする
     restart: always

@@ -133,6 +133,7 @@ func newEvent(
 
 	return &Event{
 		id:          id,
+		itemID:      itemID,
 		userID:      userID,
 		together:    together,
 		description: description,

@@ -29,20 +29,24 @@ type FindGroupsByUserIDUseCaseDto struct {
 }
 
 func (uc *FindGroupsByUserIDUseCase) Run(ctx context.Context, userID string) ([]*FindGroupsByUserIDUseCaseDto, error) {
-	groups, err := uc.groupRepo.FindGroupsByUserID(ctx,userID)
+	groups, err := uc.groupRepo.FindGroupsByUserID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*FindGroupsByUserIDUseCaseDto,len(groups))
-	for _,group := range groups{
-		result = append(result, &FindGroupsByUserIDUseCaseDto{
-		ID:        group.ID(),
-		Name:      group.Name(),
-		UserIDs:   group.UserIDs(),
-		EventIDs:  group.EventIDs(),
-		CreatedAt: group.CreatedAt(),
-		UpdatedAt: group.UpdatedAt(),
-	})}
+
+	result := make([]*FindGroupsByUserIDUseCaseDto, 0, len(groups))
+	for _, group := range groups {
+		if group != nil {
+			result = append(result, &FindGroupsByUserIDUseCaseDto{
+				ID:        group.ID(),
+				Name:      group.Name(),
+				UserIDs:   group.UserIDs(),
+				EventIDs:  group.EventIDs(),
+				CreatedAt: group.CreatedAt(),
+				UpdatedAt: group.UpdatedAt(),
+			})
+		}
+	}
 
 	return result, nil
 }

@@ -1,5 +1,5 @@
 # Builder stage
-FROM golang:1.24.4-alpine AS builder
+FROM golang:1.24.6-alpine AS builder
 
 # 作業ディレクトリを設定
 WORKDIR /workspace
