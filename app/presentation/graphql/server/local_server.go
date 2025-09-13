@@ -12,13 +12,13 @@ import (
 	"github.com/onion0904/CarShareSystem/app/presentation/graphql/graph"
 	usecase_mail "github.com/onion0904/CarShareSystem/app/usecase/mail"
 
-	"github.com/joho/godotenv"
-	"github.com/rs/cors"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -43,12 +43,12 @@ func LocalStart() {
 	}))
 
 	// CORS設定
-    c := cors.New(cors.Options{
-        AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:8080"}, // フロントエンドのURL
-        AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
-        AllowedHeaders:   []string{"Content-Type", "Authorization"},
-        Debug:           true,
-    })
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:3000", "http://localhost:8080"}, // フロントエンドのURL
+		AllowedMethods: []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders: []string{"Content-Type", "Authorization"},
+		Debug:          true,
+	})
 
 	// CORS対応。
 	srv.AddTransport(transport.Options{})

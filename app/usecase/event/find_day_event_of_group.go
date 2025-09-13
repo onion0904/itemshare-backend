@@ -37,12 +37,12 @@ type FindDayEventsOfGroupUseCaseDto struct {
 }
 
 func (uc *FindDayEventsOfGroupUseCase) Run(ctx context.Context, year, month, day int32, groupID string) ([]*FindDayEventsOfGroupUseCaseDto, error) {
-	events, err := uc.eventRepo.FindDayEventsOfGroup(ctx,year,month,day,groupID)
+	events, err := uc.eventRepo.FindDayEventsOfGroup(ctx, year, month, day, groupID)
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*FindDayEventsOfGroupUseCaseDto,0,len(events))
-	for _,event := range events{
+	result := make([]*FindDayEventsOfGroupUseCaseDto, 0, len(events))
+	for _, event := range events {
 		result = append(result, &FindDayEventsOfGroupUseCaseDto{
 			ID:          event.ID(),
 			UserID:      event.UserID(),
@@ -60,6 +60,6 @@ func (uc *FindDayEventsOfGroupUseCase) Run(ctx context.Context, year, month, day
 			Important:   event.Important(),
 		})
 	}
-	
-	return result,err
+
+	return result, err
 }

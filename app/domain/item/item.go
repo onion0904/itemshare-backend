@@ -3,15 +3,15 @@ package item
 import "github.com/onion0904/CarShareSystem/pkg/ulid"
 
 type Item struct {
-	id         string
-	name 	   string
-	groupID    string
+	id      string
+	name    string
+	groupID string
 }
 
 func Reconstruct(
-	id         string,
-	name 	   string,
-	groupID    string,
+	id string,
+	name string,
+	groupID string,
 ) (*Item, error) {
 	return newItem(
 		id,
@@ -21,8 +21,8 @@ func Reconstruct(
 }
 
 func NewItem(
-	name 	   string,
-	groupID    string,
+	name string,
+	groupID string,
 ) (*Item, error) {
 	return newItem(
 		ulid.NewUlid(),
@@ -32,14 +32,14 @@ func NewItem(
 }
 
 func newItem(
-	id         string,
-	name 	   string,
-	groupID    string,
+	id string,
+	name string,
+	groupID string,
 ) (*Item, error) {
 	return &Item{
-		id: 		id,
-		name: 		name,
-		groupID: 	groupID,
+		id:      id,
+		name:    name,
+		groupID: groupID,
 	}, nil
 }
 

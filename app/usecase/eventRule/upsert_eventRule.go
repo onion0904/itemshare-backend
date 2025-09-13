@@ -19,18 +19,18 @@ func NewUpsertUseCase(
 }
 
 type UpsertUseCaseDto struct {
-	UserID string
-	ItemID string
-	NormalLimit int32
+	UserID         string
+	ItemID         string
+	NormalLimit    int32
 	ImportantLimit int32
 }
 
-func (uc *UpsertUseCase) Run(ctx context.Context, dto UpsertUseCaseDto) (error) {
-	neventRule, err := eventRuleDomain.NewEventRule(dto.UserID,dto.ItemID,dto.NormalLimit,dto.ImportantLimit)
+func (uc *UpsertUseCase) Run(ctx context.Context, dto UpsertUseCaseDto) error {
+	neventRule, err := eventRuleDomain.NewEventRule(dto.UserID, dto.ItemID, dto.NormalLimit, dto.ImportantLimit)
 	if err != nil {
 		return err
 	}
-	err = uc.eventRuleRepo.UpsertEventRule(ctx,neventRule)
+	err = uc.eventRuleRepo.UpsertEventRule(ctx, neventRule)
 	if err != nil {
 		return err
 	}

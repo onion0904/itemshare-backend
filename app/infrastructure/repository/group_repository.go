@@ -121,7 +121,7 @@ func (gr *groupRepository) FindGroupsByUserID(ctx context.Context, userID string
 
 	query := db.GetQuery(ctx).WithTx(tx)
 
-	groups, err := query.FindGroupsByUserID(ctx,userID)
+	groups, err := query.FindGroupsByUserID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errDomain.NewError("Group not found")
@@ -129,9 +129,9 @@ func (gr *groupRepository) FindGroupsByUserID(ctx context.Context, userID string
 		return nil, err
 	}
 
-	result := make([]*group.Group,0,len(groups))
+	result := make([]*group.Group, 0, len(groups))
 
-	for _,g := range groups{
+	for _, g := range groups {
 		userIDs, err := query.GetUserIDsByGroupID(ctx, g.ID)
 		if err != nil {
 			return nil, err

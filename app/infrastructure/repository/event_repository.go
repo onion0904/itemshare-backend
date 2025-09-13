@@ -98,7 +98,7 @@ func (er *eventRepository) FindDayEventsOfGroup(ctx context.Context, year, month
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*event.Event,0, len(events))
+	result := make([]*event.Event, 0, len(events))
 	for _, e := range events {
 		ne, err := event.Reconstruct(
 			e.ID,
@@ -176,7 +176,7 @@ func (er *eventRepository) FindWeeklyEvents(ctx context.Context, year, month, da
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*event.Event,0, len(events))
+	result := make([]*event.Event, 0, len(events))
 	for _, e := range events {
 		ne, err := event.Reconstruct(
 			e.ID,

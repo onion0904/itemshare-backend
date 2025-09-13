@@ -19,9 +19,9 @@ func NewFindeventRuleByItemIDUseCase(
 }
 
 type FindeventRuleByItemIDUseCaseDto struct {
-	UserID string
-	ItemID string
-	NormalLimit int32
+	UserID         string
+	ItemID         string
+	NormalLimit    int32
 	ImportantLimit int32
 }
 
@@ -31,15 +31,15 @@ func (uc *FindeventRuleByItemIDUseCase) Run(ctx context.Context, itemID string) 
 		return nil, err
 	}
 	var dto []FindeventRuleByItemIDUseCaseDto
-	for _,eventRule := range *eventRules{
-		dto = append(dto, 
+	for _, eventRule := range *eventRules {
+		dto = append(dto,
 			FindeventRuleByItemIDUseCaseDto{
-				UserID: eventRule.UserID(),
-				ItemID: eventRule.ItemID(),
-				NormalLimit: eventRule.NormalLimit(),
+				UserID:         eventRule.UserID(),
+				ItemID:         eventRule.ItemID(),
+				NormalLimit:    eventRule.NormalLimit(),
 				ImportantLimit: eventRule.ImportantLimit(),
 			})
 	}
 
-	return &dto,nil
+	return &dto, nil
 }

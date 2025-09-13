@@ -19,9 +19,9 @@ func NewFindItemByIDUseCase(
 }
 
 type FindItemByIDUseCaseDto struct {
-	ID          string
-	Name      string
-	GroupID      string
+	ID      string
+	Name    string
+	GroupID string
 }
 
 func (uc *FindItemByIDUseCase) Run(ctx context.Context, itemID string) (*FindItemByIDUseCaseDto, error) {
@@ -30,8 +30,8 @@ func (uc *FindItemByIDUseCase) Run(ctx context.Context, itemID string) (*FindIte
 		return nil, err
 	}
 	return &FindItemByIDUseCaseDto{
-		ID:          item.ID(),
-		Name: 		 item.Name(),
-		GroupID:     item.GroupID(),
+		ID:      item.ID(),
+		Name:    item.Name(),
+		GroupID: item.GroupID(),
 	}, nil
 }

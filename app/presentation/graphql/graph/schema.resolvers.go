@@ -577,7 +577,7 @@ func (r *queryResolver) User(ctx context.Context, id *string) (*model.User, erro
 		}, nil
 	}
 
-	return nil,nil
+	return nil, nil
 }
 
 // Group is the resolver for the group field.

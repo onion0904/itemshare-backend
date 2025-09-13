@@ -37,7 +37,7 @@ func (c *EventDomainService) SaveEventService(ctx context.Context, event *Event,
 		log.Printf("Error finding event rule: %v", err) // エラーログ
 		return fmt.Errorf("eventRule not found: %w", err)
 	}
-	log.Println(normal,important)
+	log.Println(normal, important)
 
 	var ncount, icount int32
 
@@ -90,26 +90,26 @@ func (c *EventDomainService) EqualItemEvents(ctx context.Context, oldEvent, newE
 }
 
 func (c *EventDomainService) validImportantOrNormal(ctx context.Context, oldEvent, newEvent *Event) error {
-    switch {
-    case oldEvent.important && newEvent.important:
-        // 両方重要 → エラー
-        return errors.New("すでに重要なイベントが登録されています。")
+	switch {
+	case oldEvent.important && newEvent.important:
+		// 両方重要 → エラー
+		return errors.New("すでに重要なイベントが登録されています。")
 
-    case !oldEvent.important && !newEvent.important:
-        // 両方普通 → エラー
-        return errors.New("すでにイベントが登録されていますが、重要にすれば登録できます。")
+	case !oldEvent.important && !newEvent.important:
+		// 両方普通 → エラー
+		return errors.New("すでにイベントが登録されていますが、重要にすれば登録できます。")
 
-    case oldEvent.important && !newEvent.important:
-        // 既存重要、新規普通 → エラー
-        return errors.New("すでに重要なイベントが登録されています。")
+	case oldEvent.important && !newEvent.important:
+		// 既存重要、新規普通 → エラー
+		return errors.New("すでに重要なイベントが登録されています。")
 
-    case !oldEvent.important && newEvent.important:
-        // 既存普通、新規重要 → 古いイベントを削除して新規を登録
-        if err := c.EventRepo.DeleteEvent(ctx, oldEvent.id); err != nil {
-            return err
-        }
-        return nil
-    }
+	case !oldEvent.important && newEvent.important:
+		// 既存普通、新規重要 → 古いイベントを削除して新規を登録
+		if err := c.EventRepo.DeleteEvent(ctx, oldEvent.id); err != nil {
+			return err
+		}
+		return nil
+	}
 
-    return nil
+	return nil
 }
