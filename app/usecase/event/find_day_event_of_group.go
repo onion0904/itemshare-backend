@@ -22,6 +22,7 @@ func NewFindDayEventsOfGroupUseCase(
 type FindDayEventsOfGroupUseCaseDto struct {
 	ID          string
 	UserID      string
+	ItemID      string
 	Together    bool
 	Description string
 	Year        int32
@@ -40,11 +41,12 @@ func (uc *FindDayEventsOfGroupUseCase) Run(ctx context.Context, year, month, day
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*FindDayEventsOfGroupUseCaseDto,len(events))
+	result := make([]*FindDayEventsOfGroupUseCaseDto,0,len(events))
 	for _,event := range events{
 		result = append(result, &FindDayEventsOfGroupUseCaseDto{
 			ID:          event.ID(),
 			UserID:      event.UserID(),
+			ItemID:      event.ItemID(),
 			Together:    event.Together(),
 			Description: event.Description(),
 			Year:        event.Year(),

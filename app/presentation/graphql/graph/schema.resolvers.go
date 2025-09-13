@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/onion0904/CarShareSystem/app/config"
@@ -67,12 +68,17 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (bool, error) {
 }
 
 // CreateGroup is the resolver for the createGroup field.
-func (r *mutationResolver) CreateGroup(ctx context.Context, input model.CreateGroupInput) (*model.Group, error) {
+func (r *mutationResolver) CreateGroup(ctx context.Context, name string) (*model.Group, error) {
 	groupRepo := repo.NewGroupRepository(r.DB)
 	create := usecase_group.NewSaveUseCase(groupRepo)
+	autg := usecase_group.NewAddUserToGroupUseCase(groupRepo)
 
+	var userIDs []string
+	userID, _ := middleware.GetUserID(ctx)
+	userIDs = append(userIDs, userID)
 	DTO := usecase_group.SaveUseCaseDto{
-		Name: input.Name,
+		Name:    name,
+		UsersID: userIDs,
 	}
 
 	group, err := create.Run(ctx, DTO)
@@ -86,6 +92,15 @@ func (r *mutationResolver) CreateGroup(ctx context.Context, input model.CreateGr
 		UpdatedAt: group.UpdatedAt(),
 		UserIDs:   group.UserIDs(),
 		EventIDs:  group.EventIDs(),
+	}
+
+	autgDTO := usecase_group.AddUserToGroupUseCaseDto{
+		UserID:  userID,
+		GroupID: group.ID(),
+	}
+	_, err = autg.Run(ctx, autgDTO)
+	if err != nil {
+		return nil, err
 	}
 	return &ngroup, nil
 }
@@ -220,9 +235,10 @@ func (r *mutationResolver) AcceptGroupInvitation(ctx context.Context, token stri
 func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEventInput, groupID string) (*model.Event, error) {
 	eventRepo := repo.NewEventRepository(r.DB)
 	eventRuleRepo := repo.NewEventRuleRepository(r.DB)
-	create := usecase_event.NewEventUseCase(domain_event.NewEventDomainService(eventRepo,eventRuleRepo))
+	userID, _ := middleware.GetUserID(ctx)
+	create := usecase_event.NewEventUseCase(domain_event.NewEventDomainService(eventRepo, eventRuleRepo))
 	AddEventUseCaseDTO := usecase_event.AddEventUseCaseDTO{
-		UsersID:     input.UserID,
+		UsersID:     userID,
 		ItemID:      input.ItemID,
 		Together:    input.Together,
 		Description: input.Description,
@@ -231,7 +247,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input model.CreateEv
 		Day:         input.Day,
 		Important:   input.Important,
 	}
-	event, err := create.Run(ctx, AddEventUseCaseDTO,groupID)
+	event, err := create.Run(ctx, AddEventUseCaseDTO, groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -278,6 +294,7 @@ func (r *mutationResolver) DeleteEvent(ctx context.Context, id string) (bool, er
 
 // CreateItem is the resolver for the createItem field.
 func (r *mutationResolver) CreateItem(ctx context.Context, input model.CreateItemInput) (*model.Item, error) {
+	// 1. アイテムを作成
 	itemRepo := repo.NewItemRepository(r.DB)
 	create := usecase_item.NewSaveItemUseCase(itemRepo)
 	DTO := usecase_item.SaveUseCaseDto{
@@ -289,21 +306,33 @@ func (r *mutationResolver) CreateItem(ctx context.Context, input model.CreateIte
 		return nil, err
 	}
 
-	findGroupUC := usecase_group.NewFindGroupUseCase(repo.NewGroupRepository(r.DB))
+	// 2. グループ情報を取得
+	groupRepo := repo.NewGroupRepository(r.DB)
+	findGroupUC := usecase_group.NewFindGroupUseCase(groupRepo)
 	group, err := findGroupUC.Run(ctx, input.GroupID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find group: %w", err)
+	}
 
-	upsertEventRuleUC := usecase_eventRule.NewUpsertUseCase(repo.NewEventRuleRepository(r.DB))
+	// 3. グループに所属する全ユーザーのイベントルールを作成
+	eventRuleRepo := repo.NewEventRuleRepository(r.DB)
+	upsertEventRuleUC := usecase_eventRule.NewUpsertUseCase(eventRuleRepo)
 
-	// eventRuleのデフォルト値の追加
+	log.Printf("Creating event rules for users: %v", group.UserIDs) // デバッグログ
+
 	for _, userID := range group.UserIDs {
+		if userID == "" {
+			continue // 空のユーザーIDをスキップ
+		}
+
 		err := upsertEventRuleUC.Run(ctx, usecase_eventRule.UpsertUseCaseDto{
 			UserID:         userID,
 			ItemID:         item.ID,
-			NormalLimit:    7,
-			ImportantLimit: 0,
+			NormalLimit:    7, // デフォルト値
+			ImportantLimit: 0, // デフォルト値
 		})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to create event rule for user %s: %w", userID, err)
 		}
 	}
 
@@ -439,6 +468,7 @@ func (r *mutationResolver) Signup(ctx context.Context, input model.CreateUserInp
 	if err != nil {
 		return nil, err
 	}
+
 	return &model.AuthUserResponse{
 		Token: tokenString,
 		User:  &nuser,
@@ -506,44 +536,48 @@ func (r *mutationResolver) Signin(ctx context.Context, email string, password st
 }
 
 // User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+func (r *queryResolver) User(ctx context.Context, id *string) (*model.User, error) {
 	userRepo := repo.NewUserRepository(r.DB)
 	find := usecase_user.NewFindUserUseCase(userRepo)
 	var user *usecase_user.FindUserUseCaseDto
 	var err error
 	//ctx から取った userID を使うことで 「なりすまし」を防ぐ
-	userID, ok := middleware.GetUserID(ctx)
-	if !ok {
+	if id != nil {
 		// 本人じゃない時
-		user, err = find.Run(ctx, id)
+		user, err = find.Run(ctx, *id)
 		if err != nil {
 			return nil, err
 		}
-		nuser := model.User{
+		return &model.User{
 			ID:        user.ID,
 			LastName:  user.LastName,
 			FirstName: user.FirstName,
-		}
-		return &nuser, nil
-	} else {
+			Email:     user.Email,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+		}, nil
+	}
+
+	userID, ok := middleware.GetUserID(ctx)
+	if ok {
 		// 本人の時
 		user, err = find.Run(ctx, userID)
 		if err != nil {
 			return nil, err
 		}
-		nuser := model.User{
+		return &model.User{
 			ID:        user.ID,
 			LastName:  user.LastName,
 			FirstName: user.FirstName,
 			Email:     user.Email,
-			Password:  user.Password,
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
 			GroupIDs:  user.GroupIDs,
 			EventIDs:  user.EventIDs,
-		}
-		return &nuser, nil
+		}, nil
 	}
+
+	return nil,nil
 }
 
 // Group is the resolver for the group field.
@@ -566,23 +600,27 @@ func (r *queryResolver) Group(ctx context.Context, id string) (*model.Group, err
 }
 
 // GroupsByUserID is the resolver for the groupsByUserID field.
-func (r *queryResolver) GroupsByUserID(ctx context.Context, userID string) ([]*model.Group, error) {
+func (r *queryResolver) GroupsByUserID(ctx context.Context) ([]*model.Group, error) {
+	userID, _ := middleware.GetUserID(ctx)
 	groupRepo := repo.NewGroupRepository(r.DB)
 	find := usecase_group.NewFindGroupsByUserIDUseCase(groupRepo)
 	groups, err := find.Run(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*model.Group, len(groups))
+
+	result := make([]*model.Group, 0, len(groups))
 	for _, group := range groups {
-		result = append(result, &model.Group{
-			ID:        group.ID,
-			Name:      group.Name,
-			CreatedAt: group.CreatedAt,
-			UpdatedAt: group.UpdatedAt,
-			UserIDs:   group.UserIDs,
-			EventIDs:  group.EventIDs,
-		})
+		if group != nil {
+			result = append(result, &model.Group{
+				ID:        group.ID,
+				Name:      group.Name,
+				CreatedAt: group.CreatedAt,
+				UpdatedAt: group.UpdatedAt,
+				UserIDs:   group.UserIDs,
+				EventIDs:  group.EventIDs,
+			})
+		}
 	}
 	return result, nil
 }
@@ -621,11 +659,12 @@ func (r *queryResolver) EventsByMonth(ctx context.Context, input model.MonthlyEv
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*model.Event, len(events))
-	for _, event := range result {
+	result := make([]*model.Event, 0, len(events))
+	for _, event := range events {
 		result = append(result, &model.Event{
 			ID:          event.ID,
 			UserID:      event.UserID,
+			ItemID:      event.ItemID,
 			Together:    event.Together,
 			Description: event.Description,
 			Year:        event.Year,
@@ -639,7 +678,6 @@ func (r *queryResolver) EventsByMonth(ctx context.Context, input model.MonthlyEv
 			Important:   event.Important,
 		})
 	}
-
 	return result, nil
 }
 
@@ -651,11 +689,12 @@ func (r *queryResolver) EventsByDay(ctx context.Context, input model.DailyEventI
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*model.Event, len(events))
+	result := make([]*model.Event, 0, len(events))
 	for _, event := range events {
 		result = append(result, &model.Event{
 			ID:          event.ID,
 			UserID:      event.UserID,
+			ItemID:      event.ItemID,
 			Together:    event.Together,
 			Description: event.Description,
 			Year:        event.Year,

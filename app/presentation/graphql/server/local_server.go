@@ -13,6 +13,7 @@ import (
 	usecase_mail "github.com/onion0904/CarShareSystem/app/usecase/mail"
 
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -41,6 +42,14 @@ func LocalStart() {
 		Directives: graph.Directive,
 	}))
 
+	// CORS設定
+    c := cors.New(cors.Options{
+        AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:8080"}, // フロントエンドのURL
+        AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+        AllowedHeaders:   []string{"Content-Type", "Authorization"},
+        Debug:           true,
+    })
+
 	// CORS対応。
 	srv.AddTransport(transport.Options{})
 	// GET / POST：GraphQLクエリを HTTP 経由で受け取るため。
@@ -58,7 +67,7 @@ func LocalStart() {
 	})
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", mymiddleware.AuthMiddleware(srv))
+	http.Handle("/query", c.Handler(mymiddleware.AuthMiddleware(srv)))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", Port)
 	log.Fatal(http.ListenAndServe(":"+Port, nil))

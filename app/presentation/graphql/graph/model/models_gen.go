@@ -12,7 +12,6 @@ type AuthUserResponse struct {
 }
 
 type CreateEventInput struct {
-	UserID      string `json:"userID"`
 	ItemID      string `json:"itemID"`
 	Together    bool   `json:"together"`
 	Description string `json:"description"`
@@ -20,11 +19,6 @@ type CreateEventInput struct {
 	Month       int32  `json:"month"`
 	Day         int32  `json:"day"`
 	Important   bool   `json:"important"`
-}
-
-type CreateGroupInput struct {
-	Name   string `json:"name"`
-	UserID string `json:"userId"`
 }
 
 type CreateItemInput struct {

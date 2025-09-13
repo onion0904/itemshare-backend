@@ -96,7 +96,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		AcceptGroupInvitation     func(childComplexity int, token string) int
 		CreateEvent               func(childComplexity int, input model.CreateEventInput, groupID string) int
-		CreateGroup               func(childComplexity int, input model.CreateGroupInput) int
+		CreateGroup               func(childComplexity int, name string) int
 		CreateItem                func(childComplexity int, input model.CreateItemInput) int
 		DeleteEvent               func(childComplexity int, id string) int
 		DeleteGroup               func(childComplexity int, id string) int
@@ -118,10 +118,10 @@ type ComplexityRoot struct {
 		EventsByDay    func(childComplexity int, input model.DailyEventInput, groupID string) int
 		EventsByMonth  func(childComplexity int, input model.MonthlyEventInput, groupID string) int
 		Group          func(childComplexity int, id string) int
-		GroupsByUserID func(childComplexity int, userID string) int
+		GroupsByUserID func(childComplexity int) int
 		Item           func(childComplexity int, id string) int
 		ItemsBygroupID func(childComplexity int, groupID string) int
-		User           func(childComplexity int, id string) int
+		User           func(childComplexity int, id *string) int
 	}
 
 	User struct {
@@ -140,7 +140,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error)
 	DeleteUser(ctx context.Context) (bool, error)
-	CreateGroup(ctx context.Context, input model.CreateGroupInput) (*model.Group, error)
+	CreateGroup(ctx context.Context, name string) (*model.Group, error)
 	UpdateGroup(ctx context.Context, id string, input model.UpdateGroupInput) (*model.Group, error)
 	DeleteGroup(ctx context.Context, id string) (bool, error)
 	RemoveUserFromGroup(ctx context.Context, groupID string, userID string) (*model.Group, error)
@@ -157,9 +157,9 @@ type MutationResolver interface {
 	Signin(ctx context.Context, email string, password string) (*model.AuthUserResponse, error)
 }
 type QueryResolver interface {
-	User(ctx context.Context, id string) (*model.User, error)
+	User(ctx context.Context, id *string) (*model.User, error)
 	Group(ctx context.Context, id string) (*model.Group, error)
-	GroupsByUserID(ctx context.Context, userID string) ([]*model.Group, error)
+	GroupsByUserID(ctx context.Context) ([]*model.Group, error)
 	Event(ctx context.Context, id string) (*model.Event, error)
 	EventsByMonth(ctx context.Context, input model.MonthlyEventInput, groupID string) ([]*model.Event, error)
 	EventsByDay(ctx context.Context, input model.DailyEventInput, groupID string) ([]*model.Event, error)
@@ -423,7 +423,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateGroup(childComplexity, args["input"].(model.CreateGroupInput)), true
+		return e.complexity.Mutation.CreateGroup(childComplexity, args["name"].(string)), true
 
 	case "Mutation.createItem":
 		if e.complexity.Mutation.CreateItem == nil {
@@ -641,12 +641,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := ec.field_Query_groupsByUserID_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GroupsByUserID(childComplexity, args["userID"].(string)), true
+		return e.complexity.Query.GroupsByUserID(childComplexity), true
 
 	case "Query.item":
 		if e.complexity.Query.Item == nil {
@@ -682,7 +677,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.User(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.User(childComplexity, args["id"].(*string)), true
 
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
@@ -756,7 +751,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputCreateEventInput,
-		ec.unmarshalInputCreateGroupInput,
 		ec.unmarshalInputCreateItemInput,
 		ec.unmarshalInputCreateUserInput,
 		ec.unmarshalInputDailyEventInput,
@@ -970,23 +964,23 @@ func (ec *executionContext) field_Mutation_createEvent_argsGroupID(
 func (ec *executionContext) field_Mutation_createGroup_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_createGroup_argsInput(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_createGroup_argsName(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["input"] = arg0
+	args["name"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_createGroup_argsInput(
+func (ec *executionContext) field_Mutation_createGroup_argsName(
 	ctx context.Context,
 	rawArgs map[string]any,
-) (model.CreateGroupInput, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNCreateGroupInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateGroupInput(ctx, tmp)
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+	if tmp, ok := rawArgs["name"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
-	var zeroVal model.CreateGroupInput
+	var zeroVal string
 	return zeroVal, nil
 }
 
@@ -1489,29 +1483,6 @@ func (ec *executionContext) field_Query_group_argsID(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_groupsByUserID_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := ec.field_Query_groupsByUserID_argsUserID(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["userID"] = arg0
-	return args, nil
-}
-func (ec *executionContext) field_Query_groupsByUserID_argsUserID(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
-	if tmp, ok := rawArgs["userID"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
 func (ec *executionContext) field_Query_item_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1571,13 +1542,13 @@ func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs m
 func (ec *executionContext) field_Query_user_argsID(
 	ctx context.Context,
 	rawArgs map[string]any,
-) (string, error) {
+) (*string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 	if tmp, ok := rawArgs["id"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
 	}
 
-	var zeroVal string
+	var zeroVal *string
 	return zeroVal, nil
 }
 
@@ -3155,7 +3126,7 @@ func (ec *executionContext) _Mutation_createGroup(ctx context.Context, field gra
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		directive0 := func(rctx context.Context) (any, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().CreateGroup(rctx, fc.Args["input"].(model.CreateGroupInput))
+			return ec.resolvers.Mutation().CreateGroup(rctx, fc.Args["name"].(string))
 		}
 
 		directive1 := func(ctx context.Context) (any, error) {
@@ -4350,7 +4321,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		directive0 := func(rctx context.Context) (any, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().User(rctx, fc.Args["id"].(string))
+			return ec.resolvers.Query().User(rctx, fc.Args["id"].(*string))
 		}
 
 		directive1 := func(ctx context.Context) (any, error) {
@@ -4538,7 +4509,7 @@ func (ec *executionContext) _Query_groupsByUserID(ctx context.Context, field gra
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		directive0 := func(rctx context.Context) (any, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().GroupsByUserID(rctx, fc.Args["userID"].(string))
+			return ec.resolvers.Query().GroupsByUserID(rctx)
 		}
 
 		directive1 := func(ctx context.Context) (any, error) {
@@ -4576,7 +4547,7 @@ func (ec *executionContext) _Query_groupsByUserID(ctx context.Context, field gra
 	return ec.marshalNGroup2ᚕᚖgithubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐGroupᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_groupsByUserID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_groupsByUserID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -4599,17 +4570,6 @@ func (ec *executionContext) fieldContext_Query_groupsByUserID(ctx context.Contex
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_groupsByUserID_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -7590,20 +7550,13 @@ func (ec *executionContext) unmarshalInputCreateEventInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userID", "itemID", "together", "description", "year", "month", "day", "important"}
+	fieldsInOrder := [...]string{"itemID", "together", "description", "year", "month", "day", "important"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userID":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "itemID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("itemID"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -7653,40 +7606,6 @@ func (ec *executionContext) unmarshalInputCreateEventInput(ctx context.Context, 
 				return it, err
 			}
 			it.Important = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputCreateGroupInput(ctx context.Context, obj any) (model.CreateGroupInput, error) {
-	var it model.CreateGroupInput
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"name", "userId"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "name":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		}
 	}
 
@@ -9114,11 +9033,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 
 func (ec *executionContext) unmarshalNCreateEventInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateEventInput(ctx context.Context, v any) (model.CreateEventInput, error) {
 	res, err := ec.unmarshalInputCreateEventInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNCreateGroupInput2githubᚗcomᚋonion0904ᚋCarShareSystemᚋappᚋpresentationᚋgraphqlᚋgraphᚋmodelᚐCreateGroupInput(ctx context.Context, v any) (model.CreateGroupInput, error) {
-	res, err := ec.unmarshalInputCreateGroupInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

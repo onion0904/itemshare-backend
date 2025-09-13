@@ -129,7 +129,7 @@ func (gr *groupRepository) FindGroupsByUserID(ctx context.Context, userID string
 		return nil, err
 	}
 
-	result := make([]*group.Group,len(groups))
+	result := make([]*group.Group,0,len(groups))
 
 	for _,g := range groups{
 		userIDs, err := query.GetUserIDsByGroupID(ctx, g.ID)
@@ -156,7 +156,6 @@ func (gr *groupRepository) FindGroupsByUserID(ctx context.Context, userID string
 
 		result = append(result, ng)
 	}
-	
 
 	if err := tx.Commit(); err != nil {
 		return nil, err

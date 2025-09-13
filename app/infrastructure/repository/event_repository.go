@@ -6,10 +6,10 @@ import (
 	"errors"
 
 	errDomain "github.com/onion0904/CarShareSystem/app/domain/error"
-	pkgTime "github.com/onion0904/CarShareSystem/pkg/time"
 	"github.com/onion0904/CarShareSystem/app/domain/event"
 	"github.com/onion0904/CarShareSystem/app/infrastructure/db"
 	dbgen "github.com/onion0904/CarShareSystem/app/infrastructure/db/sqlc/dbgen"
+	pkgTime "github.com/onion0904/CarShareSystem/pkg/time"
 )
 
 type eventRepository struct {
@@ -26,7 +26,7 @@ func (er *eventRepository) UpsertEvent(ctx context.Context, event *event.Event) 
 	err := query.UpsertEvent(ctx, dbgen.UpsertEventParams{
 		ID:          event.ID(),
 		UserID:      event.UserID(),
-		ItemID: 	 event.ItemID(),
+		ItemID:      event.ItemID(),
 		Together:    event.Together(),
 		Description: event.Description(),
 		Year:        event.Year(),
@@ -35,6 +35,7 @@ func (er *eventRepository) UpsertEvent(ctx context.Context, event *event.Event) 
 		Date:        event.Date(),
 		StartDate:   event.StartDate(),
 		EndDate:     event.EndDate(),
+		Important:   event.Important(),
 	})
 	if err != nil {
 		return err
@@ -85,20 +86,20 @@ func (er *eventRepository) FindEvent(ctx context.Context, eventID string) (*even
 	return ne, nil
 }
 
-func (er *eventRepository) FindDayEventsOfGroup(ctx context.Context, year, month, day int32, groupID string) ([]*event.Event, error){
+func (er *eventRepository) FindDayEventsOfGroup(ctx context.Context, year, month, day int32, groupID string) ([]*event.Event, error) {
 	query := db.GetQuery(ctx)
 
-	events, err := query.FindDayEvents(ctx,dbgen.FindDayEventsParams{
-		Year: year,
-		Month: month,
-		Day: day,
+	events, err := query.FindDayEvents(ctx, dbgen.FindDayEventsParams{
+		Year:    year,
+		Month:   month,
+		Day:     day,
 		Groupid: groupID,
 	})
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*event.Event,len(events)) 
-	for _,e := range events{
+	result := make([]*event.Event,0, len(events))
+	for _, e := range events {
 		ne, err := event.Reconstruct(
 			e.ID,
 			e.UserID,
@@ -113,7 +114,7 @@ func (er *eventRepository) FindDayEventsOfGroup(ctx context.Context, year, month
 			e.EndDate,
 			e.Important,
 		)
-		
+
 		if err != nil {
 			return nil, err
 		}
@@ -123,23 +124,22 @@ func (er *eventRepository) FindDayEventsOfGroup(ctx context.Context, year, month
 		result = append(result, ne)
 	}
 
-	return result,err
+	return result, err
 }
-	
 
 func (er *eventRepository) FindMonthEventsOfGroup(ctx context.Context, year, month int32, groupID string) ([]*event.Event, error) {
 	query := db.GetQuery(ctx)
 
-	events, err := query.FindMonthEvents(ctx,dbgen.FindMonthEventsParams{
-		Year: year,
-		Month: month,
+	events, err := query.FindMonthEvents(ctx, dbgen.FindMonthEventsParams{
+		Year:    year,
+		Month:   month,
 		Groupid: groupID,
 	})
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*event.Event,len(events)) 
-	for _,e := range events{
+	result := make([]*event.Event, 0, len(events))
+	for _, e := range events {
 		ne, err := event.Reconstruct(
 			e.ID,
 			e.UserID,
@@ -154,7 +154,7 @@ func (er *eventRepository) FindMonthEventsOfGroup(ctx context.Context, year, mon
 			e.EndDate,
 			e.Important,
 		)
-		
+
 		if err != nil {
 			return nil, err
 		}
@@ -169,15 +169,15 @@ func (er *eventRepository) FindMonthEventsOfGroup(ctx context.Context, year, mon
 func (er *eventRepository) FindWeeklyEvents(ctx context.Context, year, month, day int32, userID string) ([]*event.Event, error) {
 	query := db.GetQuery(ctx)
 
-	events, err := query.FindWeeklyEvents(ctx,dbgen.FindWeeklyEventsParams{
-		Userid: userID,
-		Searchdate: pkgTime.CreateEventDate(year,month,day),
+	events, err := query.FindWeeklyEvents(ctx, dbgen.FindWeeklyEventsParams{
+		Userid:     userID,
+		Searchdate: pkgTime.CreateEventDate(year, month, day),
 	})
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*event.Event,len(events)) 
-	for _,e := range events{
+	result := make([]*event.Event,0, len(events))
+	for _, e := range events {
 		ne, err := event.Reconstruct(
 			e.ID,
 			e.UserID,
@@ -192,7 +192,7 @@ func (er *eventRepository) FindWeeklyEvents(ctx context.Context, year, month, da
 			e.EndDate,
 			e.Important,
 		)
-		
+
 		if err != nil {
 			return nil, err
 		}
