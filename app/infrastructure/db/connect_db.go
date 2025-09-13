@@ -103,7 +103,7 @@ func getQueriesWithContext(ctx context.Context) *dbgen.Queries {
 
 func LocalNewMainDB(cnf config.DBConfig) *sql.DB {
 	once.Do(func() {
-		dbcon, err := localConnect(cnf.DB_HOST,cnf.DB_PORT,cnf.DB_USER,cnf.DB_PASSWORD,cnf.DB_NAME)
+		dbcon, err := localConnect(cnf.DB_HOST, cnf.DB_PORT, cnf.DB_USER, cnf.DB_PASSWORD, cnf.DB_NAME)
 		if err != nil {
 			panic(err)
 		}

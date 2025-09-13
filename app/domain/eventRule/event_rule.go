@@ -1,16 +1,16 @@
 package eventRule
 
 type EventRule struct {
-	userID string
-	itemID	   string
+	userID         string
+	itemID         string
 	normalLimit    int32
 	importantLimit int32
 }
 
 func Reconstruct(
 	userID string,
-	itemID	   string,
-	normalLimit    int32,
+	itemID string,
+	normalLimit int32,
 	importantLimit int32,
 ) (*EventRule, error) {
 	return newEventRule(
@@ -23,8 +23,8 @@ func Reconstruct(
 
 func NewEventRule(
 	userID string,
-	itemID	   string,
-	normalLimit    int32,
+	itemID string,
+	normalLimit int32,
 	importantLimit int32,
 ) (*EventRule, error) {
 	return newEventRule(
@@ -37,14 +37,14 @@ func NewEventRule(
 
 func newEventRule(
 	userID string,
-	itemID	   string,
-	normalLimit    int32,
+	itemID string,
+	normalLimit int32,
 	importantLimit int32,
 ) (*EventRule, error) {
 	return &EventRule{
-		userID: userID,
-		itemID: itemID,
-		normalLimit: normalLimit,
+		userID:         userID,
+		itemID:         itemID,
+		normalLimit:    normalLimit,
 		importantLimit: importantLimit,
 	}, nil
 }
