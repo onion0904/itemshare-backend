@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production # 環境名（任意、Secrets管理に便利）
+    environment: carshare-backend # 環境名（任意、Secrets管理に便利）
 
     steps:
       - name: Checkout Code
