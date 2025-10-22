@@ -1,0 +1,59 @@
+# name: Deploy API to Proxmox VM
+
+# on:
+#   push:
+#     branches:
+#       - main # main ブランチへのプッシュでデプロイ開始
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     environment: production # 環境名（任意、Secrets管理に便利）
+
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v4
+
+#       # --- 1. Docker Hub へのログインとビルド/プッシュ ---
+#       - name: Log in to Docker Hub
+#         uses: docker/login-action@v3
+#         with:
+#           # Docker Hub のユーザー名（YOUR_DOCKER_USERNAME に置き換える）
+#           username: ${{ secrets.DOCKER_USERNAME }}
+#           # Docker Hub のアクセストークン（GitHub Secretsに登録済み）
+#           password: ${{ secrets.DOCKER_PASSWORD }}
+
+#       - name: Build and push Docker image
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: . # Dockerfileがあるディレクトリ
+#           push: true
+#           # タグ名: YOUR_DOCKER_USERNAME/YOUR_REPO_NAME:latest に置き換える
+#           tags: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.REPO_NAME }}:latest 
+
+#       # --- 2. SSH 経由でのデプロイ実行（Proxmox VMへ） ---
+#       - name: Deploy to Proxmox VM via SSH
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.DEPLOY_HOST }}
+#           username: ${{ secrets.DEPLOY_USER }}
+#           key: ${{ secrets.DEPLOY_KEY }}
+#           # 実行コマンド（VM上で実行されます）
+#           script: |
+#             # 1. アプリケーションディレクトリに移動
+#             # 注意: VM上でコードをcloneした場所へのパスに置き換えてください
+#             cd /home/${{ secrets.DEPLOY_USER }}/your-go-api-repo 
+            
+#             # 2. 環境変数の設定 (重要: .envファイルをVM上に配置する)
+#             # 環境変数をVM内の .env ファイルからロード
+            
+#             # 3. 最新のDockerイメージをプル（apiサービスのみ）
+#             # DB (postgres) のイメージは変わらないのでプルは不要
+#             /usr/bin/docker compose pull api
+            
+#             # 4. サービスを再起動（DBは停止しないよう注意）
+#             # 新しいイメージをデタッチモードで起動
+#             /usr/bin/docker compose up -d --no-deps api
+            
+#             # 5. 不要になった Docker イメージを削除し、容量を節約
+#             /usr/bin/docker image prune -f

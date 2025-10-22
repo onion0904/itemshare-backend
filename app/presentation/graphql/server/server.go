@@ -12,22 +12,23 @@ import (
 	"github.com/onion0904/CarShareSystem/app/presentation/graphql/graph"
 	usecase_mail "github.com/onion0904/CarShareSystem/app/usecase/mail"
 
-	// "github.com/joho/godotenv"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-func Start() {
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Println(".env file not found, proceeding without it")
-	// }
+func LocalStart() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println(".env file not found, proceeding without it")
+	}
 	cfg := config.GetConfig()
-	DB := db.NewMainDB(cfg.DB)
+	DB := db.LocalNewMainDB(cfg.DB)
 	migrations.Migrate(DB)
 
 	Port := cfg.Server.Port
@@ -40,6 +41,14 @@ func Start() {
 		},
 		Directives: graph.Directive,
 	}))
+
+	// CORS設定
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:3000", "http://localhost:8080"}, // フロントエンドのURL
+		AllowedMethods: []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders: []string{"Content-Type", "Authorization"},
+		Debug:          true,
+	})
 
 	// CORS対応。
 	srv.AddTransport(transport.Options{})
@@ -58,8 +67,8 @@ func Start() {
 	})
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", mymiddleware.AuthMiddleware(srv))
+	http.Handle("/query", c.Handler(mymiddleware.AuthMiddleware(srv)))
 
-	log.Printf("Listening on 0.0.0.0:%s", Port)
-	log.Fatal(http.ListenAndServe("0.0.0.0:"+Port, nil))
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", Port)
+	log.Fatal(http.ListenAndServe(":"+Port, nil))
 }

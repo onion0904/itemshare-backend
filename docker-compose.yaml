@@ -11,8 +11,6 @@ services:
       DB_USER: ${DB_USER}               # localDBユーザー名
       DB_PASSWORD: ${DB_PASSWORD}       # localDBユーザーパスワード
       DB_NAME: ${DB_NAME}               # localDB名
-      ROOTPASS: ${ROOTPASS}             # localDBのルートパスワード
-      DATABASE_URL: ${DATABASE_URL}     # supabaseのdatabaseのURL
       SERVER_PORT: ${SERVER_PORT}       # サーバーポート
       GMAIL_APP_PASS: ${GMAIL_APP_PASS} # gmailのapp password
       SENDER_EMAIL: ${SENDER_EMAIL}     # 送信者のメールアドレス

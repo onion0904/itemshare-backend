@@ -43,46 +43,6 @@ func SetDB(d *sql.DB) {
 	dbcon = d
 }
 
-func NewMainDB(cnf config.DBConfig) *sql.DB {
-	once.Do(func() {
-		dbcon, err := connect(cnf.DB_URL)
-		if err != nil {
-			panic(err)
-		}
-		q := dbgen.New(dbcon)
-		SetQuery(q)
-		SetDB(dbcon)
-	})
-
-	return dbcon
-}
-
-// supabaseのdbに接続する：最大5回リトライする
-func connect(db_url string) (*sql.DB, error) {
-	for i := 0; i < maxRetries; i++ {
-		db, err := sql.Open("postgres", db_url)
-		if err != nil {
-			log.Fatal("Error connecting to the database:", err)
-		}
-		if err != nil {
-			log.Printf("Error opening DB connection: %v", err)
-
-			return nil, fmt.Errorf("could not open db: %w", err)
-		}
-
-		err = db.Ping()
-		if err == nil {
-			return db, nil
-		}
-
-		log.Printf("could not connect to db: %v", err)
-		log.Printf("retrying in %v seconds...", delay/time.Second)
-		time.Sleep(delay)
-	}
-
-	return nil, fmt.Errorf("could not connect to db after %d attempts", maxRetries)
-}
-
 type CtxKey string
 
 const (
