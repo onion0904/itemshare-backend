@@ -38,6 +38,8 @@ jobs:
         env:
           SSH_KEY_FILE: ~/.ssh/deploy_key
         run: |
+          # .sshディレクトリを作成
+          mkdir -p ~/.ssh
           # 鍵をファイルに保存
           echo "${{ secrets.DEPLOY_KEY }}" > ${SSH_KEY_FILE}
           chmod 600 ${SSH_KEY_FILE}
