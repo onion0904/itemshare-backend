@@ -36,10 +36,11 @@ jobs:
       # ------------------------------------------------------------------
       - name: Setup SSH Environment and Install Cloudflared
         env:
-          SSH_KEY_FILE: ~/.ssh/deploy_key
         run: |
-          # .sshディレクトリを作成
-          mkdir -p ~/.ssh
+          # パスを明示的に $HOME/.ssh に定義
+          SSH_KEY_PATH="$HOME/.ssh/deploy_key"
+          # .ssh ディレクトリを作成
+          mkdir -p "$HOME/.ssh"
           # 鍵をファイルに保存
           echo "${{ secrets.DEPLOY_KEY }}" > ${SSH_KEY_FILE}
           chmod 600 ${SSH_KEY_FILE}
