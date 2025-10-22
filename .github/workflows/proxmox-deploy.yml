@@ -50,13 +50,8 @@ jobs:
       # ========================================
       - name: Setup Cloudflare Access Authentication
         run: |
-          # cloudflaredの認証情報を設定
-          # この方法で環境変数として認証情報を渡す
-          export CF_ACCESS_CLIENT_ID="${{ secrets.CF_CLIENT_ID }}"
-          export CF_ACCESS_CLIENT_SECRET="${{ secrets.CF_CLIENT_SECRET }}"
-          
           # 認証情報が設定されているか確認（値は表示しない）
-          if [ -z "$CF_ACCESS_CLIENT_ID" ] || [ -z "$CF_ACCESS_CLIENT_SECRET" ]; then
+          if [ -z "${{ secrets.CF_CLIENT_ID }}" ] || [ -z "${{ secrets.CF_CLIENT_SECRET }}" ]; then
             echo "❌ Error: CF_CLIENT_ID or CF_CLIENT_SECRET is not set"
             exit 1
           fi
@@ -70,14 +65,22 @@ jobs:
           echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           
+          # cloudflaredのラッパースクリプトを作成
+          # このスクリプトが認証情報を環境変数として受け取る
+          cat << 'SCRIPT_EOF' > ~/.ssh/cloudflared-wrapper.sh
+          #!/bin/bash
+          exec cloudflared access ssh --hostname "$1"
+          SCRIPT_EOF
+          chmod +x ~/.ssh/cloudflared-wrapper.sh
+          
           # SSH設定ファイルを作成
-          # 環境変数を使用してcloudflaredに認証情報を渡す
-          cat << 'EOF' > ~/.ssh/config
+          # ProxyCommandでラッパースクリプトを使用
+          cat << EOF > ~/.ssh/config
           Host deploy-vm
             HostName ${{ secrets.DEPLOY_HOST }}
             User ${{ secrets.DEPLOY_USER }}
             IdentityFile ~/.ssh/id_rsa
-            ProxyCommand sh -c 'CF_ACCESS_CLIENT_ID=$CF_ACCESS_CLIENT_ID CF_ACCESS_CLIENT_SECRET=$CF_ACCESS_CLIENT_SECRET cloudflared access ssh --hostname %h'
+            ProxyCommand ~/.ssh/cloudflared-wrapper.sh %h
             StrictHostKeyChecking no
             UserKnownHostsFile /dev/null
           EOF
@@ -90,26 +93,34 @@ jobs:
       # ========================================
       - name: Deploy to Proxmox VM via SSH
         env:
+          # cloudflaredが環境変数から自動的に読み取る
           CF_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
           CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
         run: |
+          # 環境変数が設定されていることを確認
+          echo "🔐 Authenticating via Cloudflare Access..."
+          
           # SSH接続してデプロイコマンドを実行
-          # deploy-vmは上記で設定したHost名
-          ssh -v deploy-vm << 'EOF'
-            # アプリケーションディレクトリに移動
+          # -T: 疑似端末の割り当てを無効化（標準入力リダイレクトのため）
+          ssh -T deploy-vm << 'EOF'
+            set -e  # エラーが発生したら即座に終了
+            
+            echo "📂 Navigating to application directory..."
             cd /home/${{ secrets.DEPLOY_USER }}/main/itemshare-backend
             
-            # 最新のDockerイメージをプル（apiサービスのみ）
+            echo "📥 Pulling latest Docker image for api service..."
             /usr/bin/docker compose pull api
             
-            # apiサービスのみを再起動（他のサービスには影響しない）
+            echo "🔄 Restarting api service..."
             /usr/bin/docker compose up -d --no-deps api
             
-            # 使用されていない古いDockerイメージを削除してディスク容量を節約
+            echo "🧹 Cleaning up unused Docker images..."
             /usr/bin/docker image prune -f
             
-            echo "Deployment completed successfully!"
+            echo "✅ Deployment completed successfully!"
           EOF
+          
+          echo "🎉 Deployment finished!"
 
       # ========================================
       # 6. デプロイ完了通知（オプション）
