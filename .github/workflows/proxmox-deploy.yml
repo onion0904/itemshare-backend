@@ -3,7 +3,7 @@ name: Deploy API to Proxmox VM
 on:
   push:
     branches:
-      - main # main ブランチへのプッシュでデプロイ開始
+      - vm-deploy # main ブランチへのプッシュでデプロイ開始
 
 jobs:
   deploy:
