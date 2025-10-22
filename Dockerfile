@@ -14,7 +14,7 @@ RUN go mod download
 RUN go build -o /usr/local/bin/app-server ./app/cmd/server/main.go
 
 # 実行ステージ
-FROM golang:1.24.4-alpine AS runner
+FROM golang:1.24.6-alpine AS runner
 
 RUN apk add --no-cache git
 

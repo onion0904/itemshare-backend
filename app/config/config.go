@@ -19,8 +19,6 @@ type DBConfig struct {
 	DB_USER     string
 	DB_PASSWORD string
 	DB_NAME     string
-	ROOTPASS    string
-	DB_URL      string
 }
 
 type Server struct {
@@ -54,8 +52,6 @@ func GetConfig() *Config {
 		config.DB.DB_USER = getEnv("DB_USER", "")
 		config.DB.DB_PASSWORD = getEnv("DB_PASSWORD", "")
 		config.DB.DB_NAME = getEnv("DB_NAME", "")
-		config.DB.ROOTPASS = getEnv("ROOTPASS", "")
-		config.DB.DB_URL = getEnv("DATABASE_URL", "")
 
 		// Server
 		config.Server.Port = getEnv("SERVER_PORT", "")

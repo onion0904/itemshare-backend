@@ -26,7 +26,8 @@ func NewEventDomainService(
 
 func (c *EventDomainService) SaveEventService(ctx context.Context, event *Event, groupID string) error {
 	// イベント期間の制約を確認
-	if event.date.Before(event.startDate) || event.date.After(event.endDate) {
+	// 現在の日付から見て次の週の月曜日から日曜日が登録できる
+	if event.date.Before(event.startDate.AddDate(0, 0, -1)) || event.date.After(event.endDate) {
 		return errors.New("イベントが登録可能期間外です")
 	}
 
@@ -42,10 +43,7 @@ func (c *EventDomainService) SaveEventService(ctx context.Context, event *Event,
 	var ncount, icount int32
 
 	// 今週に登録してる予約数を確認
-	events, err := c.EventRepo.FindWeeklyEvents(ctx, event.year, event.month, event.day, event.userID)
-	if err != nil {
-		return err
-	}
+	events, _ := c.EventRepo.FindWeeklyEvents(ctx, event.year, event.month, event.day, event.userID)
 	for _, event := range events {
 		if event.important {
 			icount++
