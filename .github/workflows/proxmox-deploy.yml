@@ -46,10 +46,22 @@ jobs:
           cloudflared --version
 
       # ========================================
-      # 4. SSH設定ファイルを作成（Cloudflare Access経由の接続設定）
+      # 4. Cloudflare Access認証の設定とテスト
       # ========================================
-      - name: Setup SSH config for Cloudflare Access
+      - name: Setup Cloudflare Access Authentication
         run: |
+          # cloudflaredの認証情報を設定
+          # この方法で環境変数として認証情報を渡す
+          export CF_ACCESS_CLIENT_ID="${{ secrets.CF_CLIENT_ID }}"
+          export CF_ACCESS_CLIENT_SECRET="${{ secrets.CF_CLIENT_SECRET }}"
+          
+          # 認証情報が設定されているか確認（値は表示しない）
+          if [ -z "$CF_ACCESS_CLIENT_ID" ] || [ -z "$CF_ACCESS_CLIENT_SECRET" ]; then
+            echo "❌ Error: CF_CLIENT_ID or CF_CLIENT_SECRET is not set"
+            exit 1
+          fi
+          echo "✅ Cloudflare Access credentials are set"
+          
           # SSH用のディレクトリを作成
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
@@ -59,29 +71,31 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           
           # SSH設定ファイルを作成
-          # ProxyCommandでcloudflaredを使用してCloudflare Access経由で接続
-          cat << EOF > ~/.ssh/config
+          # 環境変数を使用してcloudflaredに認証情報を渡す
+          cat << 'EOF' > ~/.ssh/config
           Host deploy-vm
             HostName ${{ secrets.DEPLOY_HOST }}
             User ${{ secrets.DEPLOY_USER }}
             IdentityFile ~/.ssh/id_rsa
-            ProxyCommand cloudflared access ssh --hostname %h --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}
+            ProxyCommand sh -c 'CF_ACCESS_CLIENT_ID=$CF_ACCESS_CLIENT_ID CF_ACCESS_CLIENT_SECRET=$CF_ACCESS_CLIENT_SECRET cloudflared access ssh --hostname %h'
             StrictHostKeyChecking no
             UserKnownHostsFile /dev/null
           EOF
           chmod 600 ~/.ssh/config
           
-          # 設定内容を確認（デバッグ用、機密情報は表示されない）
-          echo "SSH config created successfully"
+          echo "✅ SSH config created successfully"
 
       # ========================================
       # 5. SSH経由でProxmox VMにデプロイを実行
       # ========================================
       - name: Deploy to Proxmox VM via SSH
+        env:
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
         run: |
           # SSH接続してデプロイコマンドを実行
           # deploy-vmは上記で設定したHost名
-          ssh deploy-vm << 'EOF'
+          ssh -v deploy-vm << 'EOF'
             # アプリケーションディレクトリに移動
             cd /home/${{ secrets.DEPLOY_USER }}/main/itemshare-backend
             
