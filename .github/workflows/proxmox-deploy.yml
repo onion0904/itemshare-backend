@@ -3,131 +3,84 @@ name: Deploy API to Proxmox VM
 on:
   push:
     branches:
-      - vm-deploy # vm-deployブランチへのプッシュでデプロイを開始
+      - vm-deploy # main ブランチへのプッシュでデプロイ開始
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: carshare-backend # GitHub環境設定（Secrets管理に便利）
+    environment: carshare-backend # 環境名（任意、Secrets管理に便利）
 
     steps:
-      # ========================================
-      # 1. リポジトリのコードをチェックアウト
-      # ========================================
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # ========================================
-      # 2. Docker Hubへログインしてイメージをビルド・プッシュ
-      # ========================================
+      # --- 1. Docker Hub へのログインとビルド/プッシュ ---
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
+          # Docker Hub のユーザー名（YOUR_DOCKER_USERNAME に置き換える）
           username: ${{ secrets.DOCKER_USERNAME }}
+          # Docker Hub のアクセストークン（GitHub Secretsに登録済み）
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: . # Dockerfileが存在するディレクトリ
+          context: . # Dockerfileがあるディレクトリ
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.REPO_NAME }}:latest
+          # タグ名: YOUR_DOCKER_USERNAME/YOUR_REPO_NAME:latest に置き換える
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.REPO_NAME }}:latest 
 
-      # ========================================
-      # 3. cloudflaredをインストール（Cloudflare Access経由のSSH接続に必要）
-      # ========================================
-      - name: Setup cloudflared
-        run: |
-          # cloudflaredの最新版をダウンロードしてインストール
-          wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
-          sudo dpkg -i cloudflared-linux-amd64.deb
-          
-          # インストール確認
-          cloudflared --version
-
-      # ========================================
-      # 4. Cloudflare Access認証の設定とテスト
-      # ========================================
-      - name: Setup Cloudflare Access Authentication
-        run: |
-          # 認証情報が設定されているか確認（値は表示しない）
-          if [ -z "${{ secrets.CF_CLIENT_ID }}" ] || [ -z "${{ secrets.CF_CLIENT_SECRET }}" ]; then
-            echo "❌ Error: CF_CLIENT_ID or CF_CLIENT_SECRET is not set"
-            exit 1
-          fi
-          echo "✅ Cloudflare Access credentials are set"
-          
-          # SSH用のディレクトリを作成
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          
-          # 秘密鍵をファイルに保存
-          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          
-          # cloudflaredのラッパースクリプトを作成
-          # このスクリプトが認証情報を環境変数として受け取る
-          cat << 'SCRIPT_EOF' > ~/.ssh/cloudflared-wrapper.sh
-          #!/bin/bash
-          exec cloudflared access ssh --hostname "$1"
-          SCRIPT_EOF
-          chmod +x ~/.ssh/cloudflared-wrapper.sh
-          
-          # SSH設定ファイルを作成
-          # ProxyCommandでラッパースクリプトを使用
-          cat << EOF > ~/.ssh/config
-          Host deploy-vm
-            HostName ${{ secrets.DEPLOY_HOST }}
-            User ${{ secrets.DEPLOY_USER }}
-            IdentityFile ~/.ssh/id_rsa
-            ProxyCommand ~/.ssh/cloudflared-wrapper.sh %h
-            StrictHostKeyChecking no
-            UserKnownHostsFile /dev/null
-          EOF
-          chmod 600 ~/.ssh/config
-          
-          echo "✅ SSH config created successfully"
-
-      # ========================================
-      # 5. SSH経由でProxmox VMにデプロイを実行
-      # ========================================
-      - name: Deploy to Proxmox VM via SSH
+      # ------------------------------------------------------------------
+      # --- 1. SSH 環境のセットアップと Cloudflared のインストール ---
+      # ------------------------------------------------------------------
+      - name: Setup SSH Environment and Install Cloudflared
         env:
-          # cloudflaredが環境変数から自動的に読み取る
-          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
-          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+          SSH_KEY_FILE: ~/.ssh/deploy_key
         run: |
-          # 環境変数が設定されていることを確認
-          echo "🔐 Authenticating via Cloudflare Access..."
+          # 鍵をファイルに保存
+          echo "${{ secrets.DEPLOY_KEY }}" > ${SSH_KEY_FILE}
+          chmod 600 ${SSH_KEY_FILE}
+          # ssh-add でエージェントに鍵を登録
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add ${SSH_KEY_FILE}
           
-          # SSH接続してデプロイコマンドを実行
-          # -T: 疑似端末の割り当てを無効化（標準入力リダイレクトのため）
-          ssh -T deploy-vm << 'EOF'
-            set -e  # エラーが発生したら即座に終了
-            
-            echo "📂 Navigating to application directory..."
-            cd /home/${{ secrets.DEPLOY_USER }}/main/itemshare-backend
-            
-            echo "📥 Pulling latest Docker image for api service..."
-            /usr/bin/docker compose pull api
-            
-            echo "🔄 Restarting api service..."
-            /usr/bin/docker compose up -d --no-deps api
-            
-            echo "🧹 Cleaning up unused Docker images..."
-            /usr/bin/docker image prune -f
-            
-            echo "✅ Deployment completed successfully!"
-          EOF
-          
-          echo "🎉 Deployment finished!"
+          # cloudflared のインストール
+          sudo apt update
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o /usr/local/bin/cloudflared
+          sudo chmod +x /usr/local/bin/cloudflared
 
-      # ========================================
-      # 6. デプロイ完了通知（オプション）
-      # ========================================
-      - name: Deployment Status
-        if: success()
+      # ------------------------------------------------------------------
+      # --- 2. SSH 設定ファイルの作成 (ProxyCommand) ---
+      # ------------------------------------------------------------------
+      - name: Create SSH Config with ProxyCommand
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          CF_ID: ${{ secrets.CF_CLIENT_ID }}
+          CF_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
         run: |
-          echo "✅ Deployment to Proxmox VM completed successfully!"
-          echo "📦 Image: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.REPO_NAME }}:latest"
-          echo "🚀 Service: api"
+          # SSH設定ファイルを作成し、Service Token 認証を強制
+          echo "Host ${DEPLOY_HOST}" > ~/.ssh/config
+          echo "    User ${{ secrets.DEPLOY_USER }}" >> ~/.ssh/config
+          echo "    IdentityFile ~/.ssh/deploy_key" >> ~/.ssh/config
+          echo "    StrictHostKeyChecking no" >> ~/.ssh/config # CI/CDではホスト鍵チェックを無効化
+          # ProxyCommand に Service Token を埋め込み、Cloudflare Access 経由を強制
+          echo "    ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h --client-id ${CF_ID} --client-secret ${CF_SECRET}" >> ~/.ssh/config
+          
+          chmod 600 ~/.ssh/config
+
+      # ------------------------------------------------------------------
+      # --- 3. 標準の SSH コマンドでデプロイを実行 ---
+      # ------------------------------------------------------------------
+      - name: Execute Deployment Script
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        # 標準の SSH クライアントを使って、VM上でデプロイコマンドを実行
+        run: |
+          # コマンド全体を一つにまとめて実行
+          ssh -A ${DEPLOY_HOST} "
+            cd /home/${{ secrets.DEPLOY_USER }}/main/itemshare-backend;
+            /usr/bin/docker compose pull api;
+            /usr/bin/docker compose up -d --no-deps api;
+            /usr/bin/docker image prune -f;
+          "
