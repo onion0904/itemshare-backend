@@ -35,17 +35,20 @@ jobs:
       # --- 1. SSH 環境のセットアップと Cloudflared のインストール ---
       # ------------------------------------------------------------------
       - name: Setup SSH Environment and Install Cloudflared
+        env:
+          SSH_KEY_PATH: ${{ runner.home }}/.ssh/deploy_key # runner.home を使用
         run: |
-          # パスを明示的に $HOME/.ssh に定義
-          SSH_KEY_PATH="$HOME/.ssh/deploy_key"
           # .ssh ディレクトリを作成
-          mkdir -p "$HOME/.ssh"
-          # 鍵をファイルに保存
-          echo "${{ secrets.DEPLOY_KEY }}" > ${SSH_KEY_FILE}
-          chmod 600 ${SSH_KEY_FILE}
+          mkdir -p $HOME/.ssh
+          
+          # 鍵をファイルに保存 (変数をダブルクォートで囲むことで問題を解消)
+          echo "${{ secrets.DEPLOY_KEY }}" > "${SSH_KEY_PATH}"
+          chmod 600 "${SSH_KEY_PATH}"
+          
           # ssh-add でエージェントに鍵を登録
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-add ${SSH_KEY_FILE}
+          ssh-add "${SSH_KEY_PATH}"
+          
           # cloudflared のインストール
           sudo apt update
           curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o /usr/local/bin/cloudflared
@@ -59,16 +62,17 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           CF_ID: ${{ secrets.CF_CLIENT_ID }}
           CF_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+          SSH_KEY_PATH: ${{ runner.home }}/.ssh/deploy_key
         run: |
           # SSH設定ファイルを作成し、Service Token 認証を強制
-          echo "Host ${DEPLOY_HOST}" > ~/.ssh/config
-          echo "    User ${{ secrets.DEPLOY_USER }}" >> ~/.ssh/config
-          echo "    IdentityFile ~/.ssh/deploy_key" >> ~/.ssh/config
-          echo "    StrictHostKeyChecking no" >> ~/.ssh/config # CI/CDではホスト鍵チェックを無効化
+          echo "Host ${DEPLOY_HOST}" > $HOME/.ssh/config
+          echo "    User ${{ secrets.DEPLOY_USER }}" >> $HOME/.ssh/config
+          echo "    IdentityFile ${SSH_KEY_PATH}" >> $HOME/.ssh/config
+          echo "    StrictHostKeyChecking no" >> $HOME/.ssh/config
           # ProxyCommand に Service Token を埋め込み、Cloudflare Access 経由を強制
-          echo "    ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h --client-id ${CF_ID} --client-secret ${CF_SECRET}" >> ~/.ssh/config
+          echo "    ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h --client-id ${CF_ID} --client-secret ${CF_SECRET}" >> $HOME/.ssh/config
           
-          chmod 600 ~/.ssh/config
+          chmod 600 $HOME/.ssh/config
 
       # ------------------------------------------------------------------
       # --- 3. 標準の SSH コマンドでデプロイを実行 ---
@@ -76,7 +80,6 @@ jobs:
       - name: Execute Deployment Script
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-        # 標準の SSH クライアントを使って、VM上でデプロイコマンドを実行
         run: |
           # コマンド全体を一つにまとめて実行
           ssh -A ${DEPLOY_HOST} "
