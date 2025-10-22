@@ -36,7 +36,7 @@ jobs:
       # ------------------------------------------------------------------
       - name: Setup SSH Environment and Install Cloudflared
         env:
-          SSH_KEY_PATH: ${{ runner.home }}/.ssh/deploy_key # runner.home を使用
+          SSH_KEY_PATH: $HOME/.ssh/deploy_key # $HOME を使って確実にパスを展開
         run: |
           # .ssh ディレクトリを作成
           mkdir -p $HOME/.ssh
