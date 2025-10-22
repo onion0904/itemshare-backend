@@ -3,7 +3,7 @@ name: Deploy API to Proxmox VM
 on:
   push:
     branches:
-      - vm-deploy # main ブランチへのプッシュでデプロイ開始
+      - vm-deploy
 
 jobs:
   deploy:
@@ -47,7 +47,6 @@ jobs:
           # ssh-add でエージェントに鍵を登録
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-add ${SSH_KEY_FILE}
-          
           # cloudflared のインストール
           sudo apt update
           curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o /usr/local/bin/cloudflared
