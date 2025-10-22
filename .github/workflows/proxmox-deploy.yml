@@ -1,36 +1,31 @@
-name: Deploy API to Proxmox VM
+name: Deploy to Proxmox VM
 
 on:
   push:
     branches:
-      - main # main ブランチへのプッシュでデプロイ開始
+      - main # main ブランチにプッシュされたときに実行
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: carshare-backend # 環境名（任意、Secrets管理に便利）
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # --- 1. Docker Hub へのログインとビルド/プッシュ ---
+      # --- Docker イメージのビルドとプッシュ ---
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          # Docker Hub のユーザー名（YOUR_DOCKER_USERNAME に置き換える）
           username: ${{ secrets.DOCKER_USERNAME }}
-          # Docker Hub のアクセストークン（GitHub Secretsに登録済み）
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: . # Dockerfileがあるディレクトリ
+          context: .
           push: true
-          # タグ名: YOUR_DOCKER_USERNAME/YOUR_REPO_NAME:latest に置き換える
-          tags: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.REPO_NAME }}:latest 
-
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.REPO_NAME }}:latest
+          
       # --- SSH 経由でのデプロイ実行 (cross-join/ssh-actionを使用) ---
       - name: Deploy to Proxmox VM via SSH (Cloudflare Tunnel)
         uses: cross-join/ssh-action@v3
