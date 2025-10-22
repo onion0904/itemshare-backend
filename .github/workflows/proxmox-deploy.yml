@@ -35,7 +35,6 @@ jobs:
       # --- 1. SSH 環境のセットアップと Cloudflared のインストール ---
       # ------------------------------------------------------------------
       - name: Setup SSH Environment and Install Cloudflared
-        env:
         run: |
           # パスを明示的に $HOME/.ssh に定義
           SSH_KEY_PATH="$HOME/.ssh/deploy_key"
