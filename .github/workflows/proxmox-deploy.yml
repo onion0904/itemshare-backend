@@ -3,67 +3,91 @@ name: Deploy API to Proxmox VM
 on:
   push:
     branches:
-      - main # main ブランチへのプッシュでデプロイ開始
+      - vm-deploy
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: carshare-backend # 環境名（任意、Secrets管理に便利）
+    environment: carshare-backend
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # --- 1. Docker Hub へのログインとビルド/プッシュ ---
+      # --- Docker Hub へのログインとビルド/プッシュ ---
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          # Docker Hub のユーザー名（YOUR_DOCKER_USERNAME に置き換える）
           username: ${{ secrets.DOCKER_USERNAME }}
-          # Docker Hub のアクセストークン（GitHub Secretsに登録済み）
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: . # Dockerfileがあるディレクトリ
+          context: .
           push: true
-          # タグ名: YOUR_DOCKER_USERNAME/YOUR_REPO_NAME:latest に置き換える
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.REPO_NAME }}:latest 
 
-      # --- SSH 経由でのデプロイ実行 (cross-join/ssh-actionを使用) ---
-      - name: Deploy to Proxmox VM via SSH (Cloudflare Tunnel)
-        uses: cross-join/ssh-action@v3
-        with:
-          # SSH接続先はTunnelのドメイン
-          host: ${{ secrets.DEPLOY_HOST }} 
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
+      # ------------------------------------------------------------------
+      # --- SSH 環境のセットアップと Cloudflared のインストール ---
+      # ------------------------------------------------------------------
+      - name: Setup SSH Environment and Install Cloudflared
+        run: |
+          # .ssh ディレクトリを作成
+          mkdir -p $HOME/.ssh
           
-          # 【重要】Cloudflare Access経由を強制するプロキシコマンド
-          # 認証情報 (CF_CLIENT_ID/SECRET) を使ってトークンを取得し、SSHセッションを確立
-          proxy_command: |
-            cloudflared access ssh \
-            --hostname ${{ secrets.DEPLOY_HOST }} \
-            --client-id ${{ secrets.CF_CLIENT_ID }} \
-            --client-secret ${{ secrets.CF_CLIENT_SECRET }}
-            
-          # 【重要】cloudflared コマンドがこのアクションの環境に必要なのでインストール
-          pre_script: |
-            sudo apt update && sudo apt install -y curl
-            curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o /usr/local/bin/cloudflared
-            sudo chmod +x /usr/local/bin/cloudflared
+          # 鍵をファイルに保存
+          echo "${{ secrets.DEPLOY_KEY }}" > $HOME/.ssh/deploy_key
+          chmod 600 $HOME/.ssh/deploy_key
+          
+          # ssh-agent を起動してバックグラウンドで実行
+          eval "$(ssh-agent -s)"
+          
+          # 鍵をエージェントに追加
+          ssh-add $HOME/.ssh/deploy_key
+          
+          # cloudflared のインストール
+          sudo apt update
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+          sudo mv cloudflared /usr/local/bin/cloudflared
+          sudo chmod +x /usr/local/bin/cloudflared
 
-          # VM上で実行するデプロイコマンド
-          script: |
-            # 1. アプリケーションディレクトリに移動
-            cd /home/${{ secrets.DEPLOY_USER }}/main/itemshare-backend
-            
-            # 2. 最新のDockerイメージをプル（apiサービスのみ）
+      # ------------------------------------------------------------------
+      # --- SSH 設定ファイルの作成 (ProxyCommand) ---
+      # ------------------------------------------------------------------
+      - name: Create SSH Config with ProxyCommand
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          CF_ID: ${{ secrets.CF_CLIENT_ID }}
+          CF_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+        run: |
+          # SSH設定ファイルを作成
+          cat > $HOME/.ssh/config << EOF
+          Host ${DEPLOY_HOST}
+              User ${{ secrets.DEPLOY_USER }}
+              IdentityFile $HOME/.ssh/deploy_key
+              StrictHostKeyChecking no
+              ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h --client-id ${CF_ID} --client-secret ${CF_SECRET}
+          EOF
+          
+          chmod 600 $HOME/.ssh/config
+
+      # ------------------------------------------------------------------
+      # --- 標準の SSH コマンドでデプロイを実行 ---
+      # ------------------------------------------------------------------
+      - name: Execute Deployment Script
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          # SSH エージェントを再起動
+          eval "$(ssh-agent -s)"
+          ssh-add $HOME/.ssh/deploy_key
+          
+          # デプロイコマンドを実行
+          ssh ${DEPLOY_HOST} << 'ENDSSH'
+            cd /home/${DEPLOY_USER}/main/itemshare-backend
             /usr/bin/docker compose pull api
-            
-            # 3. サービスを再起動
             /usr/bin/docker compose up -d --no-deps api
-            
-            # 4. 不要になった Docker イメージを削除
             /usr/bin/docker image prune -f
+          ENDSSH
